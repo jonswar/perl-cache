@@ -1,5 +1,5 @@
 #####################################################################
-# $Id: Cache.pm,v 1.32 2002/03/29 15:18:59 dclinton Exp $
+# $Id: Cache.pm,v 1.33 2002/04/04 13:28:34 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -61,17 +61,9 @@ sub get_auto_purge_interval;
 
 sub set_auto_purge_interval;
 
-sub get_auto_purge_interval;
-
-sub set_auto_purge_interval;
-
 sub get_auto_purge_on_set;
 
 sub set_auto_purge_on_set;
-
-sub get_auto_purge_on_get;
-
-sub set_auto_purge_on_get;
 
 sub get_namespaces;
 
