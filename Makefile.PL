@@ -13,7 +13,7 @@ WriteMakefile
                Digest::MD5 => '2.09',
                File::Spec => '0.82',
                IPC::ShareLite => '0.08',
-               Storable => '1.0.10'
+               Storable => '1.011'
               }
 
 );
