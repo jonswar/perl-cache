@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareSharedMemoryCache.pm,v 1.3 2001/03/13 03:37:09 dclinton Exp $
+# $Id: SizeAwareSharedMemoryCache.pm,v 1.4 2001/03/19 16:02:54 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -34,9 +34,6 @@ $NO_MAX_SIZE = $Cache::SizeAwareMemoryCache::NO_MAX_SIZE;
 
 
 my $IPC_IDENTIFIER = 'ipcc';
-
-
-my %_Shared_Cache_Hash;
 
 
 ##
@@ -223,28 +220,6 @@ sub _build_object_size
 
   return $size;
 }
-
-
-sub _initialize_cache_hash_ref
-{
-  # no op, because we don't use the per-instance cache_hash_ref
-
-  return $SUCCESS;
-}
-
-
-sub _get_cache_hash_ref
-{
-  croak( "Use _Restore_Cache_Hash_Ref instead" );
-}
-
-
-
-sub _set_cache_hash_ref
-{
-  croak( "Use _Store_Cache_Hash_Ref instead" );
-}
-
 
 
 sub _delete_namespace

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SharedMemoryCache.pm,v 1.4 2001/03/13 01:28:17 dclinton Exp $
+# $Id: SharedMemoryCache.pm,v 1.5 2001/03/19 16:02:54 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -262,27 +262,6 @@ sub _delete_namespace
     croak( "Couldn't delete namespace $namespace" );
 
   return $SUCCESS;
-}
-
-
-sub _initialize_cache_hash_ref
-{
-  # no op, because we don't use the per-instance cache_hash_ref
-
-  return $SUCCESS;
-}
-
-
-sub _get_cache_hash_ref
-{
-  croak( "Use _Restore_Cache_Hash_Ref instead" );
-}
-
-
-
-sub _set_cache_hash_ref
-{
-  croak( "Use _Store_Cache_Hash_Ref instead" );
 }
 
 

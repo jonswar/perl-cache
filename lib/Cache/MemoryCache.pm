@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: MemoryCache.pm,v 1.9 2001/03/12 19:19:08 dclinton Exp $
+# $Id: MemoryCache.pm,v 1.10 2001/03/13 03:37:09 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -26,7 +26,7 @@ use Carp;
 @ISA = qw ( Cache::BaseCache );
 
 
-my %_Cache_Hash;
+my $_Cache_Hash_Ref = { };
 
 
 ##
@@ -89,7 +89,10 @@ sub _Delete_Namespace
   defined $namespace or
     croak( "Namespace required" );
 
-  delete $_Cache_Hash{ $namespace };
+  my $cache_hash_ref = _Get_Cache_Hash_Ref( ) or
+    croak( "Couldn't get cache hash ref" );
+
+  delete $cache_hash_ref->{ $namespace };
 
   return $SUCCESS;
 }
@@ -97,7 +100,21 @@ sub _Delete_Namespace
 
 sub _Namespaces
 {
-  return keys %_Cache_Hash;
+  my $cache_hash_ref = _Get_Cache_Hash_Ref( ) or
+    croak( "Couldn't get cache hash ref" );
+
+  return keys %{$cache_hash_ref};
+}
+
+
+##
+# Class properties
+##
+
+
+sub _Get_Cache_Hash_Ref
+{
+  return $_Cache_Hash_Ref;
 }
 
 
@@ -198,8 +215,8 @@ sub remove
   $identifier or
     croak( "identifier required" );
 
-  my $cache_hash_ref = $self->_get_cache_hash_ref( ) or
-    croak( "Couldn't get cache_hash_ref" );
+  my $cache_hash_ref = _Get_Cache_Hash_Ref( ) or
+    croak( "Couldn't get cache hash ref" );
 
   my $namespace = $self->get_namespace( ) or
     croak( "Couldn't get namespace" );
@@ -251,21 +268,6 @@ sub _initialize_memory_cache
 {
   my ( $self, $options_hash_ref ) = @_;
 
-  $self->_initialize_cache_hash_ref( ) or
-    croak( "Couldn't initialize cache hash ref" );
-
-  return $SUCCESS;
-}
-
-
-sub _initialize_cache_hash_ref
-{
-  my ( $self ) = @_;
-
-  my $cache_hash_ref = \%_Cache_Hash;
-
-  $self->_set_cache_hash_ref( $cache_hash_ref );
-
   return $SUCCESS;
 }
 
@@ -280,8 +282,8 @@ sub _store
   my $namespace = $self->get_namespace( ) or
     croak( "Couldn't get namespace" );
 
-  my $cache_hash_ref = $self->_get_cache_hash_ref( ) or
-    croak( "Couldn't get cache_hash_ref" );
+  my $cache_hash_ref = _Get_Cache_Hash_Ref( ) or
+    croak( "Couldn't get cache hash ref" );
 
   my $object_dump;
 
@@ -301,8 +303,8 @@ sub _restore
   $identifier or
     croak( "identifier required" );
 
-  my $cache_hash_ref = $self->_get_cache_hash_ref( ) or
-    croak( "Couldn't get cache_hash_ref" );
+  my $cache_hash_ref = _Get_Cache_Hash_Ref( ) or
+    croak( "Couldn't get cache hash ref" );
 
   my $namespace = $self->get_namespace( ) or
     croak( "Couldn't get namespace" );
@@ -331,8 +333,8 @@ sub _identifiers
 {
   my ( $self ) = @_;
 
-  my $cache_hash_ref = $self->_get_cache_hash_ref( ) or
-    croak( "Couldn't get cache_hash_ref" );
+  my $cache_hash_ref = _Get_Cache_Hash_Ref( ) or
+    croak( "Couldn't get cache hash ref" );
 
   my $namespace = $self->get_namespace( ) or
     croak( "Couldn't get namespace" );
@@ -350,8 +352,8 @@ sub _build_object_size
   $identifier or
     croak( "identifier required" );
 
-  my $cache_hash_ref = $self->_get_cache_hash_ref( ) or
-    croak( "Couldn't get cache_hash_ref" );
+  my $cache_hash_ref = _Get_Cache_Hash_Ref( ) or
+    croak( "Couldn't get cache hash ref" );
 
   my $namespace = $self->get_namespace( ) or
     croak( "Couldn't get namespace" );
@@ -362,26 +364,6 @@ sub _build_object_size
   my $size = length $object_dump;
 
   return $size;
-}
-
-
-##
-# Instance properties
-##
-
-
-sub _get_cache_hash_ref
-{
-  my ( $self ) = @_;
-
-  return $self->{_Cache_Hash_Ref};
-}
-
-sub _set_cache_hash_ref
-{
-  my ( $self, $cache_hash_ref ) = @_;
-
-  $self->{_Cache_Hash_Ref} = $cache_hash_ref;
 }
 
 

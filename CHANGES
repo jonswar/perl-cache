@@ -1,5 +1,11 @@
 Revision history for Cache
 
+0.06 in progress
+ - replaced the cache_hash_ref instance property in MemoryCache with
+   a class property and updated the SharedMemoryCache and 
+   SizeAwareSharedMemoryCache modules accordingly
+ - started version 0.06
+
 0.05 2000-03-20-10-25
  - released version 0.05
  - updated Storable dependency to 1.011
