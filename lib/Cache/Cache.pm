@@ -1,5 +1,5 @@
 ######################################################################
-# $Id:  $
+# $Id: Cache.pm,v 1.1.1.1 2001/02/13 01:30:37 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -35,7 +35,7 @@ use vars qw( @ISA
 
 use vars @EXPORT_OK;
 
-$VERSION = 0.01;
+$VERSION = 0.02;
 $EXPIRES_NOW = 0;
 $EXPIRES_NEVER = -1;
 $TRUE = 1;
@@ -296,7 +296,7 @@ Cache::MemoryCache, Cache::FileCache, Cache::SharedMemoryCache
 
 Original author: DeWitt Clinton <dewitt@unto.net>
 
-Last author:     $Author: dewitt $
+Last author:     $Author: dclinton $
 
 Copyright (C) 2001 DeWitt Clinton
 
