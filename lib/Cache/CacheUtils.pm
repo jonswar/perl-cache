@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheUtils.pm,v 1.17 2001/03/25 18:13:16 dclinton Exp $
+# $Id: CacheUtils.pm,v 1.18 2001/04/24 15:18:14 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -896,6 +896,10 @@ sub Update_Access_Time
 }
 
 
+# this method checks to see if the auto_purge property is set
+# for a particular cache.  If it is, then it switches the cache
+# to the $AUTO_PURGE_NAMESPACE and stores that value under
+# the name of the current cache namespace
 
 sub Reset_Auto_Purge
 {
@@ -932,6 +936,12 @@ sub Reset_Auto_Purge
   return $SUCCESS;
 }
 
+
+# this method checks to see if the auto_purge property is set, and
+# if it is, switches to the $AUTO_PURGE_NAMESPACE and sees if
+# a value exists at the location specified by a key named for the
+# current namespace.  If that key doesn't exist, then the purge
+# method is called on the cache
 
 sub Auto_Purge
 {
