@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: FileCache.pm,v 1.2 2001/02/13 02:32:03 dclinton Exp $
+# $Id: FileCache.pm,v 1.3 2001/02/15 15:44:22 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -599,7 +599,7 @@ data in the filesystem so that it can be shared between processes.
 
   use Cache::FileCache;
 
-  my %cache_options_= ( 'namespace' => 'MyNamespace',
+  my %cache_options = ( 'namespace' => 'MyNamespace',
 			'default_expires_in' => 600 );
 
   my $file_cache = new Cache::FileCache( \%cache_options ) or
