@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: FileCache.pm,v 1.19 2001/11/05 13:34:45 dclinton Exp $
+# $Id: FileCache.pm,v 1.20 2001/11/06 23:44:08 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -157,22 +157,22 @@ sub clear
 
 sub get
 {
-  my ( $self, $p_identifier ) = @_;
+  my ( $self, $p_key ) = @_;
 
-  Assert_Defined( $p_identifier );
+  Assert_Defined( $p_key );
 
   $self->_conditionally_auto_purge_on_get( );
 
-  my $object = $self->get_object( $p_identifier ) or
+  my $object = $self->get_object( $p_key ) or
     return undef;
 
   if ( Object_Has_Expired( $object ) )
   {
-    $self->remove( $p_identifier );
+    $self->remove( $p_key );
     return undef;
   }
 
-  $self->_update_access_time( $p_identifier );
+  $self->_update_access_time( $p_key );
 
   return $object->get_data( );
 }
@@ -180,11 +180,11 @@ sub get
 
 sub get_object
 {
-  my ( $self, $p_identifier ) = @_;
+  my ( $self, $p_key ) = @_;
 
-  Assert_Defined( $p_identifier );
+  Assert_Defined( $p_key );
 
-  return $self->_restore( Build_Unique_Key( $p_identifier ) );
+  return $self->_restore( Build_Unique_Key( $p_key ) );
 }
 
 
@@ -199,7 +199,7 @@ sub purge
 
     if ( Object_Has_Expired( $object ) )
     {
-      $self->remove( $object->get_identifier( ) );
+      $self->remove( $object->get_key( ) );
     }
   }
 }
@@ -207,22 +207,22 @@ sub purge
 
 sub remove
 {
-  my ( $self, $p_identifier ) = @_;
+  my ( $self, $p_key ) = @_;
 
-  Assert_Defined( $p_identifier );
+  Assert_Defined( $p_key );
 
-  Remove_File( $self->_build_object_path( Build_Unique_Key($p_identifier) ) );
+  Remove_File( $self->_build_object_path( Build_Unique_Key($p_key) ) );
 }
 
 
 sub set
 {
-  my ( $self, $p_identifier, $p_data, $p_expires_in ) = @_;
+  my ( $self, $p_key, $p_data, $p_expires_in ) = @_;
 
   $self->_conditionally_auto_purge_on_set( );
 
-  $self->_store( Build_Unique_Key( $p_identifier ),
-                 Build_Object( $p_identifier,
+  $self->_store( Build_Unique_Key( $p_key ),
+                 Build_Object( $p_key,
                                $p_data,
                                $self->get_default_expires_in( ),
                                $p_expires_in ) );
@@ -231,9 +231,9 @@ sub set
 
 sub set_object
 {
-  my ( $self, $p_identifier, $p_object ) = @_;
+  my ( $self, $p_key, $p_object ) = @_;
 
-  $self->_store( Build_Unique_Key( $p_identifier ), $p_object );
+  $self->_store( Build_Unique_Key( $p_key ), $p_object );
 }
 
 
@@ -439,22 +439,23 @@ sub set_directory_umask
 }
 
 
-sub get_identifiers
+sub get_keys
 {
   my ( $self ) = @_;
 
-  my @identifiers;
+  my @keys;
 
   foreach my $unique_key ( $self->_list_unique_keys( ) )
   {
     my $object = $self->_restore( $unique_key ) or
       next;
 
-    push( @identifiers, $object->get_identifier( ) );
+    push( @keys, $object->get_key( ) );
   }
 
-  return @identifiers;
+  return @keys;
 }
+
 
 1;
 
@@ -542,11 +543,11 @@ See the section OPTIONS below.
 
 See Cache::Cache
 
-=item B<get( $identifier )>
+=item B<get( $key )>
 
 See Cache::Cache
 
-=item B<get_object( $identifier )>
+=item B<get_object( $key )>
 
 See Cache::Cache
 
@@ -554,11 +555,11 @@ See Cache::Cache
 
 See Cache::Cache
 
-=item B<remove( $identifier )>
+=item B<remove( $key )>
 
 See Cache::Cache
 
-=item B<set( $identifier, $data, $expires_in )>
+=item B<set( $key, $data, $expires_in )>
 
 See Cache::Cache
 
@@ -623,11 +624,11 @@ umask, thus reducing the risk of cache poisoning.  If you desire it to
 only be user writable, set the 'directory_umask' option to '077' or
 similar.
 
-=item B<get_identifiers>
+=item B<get_keys>
 
-The list of identifiers specifying objects in the namespace associated
+The list of keys specifying objects in the namespace associated
 with this cache instance.  For FileCache implementations, the
-get_identifiers routine must actual examine each stored item in the
+get_keys routine must actual examine each stored item in the
 cache, and it is therefore an expensive operation.
 
 =back

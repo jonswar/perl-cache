@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheTester.pm,v 1.8 2001/09/05 14:39:27 dclinton Exp $
+# $Id: CacheTester.pm,v 1.9 2001/11/06 23:44:08 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -485,7 +485,7 @@ sub _test_thirteen
 }
 
 
-# test the get_identifiers method
+# test the get_keys method
 
 sub _test_fourteen
 {
@@ -498,18 +498,18 @@ sub _test_fourteen
   ( $empty_size == 0 ) ?
     $self->ok( ) : $self->not_ok( '$empty_size == 0' );
 
-  my @identifiers = sort ( 'John', 'Paul', 'Ringo', 'George' );
+  my @keys = sort ( 'John', 'Paul', 'Ringo', 'George' );
 
   my $value = 'Test Value';
 
-  foreach my $identifier ( @identifiers )
+  foreach my $key ( @keys )
   {
-    $cache->set( $identifier, $value );
+    $cache->set( $key, $value );
   }
 
-  my @cached_identifiers = sort $cache->get_identifiers( );
+  my @cached_keys = sort $cache->get_keys( );
 
-  my $arrays_equal = Arrays_Are_Equal( \@identifiers, \@cached_identifiers );
+  my $arrays_equal = Arrays_Are_Equal( \@keys, \@cached_keys );
 
   ( $arrays_equal == 1 ) ?
     $self->ok( ) : $self->not_ok( '$arrays_equal == 1' );

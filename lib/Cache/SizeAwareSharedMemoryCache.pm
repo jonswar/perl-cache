@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareSharedMemoryCache.pm,v 1.14 2001/11/05 13:34:45 dclinton Exp $
+# $Id: SizeAwareSharedMemoryCache.pm,v 1.15 2001/11/06 23:44:08 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -122,13 +122,13 @@ sub new
 
 sub remove
 {
-  my ( $self, $p_identifier ) = @_;
+  my ( $self, $p_key ) = @_;
 
-  Assert_Defined( $p_identifier );
+  Assert_Defined( $p_key );
 
   my $cache_hash_ref = _Restore_Cache_Hash_Ref( );
 
-  delete $cache_hash_ref->{ $self->get_namespace( ) }->{ $p_identifier };
+  delete $cache_hash_ref->{ $self->get_namespace( ) }->{ $p_key };
 
   _Store_Cache_Hash_Ref( $cache_hash_ref );
 }
@@ -151,14 +151,14 @@ sub _new
 
 sub _build_object_size
 {
-  my ( $self, $p_identifier ) = @_;
+  my ( $self, $p_key ) = @_;
 
-  Assert_Defined( $p_identifier );
+  Assert_Defined( $p_key );
 
   my $object_dump =
     _Restore_Cache_Hash_Ref( )
       ->{ $self->get_namespace( ) }
-        ->{ $p_identifier } or
+        ->{ $p_key } or
           return 0;
 
   return length $object_dump;
@@ -167,13 +167,13 @@ sub _build_object_size
 
 sub _store
 {
-  my ( $self, $p_identifier, $p_object ) = @_;
+  my ( $self, $p_key, $p_object ) = @_;
 
-  Assert_Defined( $p_identifier );
+  Assert_Defined( $p_key );
 
   my $cache_hash_ref = _Restore_Cache_Hash_Ref_With_Lock( );
 
-  $cache_hash_ref->{ $self->get_namespace( ) }->{ $p_identifier } =
+  $cache_hash_ref->{ $self->get_namespace( ) }->{ $p_key } =
     $self->_freeze( $p_object );
 
   _Store_Cache_Hash_Ref( $cache_hash_ref );
@@ -182,13 +182,13 @@ sub _store
 
 sub _restore
 {
-  my ( $self, $p_identifier ) = @_;
+  my ( $self, $p_key ) = @_;
 
-  Assert_Defined( $p_identifier );
+  Assert_Defined( $p_key );
 
   my $object_dump = _Restore_Cache_Hash_Ref( )
     ->{ $self->get_namespace( ) }
-      ->{ $p_identifier } or
+      ->{ $p_key } or
         return undef;
 
   return $self->_thaw( \$object_dump );
@@ -209,7 +209,7 @@ sub _delete_namespace
 ##
 
 
-sub get_identifiers
+sub get_keys
 {
   my ( $self ) = @_;
 
@@ -287,11 +287,11 @@ See the section OPTIONS below.
 
 See Cache::Cache
 
-=item B<get( $identifier )>
+=item B<get( $key )>
 
 See Cache::Cache
 
-=item B<get_object( $identifier )>
+=item B<get_object( $key )>
 
 See Cache::Cache
 
@@ -303,11 +303,11 @@ See Cache::SizeAwareMemoryCache
 
 See Cache::Cache
 
-=item B<remove( $identifier )>
+=item B<remove( $key )>
 
 See Cache::Cache
 
-=item B<set( $identifier, $data, $expires_in )>
+=item B<set( $key, $data, $expires_in )>
 
 See Cache::Cache
 

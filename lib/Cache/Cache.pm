@@ -1,5 +1,5 @@
 #####################################################################
-# $Id: Cache.pm,v 1.19 2001/10/22 13:33:56 jswartz Exp $
+# $Id: Cache.pm,v 1.20 2001/11/06 23:44:08 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -89,7 +89,7 @@ sub get_namespace;
 
 sub set_namespace;
 
-sub get_identifiers;
+sub get_keys;
 
 sub get_auto_purge_interval;
 
@@ -107,7 +107,7 @@ sub get_auto_purge_on_get;
 
 sub set_auto_purge_on_get;
 
-
+sub get_identifiers;  # deprecated
 
 
 1;
@@ -141,14 +141,14 @@ To implement the Cache::Cache interface:
 
   sub get
   {
-    my ( $self, $identifier ) = @_;
+    my ( $self, $key ) = @_;
 
     # implement the get method here
   }
 
   sub set
   {
-    my ( $self, $identifier, $data, $expires_in ) = @_;
+    my ( $self, $key, $data, $expires_in ) = @_;
 
     # implement the set method here
   }
@@ -226,19 +226,19 @@ OPTIONS below.
 
 Remove all objects from the namespace associated with this cache instance. Returns either $SUCCESS or $FAILURE.
 
-=item B<get( $identifier )>
+=item B<get( $key )>
 
-Returns the data associated with I<$identifier>.
+Returns the data associated with I<$key>.
 
-=item B<get_object( $identifier )>
+=item B<get_object( $key )>
 
 Returns the underlying Cache::Object object used to store the cached
-data associated with I<$identifier>.  This will not trigger a removal
+data associated with I<$key>.  This will not trigger a removal
 of the cached object even if the object has expired.
 
-=item B<set_object( $identifier, $object )>
+=item B<set_object( $key, $object )>
 
-Associates I<$identifier> with Cache::Object I<$object>.  Using
+Associates I<$key> with Cache::Object I<$object>.  Using
 _object (as opposed to set) does not trigger an automatic purge.
 Returns either $SUCCESS or $FAILURE.
 
@@ -247,14 +247,14 @@ Returns either $SUCCESS or $FAILURE.
 Remove all objects that have expired from the namespace associated
 with this cache instance. Returns either $SUCCESS or $FAILURE.
 
-=item B<remove( $identifier )>
+=item B<remove( $key )>
 
-Delete the data associated with the I<$identifier> from the cache.
+Delete the data associated with the I<$key> from the cache.
 Returns either $SUCCESS or $FAILURE.
 
-=item B<set( $identifier, $data, [$expires_in] )>
+=item B<set( $key, $data, [$expires_in] )>
 
-Associates I<$data> with I<$identifier> in the cache. I<$expires_in>
+Associates I<$data> with I<$key> in the cache. I<$expires_in>
 indicates the time in seconds until this data should be erased, or the
 constant $EXPIRES_NOW, or the constant $EXPIRES_NEVER.  Defaults to
 $EXPIRES_NEVER.  This variable can also be in the extended format of
@@ -319,9 +319,9 @@ The namespace of this cache instance
 
 The default expiration time for objects placed in this cache instance
 
-=item B<get_identifiers( )>
+=item B<get_keys( )>
 
-The list of identifiers specifying objects in the namespace associated
+The list of keys specifying objects in the namespace associated
 with this cache instance
 
 =item B<(get|set)_auto_purge_interval( )>
@@ -352,7 +352,7 @@ Cache::SharedMemoryCache, and Cache::SizeAwareFileCache
 
 Original author: DeWitt Clinton <dewitt@unto.net>
 
-Last author:     $Author: jswartz $
+Last author:     $Author: dclinton $
 
 Copyright (C) 2001 DeWitt Clinton
 

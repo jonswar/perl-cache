@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: NullCache.pm,v 1.1 2001/09/05 14:39:27 dclinton Exp $
+# $Id: NullCache.pm,v 1.2 2001/11/06 23:44:08 dclinton Exp $
 # Copyright (C) 2001 Jay Sachs  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -114,7 +114,7 @@ sub set_namespace
   $self->{_Namespace} = $namespace;
 }
 
-sub get_identifiers
+sub get_keys
 {
   return ();
 }

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: BaseCache.pm,v 1.9 2001/11/05 13:34:45 dclinton Exp $
+# $Id: BaseCache.pm,v 1.10 2001/11/06 23:44:08 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -51,6 +51,22 @@ sub new
   $self->_complete_initialization( );
 
   return $self;
+}
+
+
+
+##
+# Public instance methods
+##
+
+
+sub get_identifiers
+{
+  my ( $self ) = @_;
+
+  warn( "get_identifiers has been marked deprepricated.  use get_keys" );
+
+  return $self->get_keys( );
 }
 
 
@@ -470,7 +486,7 @@ implementations.
 
   sub get
   {
-    my ( $self, $identifier ) = @_;
+    my ( $self, $key ) = @_;
 
     #...
   }

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: MemoryCache.pm,v 1.18 2001/11/05 13:34:45 dclinton Exp $
+# $Id: MemoryCache.pm,v 1.19 2001/11/06 23:44:08 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -130,18 +130,18 @@ sub clear
 
 sub get
 {
-  my ( $self, $p_identifier ) = @_;
+  my ( $self, $p_key ) = @_;
 
-  Assert_Defined( $p_identifier );
+  Assert_Defined( $p_key );
 
   $self->_conditionally_auto_purge_on_get( );
 
-  my $object = $self->get_object( $p_identifier ) or
+  my $object = $self->get_object( $p_key ) or
     return undef;
 
   if ( Object_Has_Expired( $object ) )
   {
-    $self->remove( $p_identifier );
+    $self->remove( $p_key );
     return undef;
   }
 
@@ -151,11 +151,11 @@ sub get
 
 sub get_object
 {
-  my ( $self, $p_identifier ) = @_;
+  my ( $self, $p_key ) = @_;
 
-  Assert_Defined( $p_identifier );
+  Assert_Defined( $p_key );
 
-  return $self->_restore( $p_identifier );
+  return $self->_restore( $p_key );
 }
 
 
@@ -163,33 +163,33 @@ sub purge
 {
   my ( $self ) = @_;
 
-  foreach my $identifier ( $self->get_identifiers( ) )
+  foreach my $key ( $self->get_keys( ) )
   {
-    $self->get( $identifier );
+    $self->get( $key );
   }
 }
 
 
 sub remove
 {
-  my ( $self, $p_identifier ) = @_;
+  my ( $self, $p_key ) = @_;
 
-  Assert_Defined( $p_identifier );
+  Assert_Defined( $p_key );
 
   delete $self->_get_cache_hash_ref( )
     ->{ $self->get_namespace( ) }
-      ->{ $p_identifier };
+      ->{ $p_key };
 }
 
 
 sub set
 {
-  my ( $self, $p_identifier, $p_data, $p_expires_in ) = @_;
+  my ( $self, $p_key, $p_data, $p_expires_in ) = @_;
 
   $self->_conditionally_auto_purge_on_set( );
 
-  $self->_store( $p_identifier,
-                 Build_Object( $p_identifier,
+  $self->_store( $p_key,
+                 Build_Object( $p_key,
                                $p_data,
                                $self->get_default_expires_in( ),
                                $p_expires_in ) );
@@ -199,9 +199,9 @@ sub set
 
 sub set_object
 {
-  my ( $self, $p_identifier, $p_object ) = @_;
+  my ( $self, $p_key, $p_object ) = @_;
 
-  $self->_store( $p_identifier, $p_object );
+  $self->_store( $p_key, $p_object );
 }
 
 
@@ -212,9 +212,9 @@ sub size
 
   my $size = 0;
 
-  foreach my $identifier ( $self->get_identifiers( ) )
+  foreach my $key ( $self->get_keys( ) )
   {
-    $size += $self->_build_object_size( $identifier );
+    $size += $self->_build_object_size( $key );
   }
 
   return $size;
@@ -237,26 +237,26 @@ sub _new
 
 sub _store
 {
-  my ( $self, $p_identifier, $p_object ) = @_;
+  my ( $self, $p_key, $p_object ) = @_;
 
-  Assert_Defined( $p_identifier );
+  Assert_Defined( $p_key );
   Assert_Defined( $p_object );
 
   $self->_get_cache_hash_ref( )
     ->{ $self->get_namespace( ) }
-      ->{ $p_identifier } = $self->_freeze( $p_object );
+      ->{ $p_key } = $self->_freeze( $p_object );
 }
 
 
 sub _restore
 {
-  my ( $self, $p_identifier ) = @_;
+  my ( $self, $p_key ) = @_;
 
-  Assert_Defined( $p_identifier );
+  Assert_Defined( $p_key );
 
   my $object_dump = $self->_get_cache_hash_ref( )
     ->{ $self->get_namespace( ) }
-      ->{ $p_identifier } or
+      ->{ $p_key } or
         return undef;
 
   return $self->_thaw( \$object_dump );
@@ -275,13 +275,13 @@ sub _delete_namespace
 
 sub _build_object_size
 {
-  my ( $self, $p_identifier ) = @_;
+  my ( $self, $p_key ) = @_;
 
-  Assert_Defined( $p_identifier );
+  Assert_Defined( $p_key );
 
   return length $self->_get_cache_hash_ref( )
     ->{ $self->get_namespace( ) }
-      ->{ $p_identifier };
+      ->{ $p_key };
 }
 
 
@@ -298,7 +298,7 @@ sub _get_cache_hash_ref
 
 
 
-sub get_identifiers
+sub get_keys
 {
   my ( $self ) = @_;
 
@@ -374,11 +374,11 @@ See the section OPTIONS below.
 
 See Cache::Cache
 
-=item B<get( $identifier )>
+=item B<get( $key )>
 
 See Cache::Cache
 
-=item B<get_object( $identifier )>
+=item B<get_object( $key )>
 
 See Cache::Cache
 
@@ -386,11 +386,11 @@ See Cache::Cache
 
 See Cache::Cache
 
-=item B<remove( $identifier )>
+=item B<remove( $key )>
 
 See Cache::Cache
 
-=item B<set( $identifier, $data, $expires_in )>
+=item B<set( $key, $data, $expires_in )>
 
 See Cache::Cache
 

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareMemoryCache.pm,v 1.11 2001/11/05 13:34:45 dclinton Exp $
+# $Id: SizeAwareMemoryCache.pm,v 1.12 2001/11/06 23:44:08 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -67,9 +67,9 @@ sub _build_cache_meta_data
 
   my $cache_meta_data = new Cache::CacheMetaData( );
 
-  foreach my $identifier ( $self->get_identifiers( ) )
+  foreach my $key ( $self->get_keys( ) )
   {
-    my $object = $self->get_object( $identifier ) or
+    my $object = $self->get_object( $key ) or
       next;
 
     $cache_meta_data->insert( $object );
@@ -103,24 +103,24 @@ sub new
 
 sub get
 {
-  my ( $self, $p_identifier ) = @_;
+  my ( $self, $p_key ) = @_;
 
-  Assert_Defined( $p_identifier );
+  Assert_Defined( $p_key );
 
   $self->_conditionally_auto_purge_on_get( );
 
-  my $object = $self->get_object( $p_identifier ) or
+  my $object = $self->get_object( $p_key ) or
     return undef;
 
   if ( Object_Has_Expired( $object ) )
   {
-    $self->remove( $p_identifier );
+    $self->remove( $p_key );
     return undef;
   }
 
   $object->set_accessed_at( time( ) );
 
-  $self->_store( $p_identifier, $object );
+  $self->_store( $p_key, $object );
 
   return $object->get_data( );
 }
@@ -128,12 +128,12 @@ sub get
 
 sub set
 {
-  my ( $self, $p_identifier, $p_data, $p_expires_in ) = @_;
+  my ( $self, $p_key, $p_data, $p_expires_in ) = @_;
 
   $self->_conditionally_auto_purge_on_set( );
 
-  $self->set_object( $p_identifier, 
-                     Build_Object( $p_identifier, 
+  $self->set_object( $p_key, 
+                     Build_Object( $p_key, 
                                    $p_data, 
                                    $self->get_default_expires_in( ), 
                                    $p_expires_in ) );
@@ -147,9 +147,9 @@ sub set
 
 sub set_object
 {
-  my ( $self, $p_identifier, $p_object ) = @_;
+  my ( $self, $p_key, $p_object ) = @_;
 
-  $self->_store( $p_identifier, $p_object );
+  $self->_store( $p_key, $p_object );
 }
 
 
@@ -279,11 +279,11 @@ See the section OPTIONS below.
 
 See Cache::Cache
 
-=item B<get( $identifier )>
+=item B<get( $key )>
 
 See Cache::Cache
 
-=item B<get_object( $identifier )>
+=item B<get_object( $key )>
 
 See Cache::Cache
 
@@ -295,11 +295,11 @@ See Cache::SizeAwareCache
 
 See Cache::Cache
 
-=item B<remove( $identifier )>
+=item B<remove( $key )>
 
 See Cache::Cache
 
-=item B<set( $identifier, $data, $expires_in )>
+=item B<set( $key, $data, $expires_in )>
 
 See Cache::Cache
 

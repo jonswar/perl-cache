@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareFileCache.pm,v 1.19 2001/11/05 13:34:45 dclinton Exp $
+# $Id: SizeAwareFileCache.pm,v 1.20 2001/11/06 23:44:08 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -92,9 +92,9 @@ sub new
 
 sub set
 {
-  my ( $self, $p_identifier, $p_data, $p_expires_in ) = @_;
+  my ( $self, $p_key, $p_data, $p_expires_in ) = @_;
 
-  $self->SUPER::set( $p_identifier, $p_data, $p_expires_in );
+  $self->SUPER::set( $p_key, $p_data, $p_expires_in );
 
   if ( $self->get_max_size( ) != $NO_MAX_SIZE )
   {
@@ -282,11 +282,11 @@ See the section OPTIONS below.
 
 See Cache::Cache
 
-=item B<get( $identifier )>
+=item B<get( $key )>
 
 See Cache::Cache
 
-=item B<get_object( $identifier )>
+=item B<get_object( $key )>
 
 See Cache::Cache
 
@@ -300,11 +300,11 @@ and does not include the size of the directory inodes.
 
 See Cache::Cache
 
-=item B<remove( $identifier )>
+=item B<remove( $key )>
 
 See Cache::Cache
 
-=item B<set( $identifier, $data, $expires_in )>
+=item B<set( $key, $data, $expires_in )>
 
 See Cache::Cache
 
@@ -338,7 +338,7 @@ See Cache::Cache for default properties.
 
 See Cache::SizeAwareCache
 
-=item B<get_identifiers>
+=item B<get_keys>
 
 See Cache::FileCache
 

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: Object.pm,v 1.3 2001/03/12 19:18:33 dclinton Exp $
+# $Id: Object.pm,v 1.4 2001/03/22 21:41:35 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -92,20 +92,21 @@ sub set_expires_at
 }
 
 
-sub get_identifier
+sub get_key
 {
   my ( $self ) = @_;
 
-  return $self->{_Identifier};
+  return $self->{_Key};
 }
 
 
-sub set_identifier
+sub set_key
 {
-  my ( $self, $identifier ) = @_;
+  my ( $self, $key ) = @_;
 
-  $self->{_Identifier} = $identifier;
+  $self->{_Key} = $key;
 }
+
 
 
 sub get_size
@@ -122,6 +123,28 @@ sub set_size
 
   $self->{_Size} = $size;
 }
+
+
+sub get_identifier
+{
+  my ( $self ) = @_;
+
+  warn( "get_identifier has been marked deprepricated.  use get_key" );
+
+  return $self->get_key( );
+}
+
+
+sub set_identifier
+{
+  my ( $self, $identifier ) = @_;
+
+  warn( "set_identifier has been marked deprepricated.  use set_key" );
+
+  return $self->set_key( $identifier );
+}
+
+
 
 
 1;
@@ -148,7 +171,7 @@ on the Cache::Cache interface.
 
  my $object = new Cache::Object( );
 
- $object->set_identifier( $identifier );
+ $object->set_key( $key );
  $object->set_data( $data );
  $object->set_expires_at( $expires_at );
  $object->set_created_at( $created_at );
@@ -187,7 +210,7 @@ A scalar containing or a reference pointing to the data to be stored.
 
 The time at which the object should expire from the cache.
 
-=item B<(get|set)_identifier>
+=item B<(get|set)_key>
 
 The key under which the object was stored.
 

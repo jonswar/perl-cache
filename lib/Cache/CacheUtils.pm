@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheUtils.pm,v 1.24 2001/11/05 13:34:45 dclinton Exp $
+# $Id: CacheUtils.pm,v 1.25 2001/11/06 23:44:08 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -115,15 +115,15 @@ sub Object_Has_Expired
 }
 
 
-# Take an human readable identifier, and create a unique key from it
+# Take an human readable key, and create a unique key from it
 
 sub Build_Unique_Key
 {
-  my ( $p_identifier ) = @_;
+  my ( $p_key ) = @_;
 
-  Assert_Defined( $p_identifier );
+  Assert_Defined( $p_key );
 
-  return md5_hex( $p_identifier );
+  return md5_hex( $p_key );
 }
 
 
@@ -613,16 +613,16 @@ sub Untaint_String
 
 sub Build_Object
 {
-  my ( $p_identifier, $p_data, $p_default_expires_in, $p_expires_in ) = @_;
+  my ( $p_key, $p_data, $p_default_expires_in, $p_expires_in ) = @_;
 
-  Assert_Defined( $p_identifier );
+  Assert_Defined( $p_key );
   Assert_Defined( $p_default_expires_in );
 
   my $now = time( );
 
   my $object = new Cache::Object( );
 
-  $object->set_identifier( $p_identifier );
+  $object->set_key( $p_key );
   $object->set_data( $p_data );
   $object->set_created_at( $now );
   $object->set_accessed_at( $now );
@@ -693,12 +693,12 @@ sub Limit_Size
 
   return if $size_estimate <= $p_new_size;
 
-  foreach my $identifier ( $p_cache_meta_data->build_removal_list( ) )
+  foreach my $key ( $p_cache_meta_data->build_removal_list( ) )
   {
-    $size_estimate -= $p_cache_meta_data->build_object_size( $identifier );
+    $size_estimate -= $p_cache_meta_data->build_object_size( $key );
 
-    $p_cache->remove( $identifier );
-    $p_cache_meta_data->remove( $identifier );
+    $p_cache->remove( $key );
+    $p_cache_meta_data->remove( $key );
 
     return if $size_estimate <= $p_new_size;
   }

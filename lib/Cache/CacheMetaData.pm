@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheMetaData.pm,v 1.5 2001/11/05 13:34:45 dclinton Exp $
+# $Id: CacheMetaData.pm,v 1.6 2001/11/06 23:44:08 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -19,8 +19,8 @@ use Carp;
 
 # %meta_data_hash =
 #  (
-#   $identifier_1 => [ $expires_at, $accessed_at, $object_size ],
-#   $identifier_2 => [ $expires_at, $accessed_at, $object_size ],
+#   $key_1 => [ $expires_at, $accessed_at, $object_size ],
+#   $key_2 => [ $expires_at, $accessed_at, $object_size ],
 #   ...
 #  )
 
@@ -60,12 +60,12 @@ sub insert
 
 sub remove
 {
-  my ( $self, $p_identifier ) = @_;
+  my ( $self, $p_key ) = @_;
 
   $self->_set_cache_size( $self->get_cache_size( ) -
-                          $self->build_object_size( $p_identifier ) );
+                          $self->build_object_size( $p_key ) );
 
-  delete $self->_get_meta_data_hash_ref( )->{ $p_identifier };
+  delete $self->_get_meta_data_hash_ref( )->{ $p_key };
 }
 
 
@@ -102,11 +102,9 @@ sub build_removal_list
 
 sub build_object_size
 {
-  my ( $self, $p_identifier  ) = @_;
+  my ( $self, $p_key  ) = @_;
 
-  return $self->_get_meta_data_hash_ref( )
-    ->{ $p_identifier }
-      ->[ $_SIZE_OFFSET ];
+  return $self->_get_meta_data_hash_ref( )->{ $p_key }->[ $_SIZE_OFFSET ];
 }
 
 
@@ -114,9 +112,8 @@ sub _insert_object_meta_data
 {
   my ( $self, $p_object, $p_offset, $p_value ) = @_;
 
-  $self->_get_meta_data_hash_ref( )
-    ->{ $p_object->get_identifier( ) }
-      ->[ $p_offset ] = $p_value;
+  $self->_get_meta_data_hash_ref( )->{ $p_object->get_key( ) }->[ $p_offset ] =
+    $p_value;
 }
 
 
@@ -246,13 +243,13 @@ The object to be examined for its meta data
 
 =back
 
-=item B<remove( $identifier )>
+=item B<remove( $key )>
 
 Inform the CacheMetaData that an object is no longer in the cache
 
 =over 4
 
-=item $identifier
+=item $key
 
 The key under which the object was stored.
 
@@ -260,7 +257,7 @@ The key under which the object was stored.
 
 =item B<build_removal_list( $removal_list_ref )>
 
-Create a list of the identifiers in the cache, ordered as follows:
+Create a list of the keys in the cache, ordered as follows:
 
 1) objects that expire now
 
@@ -282,13 +279,13 @@ A reference to the list that should hold the result
 
 =back
 
-=item B<build_object_size( $identifier, $object_size_ref )>
+=item B<build_object_size( $key, $object_size_ref )>
 
 Determine the size of an object that the CacheMetaData knows about
 
 =over 4
 
-=item $identifier
+=item $key
 
 The key under which the object was stored.
 
