@@ -1,5 +1,5 @@
 #####################################################################
-# $Id: Cache.pm,v 1.23 2001/11/29 18:12:55 dclinton Exp $
+# $Id: Cache.pm,v 1.24 2001/11/29 18:33:21 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -13,24 +13,12 @@ package Cache::Cache;
 
 
 use strict;
-use vars qw( @ISA
-             @EXPORT_OK
-             $VERSION
-             $EXPIRES_NOW
-             $EXPIRES_NEVER );
+use vars qw( @ISA @EXPORT_OK $VERSION $EXPIRES_NOW $EXPIRES_NEVER );
 use Exporter;
-
 
 @ISA = qw( Exporter );
 
-
-@EXPORT_OK = qw( $VERSION
-                 $EXPIRES_NOW
-                 $EXPIRES_NEVER );
-
-
-use vars @EXPORT_OK;
-
+@EXPORT_OK = qw( $VERSION $EXPIRES_NOW $EXPIRES_NEVER );
 
 $VERSION = 0.99;
 $EXPIRES_NOW = 'now';
@@ -106,67 +94,31 @@ The Cache interface is implemented by classes that support the get,
 set, remove, size, purge, and clear instance methods and their
 corresponding static methods for persisting data across method calls.
 
-=head1 SYNOPSIS
+=head1 USAGE
 
-To implement the Cache::Cache interface:
+One common way to use the cache is as a mechanism for temporarily
+storing data that is expensive to retrieve from a backend.  In the
+following example, the cache is used to store a customer record for a
+short period of time to save repeated expensive calls to a database
+via the get_customer_from_db routine.
 
-  package Cache::MyCache;
+    use Cache::FileCache;
 
-  use Cache::Cache;
-  use vars qw( @ISA );
+    my $cache = new Cache::FileCache( );
 
-  @ISA = qw( Cache::Cache );
+    my $customer = $cache->get( $name );
 
-  sub get
-  {
-    my ( $self, $key ) = @_;
+    if ( not defined $customer )
+    {
+      $customer = get_customer_from_db( $name );
+      $cache->set( $name, $customer, "10 minutes" );
+    }
 
-    # implement the get method here
-  }
-
-  sub set
-  {
-    my ( $self, $key, $data, $expires_in ) = @_;
-
-    # implement the set method here
-  }
-
-  # implement the other interface methods here
-
-
-To use a Cache implementation, such as Cache::MemoryCache:
-
-
-  use Cache::Cache qw( $EXPIRES_NEVER $EXPIRES_NOW );
-  use Cache::MemoryCache;
-
-  my $options_hash_ref = { 'default_expires_in' => '10 seconds' };
-
-  my $cache = new Cache::MemoryCache( $options_hash_ref );
-
-  my $expires_in = '10 minutes';
-
-  $cache->set( 'Key', 'Value', $expires_in );
-
-  # if the next line is called within 10 minutes, then this 
-  # will return the cache value
-
-  my $value = $cache->get( 'Key' );
-
+    return $customer;
 
 =head1 CONSTANTS
 
 =over
-
-=item $SUCCESS
-
-Typically returned from a subroutine, this value is synonymous with 1
-and can be used as the typical perl "boolean" for true
-
-=item $FAILURE
-
-Typically returned from a subroutine, this value is synonymous with 0
-and can be used as the typical perl "boolean" for false
 
 =item $EXPIRES_NEVER
 
