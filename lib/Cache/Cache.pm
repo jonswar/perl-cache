@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: Cache.pm,v 1.14 2001/04/08 22:48:37 dclinton Exp $
+# $Id: Cache.pm,v 1.15 2001/04/24 15:18:14 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -57,9 +57,7 @@ $FAILURE = 0;
 
 sub Clear;
 
-
 sub Purge;
-
 
 sub Size;
 
@@ -79,24 +77,17 @@ sub new;
 
 sub clear;
 
-
 sub get;
-
 
 sub get_object;
 
-
 sub purge;
-
 
 sub remove;
 
-
 sub set;
 
-
 sub set_object;
-
 
 sub size;
 
@@ -108,11 +99,29 @@ sub size;
 
 sub get_default_expires_in;
 
-
 sub get_namespace;
 
+sub set_namespace;
 
 sub get_identifiers;
+
+sub get_auto_purge_interval;
+
+sub set_auto_purge_interval;
+
+sub get_auto_purge_interval;
+
+sub set_auto_purge_interval;
+
+sub get_auto_purge_on_set;
+
+sub set_auto_purge_on_set;
+
+sub get_auto_purge_on_get;
+
+sub set_auto_purge_on_get;
+
+
 
 
 1;
@@ -422,13 +431,22 @@ not explicitly set.
 The default expiration time for objects place in the cache.  Defaults
 to $EXPIRES_NEVER if not explicitly set.
 
-=item auto_purge
+=item auto_purge_interval
 
 Sets the auto purge interval.  If this option is set to a particular
 time ( in the same format as the expires_in ), then the purge( )
 routine will be called during the first set after the interval
 expires.  The interval will then be reset.
 
+=item auto_purge_on_set
+
+If this option is true, then the auto purge interval routine will be
+checked on every set.
+
+=item auto_purge_on_get
+
+If this option is true, then the auto purge interval routine will be
+checked on every get.
 
 =back
 
@@ -449,12 +467,22 @@ The default expiration time for objects placed in this cache instance
 The list of identifiers specifying objects in the namespace associated
 with this cache instance
 
-=item B<(get|set)_auto_purge( )>
+=item B<(get|set)_auto_purge_interval( )>
 
 Accesses the auto purge interval.  If this option is set to a particular
 time ( in the same format as the expires_in ), then the purge( )
 routine will be called during the first get after the interval
 expires.  The interval will then be reset.
+
+=item B<(get|set)_auto_purge_on_set( )>
+
+If this property is true, then the auto purge interval routine will be
+checked on every set.
+
+=item B<(get|set)_auto_purge_on_get( )>
+
+If this property is true, then the auto purge interval routine will be
+checked on every get.
 
 =back
 

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareFileCache.pm,v 1.15 2001/04/08 22:48:37 dclinton Exp $
+# $Id: SizeAwareFileCache.pm,v 1.16 2001/04/24 15:18:14 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -98,6 +98,9 @@ sub new
 sub set
 {
   my ( $self, $identifier, $data, $expires_in ) = @_;
+
+  $self->_conditionally_auto_purge_on_set( ) or
+    croak( "Couldn't conditionally auto purge on set" );
 
   my $default_expires_in = $self->get_default_expires_in( );
 

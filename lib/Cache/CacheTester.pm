@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheTester.pm,v 1.5 2001/03/23 00:15:06 dclinton Exp $
+# $Id: CacheTester.pm,v 1.6 2001/04/24 15:18:14 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -13,7 +13,7 @@ package Cache::CacheTester;
 use strict;
 use Carp;
 use Cache::BaseCacheTester;
-use Cache::Cache qw( $SUCCESS );
+use Cache::Cache qw( $SUCCESS $TRUE );
 
 use vars qw( @ISA $EXPIRES_DELAY );
 
@@ -585,7 +585,7 @@ sub _test_fourteen
 }
 
 
-# test the auto_purge functionality
+# test the auto_purge on set functionality
 
 sub _test_fifteen
 {
@@ -598,7 +598,9 @@ sub _test_fifteen
 
   my $expires_in = "1 second";
 
-  $cache->set_auto_purge( $expires_in );
+  $cache->set_auto_purge_interval( $expires_in );
+
+  $cache->set_auto_purge_on_set( $TRUE );
 
   my $key = 'Test Key';
 
@@ -621,10 +623,10 @@ sub _test_fifteen
   ( $set_status eq $SUCCESS ) ?
     $self->ok( ) : $self->not_ok( '$set_status eq $SUCCESS' );
 
-  my $fetched_expired_value = $cache->get( $key );
+  my $fetched_expired_object = $cache->get_object( $key );
 
-  ( not defined $fetched_expired_value ) ?
-    $self->ok( ) : $self->not_ok( 'not defined $fetched_expired_value' );
+  ( not defined $fetched_expired_object ) ?
+    $self->ok( ) : $self->not_ok( 'not defined $fetched_expired_object' );
 
   $clear_status = $cache->Clear( );
 

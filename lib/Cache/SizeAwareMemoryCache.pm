@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareMemoryCache.pm,v 1.7 2001/04/08 22:48:37 dclinton Exp $
+# $Id: SizeAwareMemoryCache.pm,v 1.8 2001/04/24 15:18:14 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -16,8 +16,7 @@ use strict;
 use vars qw( @ISA );
 use Cache::Cache qw( $EXPIRES_NEVER $SUCCESS $FAILURE $TRUE $FALSE );
 use Cache::CacheMetaData;
-use Cache::CacheUtils qw ( Auto_Purge
-                           Build_Object
+use Cache::CacheUtils qw ( Build_Object
                            Freeze_Object
                            Limit_Size
                            Object_Has_Expired
@@ -116,6 +115,9 @@ sub get
   $identifier or
     croak( "identifier required" );
 
+  $self->_conditionally_auto_purge_on_get( ) or
+    croak( "Couldn't conditionally auto purge on get" );
+
   my $object = $self->get_object( $identifier ) or
     return undef;
 
@@ -143,8 +145,8 @@ sub set
 {
   my ( $self, $identifier, $data, $expires_in ) = @_;
 
-  Auto_Purge( $self ) or
-    croak( "Couldn't auto purge" );
+  $self->_conditionally_auto_purge_on_set( ) or
+    croak( "Couldn't conditionally auto purge on set" );
 
   my $default_expires_in = $self->get_default_expires_in( );
 

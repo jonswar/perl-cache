@@ -1,6 +1,10 @@
 Revision history for Cache
 
 0.08 in progress
+ - renamed the auto_purge option to auto_purge_interval
+ - added the auto_purge_on_set and auto_purge_on_get options
+ - moved the Auto_Purge and Reset_Auto_Purge methods to BaseCache
+   as the instance methods _auto_purge and _reset_auto_purge
  - added the auto_purge option and property to the base cache interface
    and implementations.  This option will call the purge method on
    the cache after the specified interval expires

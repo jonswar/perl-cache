@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheUtils.pm,v 1.18 2001/04/24 15:18:14 dclinton Exp $
+# $Id: CacheUtils.pm,v 1.19 2001/04/24 15:23:22 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -28,8 +28,7 @@ use Storable qw( nfreeze thaw dclone );
 
 @ISA = qw( Exporter );
 
-@EXPORT_OK = qw( Auto_Purge
-                 Build_Expires_At
+@EXPORT_OK = qw( Build_Expires_At
                  Build_Object
                  Build_Object_Dump
                  Build_Path
@@ -48,7 +47,6 @@ use Storable qw( nfreeze thaw dclone );
                  Recursively_List_Files_With_Paths
                  Recursively_Remove_Directory
                  Remove_File
-                 Reset_Auto_Purge
                  Restore_Shared_Hash_Ref
                  Restore_Shared_Hash_Ref_With_Lock
                  Split_Word
@@ -83,11 +81,6 @@ my %_Expiration_Units = ( map(($_,             1), qw(s second seconds sec)),
 # current umask
 
 my $DIRECTORY_MODE = 0777;
-
-
-# keys that trigger the automatic purging are placed in this namespace
-
-my $AUTO_PURGE_NAMESPACE = "__AUTO_PURGE__";
 
 
 # Compare the expires_at to the current time to determine whether or
@@ -890,91 +883,6 @@ sub Update_Access_Time
     my $now = time( );
 
     utime( $now, $now, $path );
-  }
-
-  return $SUCCESS;
-}
-
-
-# this method checks to see if the auto_purge property is set
-# for a particular cache.  If it is, then it switches the cache
-# to the $AUTO_PURGE_NAMESPACE and stores that value under
-# the name of the current cache namespace
-
-sub Reset_Auto_Purge
-{
-  my ( $cache ) = @_;
-
-  defined $cache or
-    croak( "cache required" );
-
-  my $auto_purge = $cache->get_auto_purge( );
-
-  return $SUCCESS if not defined $auto_purge;
-
-  return $SUCCESS if $auto_purge eq $EXPIRES_NEVER;
-
-  my $namespace = $cache->get_namespace( ) or
-    croak( "Couldn't get namespace" );
-
-  $cache->set_namespace( $AUTO_PURGE_NAMESPACE ) or
-    croak( "Couldn't set auto purge namespace to $AUTO_PURGE_NAMESPACE" );
-
-  if ( not defined $cache->get( $namespace ) )
-  {
-    my $object =
-      Build_Object( $namespace, 1, $auto_purge, undef ) or
-        croak( "Couldn't build cache object" );
-
-    $cache->set_object( $namespace, $object ) or
-      croak( "Couldn't set_object( $namespace, $object )" );
-  }
-
-  $cache->set_namespace( $namespace ) or
-    croak( "Couldn't set namespace to $namespace" );
-
-  return $SUCCESS;
-}
-
-
-# this method checks to see if the auto_purge property is set, and
-# if it is, switches to the $AUTO_PURGE_NAMESPACE and sees if
-# a value exists at the location specified by a key named for the
-# current namespace.  If that key doesn't exist, then the purge
-# method is called on the cache
-
-sub Auto_Purge
-{
-  my ( $cache ) = @_;
-
-  defined $cache or
-    croak( "cache required" );
-
-  my $auto_purge = $cache->get_auto_purge( );
-
-  return $SUCCESS if not defined $auto_purge;
-
-  return $SUCCESS if $auto_purge eq $EXPIRES_NEVER;
-
-  my $namespace = $cache->get_namespace( ) or
-    croak( "Couldn't get namespace" );
-
-  $cache->set_namespace( $AUTO_PURGE_NAMESPACE ) or
-    croak( "Couldn't set auto purge namespace to $AUTO_PURGE_NAMESPACE" );
-
-  my $auto_purge_object = $cache->get_object( $namespace );
-
-  $cache->set_namespace( $namespace ) or
-    croak( "Couldn't set namespace to $namespace" );
-
-  if ( ( not defined $auto_purge_object ) or
-       ( Object_Has_Expired ( $auto_purge_object ) ) )
-  {
-    $cache->purge( ) or
-      croak( "Couldn't purge" );
-
-    Reset_Auto_Purge( $cache ) or
-      croak( "Couldn't reset auto_purge" );
   }
 
   return $SUCCESS;
