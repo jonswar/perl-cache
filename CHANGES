@@ -15,7 +15,7 @@ Revision history for Cache
    caches to consistently reflect the total size of the objects on disk,
    but not including the directory overhead
  - changed format of persisted data in the FileBackend
- - major rewrite of documentatoin
+ - major rewrite of documentation
 
 0.09 2001-09-10-12-10
  - released version 0.09
