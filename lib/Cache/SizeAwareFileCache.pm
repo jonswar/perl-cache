@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareFileCache.pm,v 1.7 2001/03/06 08:41:33 dclinton Exp $
+# $Id: SizeAwareFileCache.pm,v 1.8 2001/03/06 18:37:21 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -15,7 +15,9 @@ package Cache::SizeAwareFileCache;
 use strict;
 use vars qw( @ISA @EXPORT_OK $NO_MAX_SIZE );
 use Cache::Cache qw( $EXPIRES_NEVER $SUCCESS $FAILURE $TRUE $FALSE );
-use Cache::CacheUtils qw ( Make_Path
+use Cache::CacheUtils qw ( Build_Object
+                           Build_Unique_Key
+                           Make_Path
                            Recursively_List_Files_With_Paths
                            Read_File_Without_Time_Modification
                            Remove_File
@@ -27,7 +29,7 @@ use Data::Dumper;
 use Exporter;
 
 
-@ISA = qw ( Cache::FileCache );
+@ISA = qw ( Cache::FileCache Exporter );
 @EXPORT_OK = qw( $NO_MAX_SIZE );
 
 
@@ -191,12 +193,43 @@ sub new
 ##
 
 
+
+sub set
+{
+  my ( $self, $identifier, $data, $expires_in ) = @_;
+
+  my $default_expires_in = $self->get_default_expires_in( );
+
+  my $object =
+    Build_Object( $identifier, $data, $default_expires_in, $expires_in ) or
+      croak( "Couldn't build cache object" );
+
+  my $unique_key = Build_Unique_Key( $identifier ) or
+    croak( "Couldn't build unique key" );
+
+  $self->_store( $unique_key, $object ) or
+    croak( "Couldn't store $identifier" );
+
+  my $max_size = $self->get_max_size();
+
+  if ( $max_size != $NO_MAX_SIZE )
+  {
+    $self->limit_size( $max_size );
+  }
+
+  return $SUCCESS;
+}
+
+
+
 sub limit_size
 {
   my ( $self, $new_size ) = @_;
 
   $new_size >= 0 or
     croak( "size >= 0 required" );
+
+  return $SUCCESS if ( $new_size == $NO_MAX_SIZE );
 
   my $namespace_path = $self->_build_namespace_path( ) or
     croak( "Couldn't build namespace path" );
@@ -220,7 +253,7 @@ sub limit_size
 
     $size_difference -= $size;
 
-    last if $size_difference <= 0;
+    last if ( $size_difference <= 0 );
   }
 
   if ( $size_difference > 0 )
@@ -237,43 +270,6 @@ sub limit_size
 ##
 # Private instance methods
 ##
-
-
-sub _store
-{
-  my ( $self, $unique_key, $object ) = @_;
-
-  $unique_key or
-    croak( "unique_key required" );
-
-  my $object_path = $self->_build_object_path( $unique_key ) or
-    croak( "Couldn't build object path" );
-
-  my $data_dumper = new Data::Dumper( [$object] );
-
-  $data_dumper->Deepcopy( 1 );
-
-  my $object_dump = $data_dumper->Dump( );
-
-  Make_Path( $object_path ) or
-    croak( "Couldn't make path: $object_path" );
-
-  my $max_size = $self->get_max_size();
-
-  if ( $max_size != $NO_MAX_SIZE )
-  {
-    my $new_size = $max_size - length $object_dump;
-
-    $new_size = 0 if $new_size < 0;
-
-    $self->limit_size( $new_size );
-  }
-
-  Write_File( $object_path, \$object_dump ) or
-    croak( "Couldn't write file $object_path" );
-
-  return $SUCCESS;
-}
 
 
 sub _initialize_size_aware_file_cache
@@ -383,7 +379,7 @@ to be sized.
 
 =item B<new( $options_hash_ref )>
 
-Constructs a new FileCache.
+Constructs a new SizeAwareFileCache
 
 =item C<$options_hash_ref>
 
