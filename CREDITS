@@ -25,8 +25,8 @@
 - Richard Chen <chenri@snet.net> informed me of a better way to call
   static methods without knowing the type of the class until runtime
 
-- Christophe Marcant <christophe@marcant.org> offered a patch to allow
-  spaces to be used in the filenames
+- Christophe Marcant <bl3rw5pv001@sneakemail.com> offered a patch to
+  allow spaces to be used in the filenames
 
 - Eric Cholet <cholet@logilune.com> offered a patch to fix the missing
   import in Cache::CacheUtils and is helping debug using a Backend on
