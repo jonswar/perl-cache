@@ -1,6 +1,8 @@
 Revision history for Cache
 
-0.09 in progress
+0.09 2001-09-05-19-08
+ - released version 0.09
+ - changed the license to be either the GPL or the Artistic license
  - added Jay Sachs' implementation of NullCache
  - modified the remove methods to avoid croaking if two cache
    instances are both purging or limiting at the same time
