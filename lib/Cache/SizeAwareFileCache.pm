@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareFileCache.pm,v 1.5 2001/03/05 19:02:09 dclinton Exp $
+# $Id: SizeAwareFileCache.pm,v 1.6 2001/03/06 07:19:43 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -16,6 +16,7 @@ use Cache::Cache qw( $EXPIRES_NEVER $SUCCESS $FAILURE $TRUE $FALSE );
 use Cache::CacheUtils qw ( Make_Path
                            Recursively_List_Files_With_Paths
                            Read_File_Without_Time_Modification
+                           Remove_File
                            Static_Params
                            Write_File );
 use Cache::FileCache;
@@ -125,65 +126,64 @@ sub limit_size
   my $namespace_path = $self->_build_namespace_path( ) or
     croak( "Couldn't build namespace path" );
 
-  while ( $self->size() > $new_size )
+  my $current_size = $self->size( );
+
+  my $size_difference = $self->size( ) - $new_size;
+
+  my @removal_list;
+
+  _Build_Removal_List( $namespace_path, \@removal_list );
+
+  foreach my $filename ( @removal_list )
   {
-    my $identifier_to_remove = _Choose_Identifier_To_Remove( $namespace_path );
+    my $size = -s $filename;
 
-    if ( not defined $identifier_to_remove )
-    {
-      warn("Couldn't limit size to $new_size\n");
+    Remove_File( $filename ) or
+      croak( "Couldn't remove file $filename" );
 
-      return $FAILURE;
-    }
+    $size_difference -= $size;
 
-    $self->remove( $identifier_to_remove ) or
-      croak( "Couldn't remove identifier $identifier_to_remove" );
+    last if $size_difference <= 0;
+  }
+
+  if ( $size_difference > 0 )
+  {
+    warn("Couldn't limit size to $new_size\n");
+
+    return $FAILURE;
   }
 
   return $SUCCESS;
 }
 
 
-sub _Choose_Identifier_To_Remove
+
+# _Build_Removal_List creates a list of all of the files in the cache
+# Each file appears twice in the list.  First, ordered by the the time
+# in which they will expire (skipping those that will not expire), and
+# second, in the order by which they were most recently accessed
+#
+# NOTE:  I aplogize if this method is confusing.  This was an area
+# of significant performance issues, so it is written to be fast
+# in terms of run time speed, not clarity
+
+
+sub _Build_Removal_List
 {
-  my ( $namespace_path ) = @_;
+  my ( $namespace_path, $removal_list_ref ) = @_;
 
   defined( $namespace_path ) or
     croak( "namespace_path required" );
 
-  my $next_expiring_indentifier =
-    _Find_Next_Expiring_Identifier( $namespace_path );
+  defined( $removal_list_ref ) or
+    croak( "removal_list_ref required" );
 
-  if ( defined $next_expiring_indentifier )
-  {
-    return $next_expiring_indentifier;
-  }
-
-  my $least_recently_accessed_identifier =
-    _Find_Least_Recently_Accessed_Identifier( $namespace_path );
-
-  if ( defined $least_recently_accessed_identifier )
-  {
-    return $least_recently_accessed_identifier;
-  }
-
-  return undef;
-}
-
-
-
-sub _Find_Next_Expiring_Identifier
-{
-  my ( $namespace_path ) = @_;
-
-  defined( $namespace_path ) or
-    croak( "namespace_path required" );
-
-  my $next_expiring_indentifier = undef;
-
-  my $next_expires_at = undef;
 
   my @filenames;
+
+  my %next_expiration_hash;
+
+  my %least_recently_accessed_hash;
 
   Recursively_List_Files_With_Paths( $namespace_path, \@filenames );
 
@@ -194,55 +194,32 @@ sub _Find_Next_Expiring_Identifier
 
     my $expires_at = $object->get_expires_at( );
 
-    next if $expires_at eq $EXPIRES_NEVER;
-
-    if ( ( not defined $next_expires_at ) or
-         ( $expires_at < $next_expires_at ) )
-    {
-      $next_expires_at = $expires_at;
-
-      $next_expiring_indentifier = $object->get_identifier( ) or
-        croak( "Couldn't get identifier" );
-    }
-  }
-
-  return $next_expiring_indentifier;
-}
-
-
-sub _Find_Least_Recently_Accessed_Identifier
-{
-  my ( $namespace_path ) = @_;
-
-  defined( $namespace_path ) or
-    croak( "namespace_path required" );
-
-  my $least_recently_accessed_identifier = undef;
-
-  my $least_recent_access_time = undef;
-
-  my @filenames;
-
-  Recursively_List_Files_With_Paths( $namespace_path, \@filenames );
-
-  foreach my $filename ( @filenames )
-  {
     my $last_access_time = ( stat( $filename ) )[8];
 
-    if ( ( not defined $least_recent_access_time ) or
-         ( $least_recent_access_time < $last_access_time ) )
-    {
-      my $object = _Restore_Object_Without_Time_Modication( $filename ) or
-        next;
+    $next_expiration_hash{ $filename } = $expires_at if
+      $expires_at ne $EXPIRES_NEVER;
 
-      $least_recent_access_time = $last_access_time;
-
-      $least_recently_accessed_identifier = $object->get_identifier( ) or
-        croak( "Couldn't get identifier" );
-    }
+    $least_recently_accessed_hash{ $filename } = $last_access_time;
   }
 
-  return $least_recently_accessed_identifier;
+
+  my @next_expiring_list =
+    sort
+    {
+      $next_expiration_hash{$b} <=> $next_expiration_hash{$a}
+    } keys %next_expiration_hash;
+
+
+  my @least_recently_accessed_list =
+    sort
+    {
+      $least_recently_accessed_hash{$b} <=> $least_recently_accessed_hash{$a}
+    } keys %least_recently_accessed_hash;
+
+
+  @$removal_list_ref = ( @next_expiring_list, @least_recently_accessed_list );
+
+  return $SUCCESS;
 }
 
 
