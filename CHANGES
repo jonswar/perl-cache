@@ -1,6 +1,7 @@
 Revision history for Cache
 
 0.08 in progress
+ - prepared for version 0.08
  - renamed the auto_purge option to auto_purge_interval
  - added the auto_purge_on_set and auto_purge_on_get options
  - moved the Auto_Purge and Reset_Auto_Purge methods to BaseCache
