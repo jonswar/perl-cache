@@ -1,3 +1,6 @@
+- Sterling Swartwout <sterling_swartwout@standardandpoors.com> helped
+  track down an issue with the regex quoting in older versions of perl
+
 - Yves Orton <yves.orton@mciworldcom.de>, a CPAN tester, submitted a
   patch to _Make_Path to fix warnings on Win32
 
