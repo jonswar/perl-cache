@@ -4,6 +4,8 @@ Revision history for Cache
  - localized scope of global file and directory handles (FILE and DIR)
  - applied Jonathan Swartz's patch for a much better untainting regex
  - changed _Untaint_String to throw an exception on a taint
+ - further improved the fix to prevent race conditions that caused the
+   tests to fail
 
 0.99 2001-12-09-18-45
  - released version 0.99

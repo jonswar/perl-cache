@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheTester.pm,v 1.16 2001/12/09 22:43:03 dclinton Exp $
+# $Id: CacheTester.pm,v 1.17 2001/12/13 15:48:29 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -19,7 +19,7 @@ use vars qw( @ISA $EXPIRES_DELAY );
 
 @ISA = qw ( Cache::BaseCacheTester );
 
-$EXPIRES_DELAY = 1;
+$EXPIRES_DELAY = 2;
 $Error::Debug = 1;
 
 sub test
@@ -453,7 +453,7 @@ sub _test_thirteen
 {
   my ( $self, $cache ) = @_;
 
-  my $expires_in = "1 second";
+  my $expires_in = $EXPIRES_DELAY;
 
   my $key = 'Test Key';
 
@@ -514,7 +514,7 @@ sub _test_fifteen
 
   $cache->Clear( );
 
-  my $expires_in = "2 second";
+  my $expires_in = $EXPIRES_DELAY;
 
   $cache->set_auto_purge_interval( $expires_in );
 
@@ -551,7 +551,7 @@ sub _test_sixteen
 {
   my ( $self, $cache ) = @_;
 
-  my $expires_in = "1 second";
+  my $expires_in = $EXPIRES_DELAY;
 
   eval
   {
