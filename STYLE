@@ -23,50 +23,24 @@ An example subroutine:
 
   sub build_something_else
   {
-     my ( $self, $param ) = @_;
+     my ( $self, $p_param ) = @_;
 
-     defined $param or
-       throw new Exception( );
+     Assert_Defined( $p_param );
 
-     my $something = calculate_something( $param );
-
-     my $something_else = calculate_something_else( $something );
-
-     return $something_else;
+     return $self->calculate_something( $p_param + 1 );
   }
-
 
 
                           -----------------
                             Return Values
                           -----------------
 
-To increase code clarity, a temporary variable should be used to store
-the return value in a subroutine.  Since "return" is essentially a
-noop in perl (it merely points the interpreter to the correct value to
-pass back), this introduces no additional overhead, but greatly
-improves readability.  I.e., one should write:
-
-
-  sub calculate_two
-  {
-    my ( $self ) = @_;
-
-    my $two = 1 + 1;
-
-    return $two;
-  }
-
-
-instead of:
-
-
-  sub calculate_two
-  {
-    my ( $self ) = @_;
-
-    return 1 + 1;
-  }
+[Initially I advocated using a temporary variable to store the
+ return value to increase code readability, but since reading and
+ rereading (and re-rereading) Fowler's _Refactoring_, I am inclined
+ to agree with him and now support the Remove Temp with Query
+ refactoring, which also implies returning the result of a calculation
+ directly]
 
                               ----------
                                 Naming
@@ -105,6 +79,19 @@ The following naming conventions should be used:
   
   my $file_cache = new Cache::FileCache( );
 
+
+* Parameters
+
+  Parameters should be prefixed with 'p_' to assist in readability.  Note
+  that I typically leave off the p_ for the $self parameter, and the
+  $proto parameter in the constructor.  For example:
+
+  sub add
+  {
+     my ( $self, $p_value_one, $p_value_two ) = @_;
+ 
+     return $p_value_one + $p_value_two;
+  }
 
 
 * Public static class variables
@@ -161,7 +148,7 @@ The following naming conventions should be used:
 
   sub public_instance_method
   {
-    my ( $self, $parameter ) = @_;
+    my ( $self, $p_parameter ) = @_;
   }
 
 
@@ -174,7 +161,7 @@ The following naming conventions should be used:
 
   sub _private_instance_method
   {
-    my ( $self, $parameter ) = @_;
+    my ( $self, $p_parameter ) = @_;
   }
 
 
@@ -184,11 +171,15 @@ The following naming conventions should be used:
   This type of subroutine is written "Public_Class_Method" and does
   not take $self as a parameter.  This is part of the public interface
   for a module, and should be documented with pod (see below for
-  details about documentation).
+  details about documentation).  You can optionally make use of
+  the Static_Params method in CacheUtils to automatically shift the
+  parameters if it is called via the class dereference operator rather
+  that explicitly via the package's namespace.  (i.e. it is called via
+  Class->Public_Class_Method( ) vs. Class::Public_Class_Method( ) ).
 
   sub Public_Class_Method
   {
-    my ( $parameter ) = @_;  
+    my ( $p_parameter ) = Static_Params( @_ );  
   }
 
 
@@ -196,11 +187,17 @@ The following naming conventions should be used:
 
   This type of subroutine is written "_Private_Class_Method" and does
   not take $self as a parameter.  This is not part of the public
-  interface, and can be documented inline with perl comments.
+  interface, and can be documented inline with perl comments.  You can
+  optionally make use of the Static_Params method in CacheUtils to
+  automatically shift the parameters if it is called via the class
+  dereference operator rather that explicitly via the package's
+  namespace.  (i.e. it is called via Class->Public_Class_Method( )
+  vs. Class::Public_Class_Method( ) ).
+
 
   sub _Private_Class_Method
   {
-    my ( $parameter ) = @_;
+    my ( $p_parameter ) = Static_Params( @_ );
   } 
 
 
@@ -312,7 +309,7 @@ public getter and a public setter.
 * error handling
 
   my $foo = $self->get_foo( ) or
-    croak( "Couldn't get foo" );
+    throw Error( "Couldn't get foo" );
 
 
 
@@ -349,8 +346,8 @@ next line after the package declaration)
 
   use strict;
   use vars qw( @ISA @EXPORT_OK $PUBLIC_STATIC_CONSTANT );
-  use Cache::Cache qw( $EXPIRES_NEVER $SUCCESS $FAILURE $TRUE $FALSE );
-  use Carp;
+  use Cache::Cache qw( $EXPIRES_NEVER );
+  use Error;
   use Exporter;
 
 
@@ -404,15 +401,15 @@ Finally, the class should be documented according to this template:
 
   =over 4
 
-  =item B<method_name( $parameter )>
+  =item B<method_name( $p_parameter )>
 
   Description of the method
 
   =over 4 
 
-  =item $parameter
+  =item $p_parameter
 
-  Description of the $parameter
+  Description of the $p_parameter
 
   =item Returns
 
