@@ -1,6 +1,7 @@
 Revision history for Cache
 
 0.07 in progress
+ - removed last "use IPC::Shareable" 
  - added support in the Makefile.PL to conditionally build the
    SharedMemoryCache, which requires IPC::ShareLite, and thus runs only
    on certain architectures.  Also broke out the IPC related routines
