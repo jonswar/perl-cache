@@ -1,7 +1,7 @@
 Revision history for Cache
 
-0.08 in progress
- - prepared for version 0.08
+0.08 2001-04-26-08-53
+ - released version 0.08
  - renamed the auto_purge option to auto_purge_interval
  - added the auto_purge_on_set and auto_purge_on_get options
  - moved the Auto_Purge and Reset_Auto_Purge methods to BaseCache
@@ -16,7 +16,7 @@ Revision history for Cache
  - removed the $VERSION from SizeAwareCache
  - started version 0.08
 
-0.07 2000-03-27-08-55
+0.07 2001-03-27-08-55
  - released version 0.07
  - prepared for initial CPAN release
  - improved Cache::Cache documentation
@@ -27,7 +27,7 @@ Revision history for Cache
    into the SharedCacheUtils package.
  - started version 0.07
 
-0.06 2000-03-23-08-36
+0.06 2001-03-23-08-36
  - release version 0.06
  - added the get_identifiers method to the Cache interface, implemented
    the method for all classes, added a new test, and updated the test 
@@ -54,13 +54,13 @@ Revision history for Cache
    SizeAwareSharedMemoryCache modules accordingly
  - started version 0.06
 
-0.05 2000-03-20-10-25
+0.05 2001-03-20-10-25
  - released version 0.05
  - updated Storable dependency to 1.011
  - replaced the IPC::Shareable backend with IPC::ShareLite
  - started version 0.05
 
-0.04 2000-03-17-10-43
+0.04 2001-03-17-10-43
  - released version 0.04
  - replaced Data::Dumper with Storable, which is now a requirement
  - implemented the SizeAwareMemoryCache and associated tests
@@ -69,7 +69,7 @@ Revision history for Cache
  - moved max_size logic from the _store method to the set method
  - started version 0.04
 
-0.03 2000-03-10-12-40
+0.03 2001-03-10-12-40
  - released version 0.03
  - made the FileCache more multi-user friendly by allowing a more
    permissive default directory umask, which can also be optionally 
@@ -93,7 +93,7 @@ Revision history for Cache
  - added coding guidelines to STYLE
  - started version 0.03
 
-0.02 2000-02-15-21-12
+0.02 2001-02-15-21-12
  - released version 0.02
  - added perldoc to SizeAwareFileCache
  - created SizeAwareFileCache
