@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: BaseCache.pm,v 1.1 2001/03/05 19:00:40 dclinton Exp $
+# $Id: BaseCache.pm,v 1.2 2001/03/06 14:55:41 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -8,14 +8,18 @@
 # rights and limitations under the License.
 ######################################################################
 
+
 package Cache::BaseCache;
+
 
 use strict;
 use vars qw( @ISA );
 use Cache::Cache qw( $SUCCESS $FAILURE $EXPIRES_NEVER );
 use Carp;
 
+
 @ISA = qw( Cache::Cache );
+
 
 my $DEFAULT_EXPIRES_IN = $EXPIRES_NEVER;
 my $DEFAULT_NAMESPACE = "Default";
@@ -24,6 +28,7 @@ my $DEFAULT_NAMESPACE = "Default";
 ##
 # Constructor
 ##
+
 
 sub new
 {
@@ -42,6 +47,7 @@ sub new
 ##
 # Private instance methods
 ##
+
 
 sub _initialize_base_cache
 {
@@ -99,6 +105,7 @@ sub _initialize_default_expires_in
 # option_hash associated with this instance.  If it is not found, then
 # 'default_value' will be returned instance
 
+
 sub _read_option
 {
   my ( $self, $option_name, $default_value ) = @_;
@@ -116,10 +123,10 @@ sub _read_option
 }
 
 
-
 ##
 # Instance properties
 ##
+
 
 sub _get_options_hash_ref
 {
@@ -135,7 +142,6 @@ sub _set_options_hash_ref
 
   $self->{_Options_Hash_Ref} = $options_hash_ref;
 }
-
 
 
 sub get_namespace
@@ -173,7 +179,7 @@ sub _set_default_expires_in
 1;
 
 
-  __END__
+__END__
 
 
 =pod
