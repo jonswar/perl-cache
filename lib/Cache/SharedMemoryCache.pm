@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SharedMemoryCache.pm,v 1.22 2002/04/07 17:04:46 dclinton Exp $
+# $Id: SharedMemoryCache.pm,v 1.23 2003/04/15 14:46:23 dclinton Exp $
 # Copyright (C) 2001-2003 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -113,6 +113,24 @@ Cache::SharedMemoryCache -- extends the MemoryCache.
 The SharedMemoryCache extends the MemoryCache class and binds the data
 store to shared memory so that separate process can use the same
 cache.
+
+The official recommendation is now to use FileCache instead of
+SharedMemoryCache.  The reasons for this include:
+
+1) FileCache provides equal or better performance in all cases that
+we've been able to test.  This is due to all modern OS's ability to
+buffer and cache file system accesses very well.
+
+2) FileCache has no real limits on cached object size or the number of
+cached objects, whereas the SharedMemoryCache has limits, and rather
+low ones at that.
+
+3) FileCache works well on every OS, wherease the SharedMemoryCache
+works only on systems that support IPC::ShareLite.  And IPC::ShareLite
+is an impressive effort -- but think about how hard it is to get
+shared memory working properly on *one* system.  Now imagine writing a
+wrapper around shared memory for many operating systems.
+
 
 =head1 SYNOPSIS
 
