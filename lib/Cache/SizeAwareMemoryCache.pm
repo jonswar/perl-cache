@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareMemoryCache.pm,v 1.4 2001/03/22 18:40:08 dclinton Exp $
+# $Id: SizeAwareMemoryCache.pm,v 1.5 2001/03/22 21:41:35 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -67,7 +67,7 @@ sub _build_cache_meta_data
   my $cache_meta_data = new Cache::CacheMetaData( ) or
     croak( "Couldn't instantiate new CacheMetaData" );
 
-  my @identifiers = $self->_identifiers( );
+  my @identifiers = $self->get_identifiers( );
 
   foreach my $identifier ( @identifiers )
   {

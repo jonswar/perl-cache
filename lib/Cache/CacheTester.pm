@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheTester.pm,v 1.3 2001/03/05 19:01:25 dclinton Exp $
+# $Id: CacheTester.pm,v 1.4 2001/03/06 07:07:43 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -38,6 +38,7 @@ sub test
   $self->_test_eleven( $cache );
   $self->_test_twelve( $cache );
   $self->_test_thirteen( $cache );
+  $self->_test_fourteen( $cache );
 }
 
 
@@ -544,6 +545,61 @@ sub _test_thirteen
   ( not defined $fetched_expired_value ) ?
     $self->ok( ) : $self->not_ok( 'not defined $fetched_expired_value' );
 }
+
+
+# test the get_identifiers method
+
+sub _test_fourteen
+{
+  my ( $self, $cache ) = @_;
+
+  my $clear_status = $cache->Clear( );
+
+  ( $clear_status eq $SUCCESS ) ?
+    $self->ok( ) : $self->not_ok( '$clear_status eq $SUCCESS' );
+
+  my $empty_size = $cache->Size( );
+
+  ( $empty_size == 0 ) ?
+    $self->ok( ) : $self->not_ok( '$empty_size == 0' );
+
+  my @identifiers = sort ( 'John', 'Paul', 'Ringo', 'George' );
+
+  my $value = 'Test Value';
+
+  foreach my $identifier ( @identifiers )
+  {
+    my $set_status = $cache->set( $identifier, $value );
+
+    $set_status eq $SUCCESS ?
+      $self->ok( ) : $self->not_ok( '$set_status eq $SUCCESS' );
+  }
+
+  my @cached_identifiers = sort $cache->get_identifiers( );
+
+  my $arrays_equal = Arrays_Are_Equal( \@identifiers, \@cached_identifiers );
+
+  ( $arrays_equal == 1 ) ?
+    $self->ok( ) : $self->not_ok( '$arrays_equal == 1' );
+}
+
+
+sub Arrays_Are_Equal
+{
+  my ( $first_array_ref, $second_array_ref ) = @_;
+
+  local $^W = 0;  # silence spurious -w undef complaints
+
+  return 0 unless @$first_array_ref == @$second_array_ref;
+
+  for (my $i = 0; $i < @$first_array_ref; $i++)
+  {
+    return 0 if $first_array_ref->[$i] ne $second_array_ref->[$i];
+  }
+
+  return 1;
+}
+
 
 1;
 

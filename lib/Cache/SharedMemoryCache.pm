@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SharedMemoryCache.pm,v 1.8 2001/03/22 18:40:08 dclinton Exp $
+# $Id: SharedMemoryCache.pm,v 1.9 2001/03/22 21:41:35 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -234,21 +234,6 @@ sub _restore
 }
 
 
-sub _identifiers
-{
-  my ( $self ) = @_;
-
-  my $namespace = $self->get_namespace( ) or
-    croak( "Couldn't get namespace" );
-
-  my $cache_hash_ref = _Restore_Cache_Hash_Ref( ) or
-    croak( "Couldn't restore cache hash ref" );
-
-  return ( ) unless defined $cache_hash_ref->{$namespace};
-
-  return keys %{$cache_hash_ref->{$namespace}};
-}
-
 
 sub _build_object_size
 {
@@ -280,6 +265,27 @@ sub _delete_namespace
     croak( "Couldn't delete namespace $namespace" );
 
   return $SUCCESS;
+}
+
+
+##
+# Instance properties
+##
+
+
+sub get_identifiers
+{
+  my ( $self ) = @_;
+
+  my $namespace = $self->get_namespace( ) or
+    croak( "Couldn't get namespace" );
+
+  my $cache_hash_ref = _Restore_Cache_Hash_Ref( ) or
+    croak( "Couldn't restore cache hash ref" );
+
+  return ( ) unless defined $cache_hash_ref->{ $namespace };
+
+  return keys %{ $cache_hash_ref->{ $namespace } };
 }
 
 

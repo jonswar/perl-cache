@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheUtils.pm,v 1.14 2001/03/22 18:40:08 dclinton Exp $
+# $Id: CacheUtils.pm,v 1.15 2001/03/22 21:41:35 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -54,6 +54,7 @@ use Storable qw( nfreeze thaw dclone );
                  Static_Params
                  Store_Shared_Hash_Ref
                  Store_Shared_Hash_Ref_And_Unlock
+                 Update_Access_Time
                  Thaw_Object
                  Write_File
                  Object_Has_Expired );
@@ -474,12 +475,8 @@ sub Read_File_Without_Time_Modification
   defined( $filename ) or
     croak( "filename required" );
 
-  if ( not -e $filename )
-  {
-    warn( "filename $filename doesn't exist" );
-
+  -e $filename or
     return undef;
-  }
 
   my ( $file_access_time, $file_modified_time ) = ( stat( $filename ) )[8,9];
 
@@ -999,5 +996,25 @@ sub Limit_Size
 }
 
 
+# this method takes a file path and sets the access and modification
+# time of that file to the current time
+
+sub Update_Access_Time
+{
+  my ( $path ) = @_;
+
+  if ( not -e $path )
+  {
+    warn( "$path does not exist" );
+  }
+  else
+  {
+    my $now = time( );
+
+    utime( $now, $now, $path );
+  }
+
+  return $SUCCESS;
+}
 
 1;

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: Cache.pm,v 1.8 2001/03/19 16:02:54 dclinton Exp $
+# $Id: Cache.pm,v 1.9 2001/03/22 21:44:40 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -107,6 +107,9 @@ sub get_default_expires_in;
 
 
 sub get_namespace;
+
+
+sub get_identifiers;
 
 
 1;
@@ -322,6 +325,11 @@ The namespace of this cache instance
 =item B<get_default_expires_in( )>
 
 The default expiration time for objects placed in this cache instance
+
+=item B<get_identifiers( )>
+
+The list of identifiers specifying objects in the namespace associated
+with this cache instance
 
 =back
 

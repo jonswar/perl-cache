@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: MemoryCache.pm,v 1.11 2001/03/20 15:47:32 dclinton Exp $
+# $Id: MemoryCache.pm,v 1.12 2001/03/22 21:41:35 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -199,7 +199,7 @@ sub purge
 {
   my ( $self ) = @_;
 
-  foreach my $identifier ( $self->_identifiers( ) )
+  foreach my $identifier ( $self->get_identifiers( ) )
   {
     $self->get( $identifier );
   }
@@ -252,7 +252,7 @@ sub size
 
   my $size = 0;
 
-  foreach my $identifier ( $self->_identifiers( ) )
+  foreach my $identifier ( $self->get_identifiers( ) )
   {
     $size += $self->_build_object_size( $identifier );
   }
@@ -333,22 +333,6 @@ sub _delete_namespace
 }
 
 
-sub _identifiers
-{
-  my ( $self ) = @_;
-
-  my $cache_hash_ref = $self->_get_cache_hash_ref( ) or
-    croak( "Couldn't get cache hash ref" );
-
-  my $namespace = $self->get_namespace( ) or
-    croak( "Couldn't get namespace" );
-
-  return ( ) unless defined $cache_hash_ref->{$namespace};
-
-  return keys %{$cache_hash_ref->{$namespace}};
-}
-
-
 sub _build_object_size
 {
   my ( $self, $identifier ) = @_;
@@ -380,6 +364,23 @@ sub _get_cache_hash_ref
   my ( $self ) = @_;
 
   return _Get_Cache_Hash_Ref( );
+}
+
+
+
+sub get_identifiers
+{
+  my ( $self ) = @_;
+
+  my $cache_hash_ref = $self->_get_cache_hash_ref( ) or
+    croak( "Couldn't get cache hash ref" );
+
+  my $namespace = $self->get_namespace( ) or
+    croak( "Couldn't get namespace" );
+
+  return ( ) unless defined $cache_hash_ref->{ $namespace };
+
+  return keys %{ $cache_hash_ref->{ $namespace} };
 }
 
 

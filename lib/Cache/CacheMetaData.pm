@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheMetaData.pm,v 1.1 2001/03/22 18:40:08 dclinton Exp $
+# $Id: CacheMetaData.pm,v 1.2 2001/03/22 21:41:35 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -43,6 +43,8 @@ sub new
   bless( $self, $class );
 
   $self->_set_meta_data_hash_ref( { } );
+
+  $self->_set_cache_size( 0 );
 
   return $self;
 }

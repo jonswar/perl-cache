@@ -1,6 +1,9 @@
 Revision history for Cache
 
 0.06 in progress
+ - added the get_identifiers method to the Cache interface, implemented
+   the method for all classes, added a new test, and updated the test 
+   scripts
  - added the size property to Object
  - added the _freeze and _thaw methods to the BaseCache class and
    modified all children classes to use them

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareFileCache.pm,v 1.12 2001/03/22 18:40:08 dclinton Exp $
+# $Id: SizeAwareFileCache.pm,v 1.13 2001/03/22 21:41:35 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -20,8 +20,7 @@ use Cache::CacheUtils qw ( Build_Object
                            Build_Unique_Key
                            Limit_Size
                            Make_Path
-                           Recursively_List_Files_With_Paths
-                           Read_File_Without_Time_Modification
+                           Recursively_List_Files
                            Remove_File
                            Static_Params
                            Write_File );
@@ -139,24 +138,14 @@ sub _build_cache_meta_data
 
   my @filenames;
 
-  Recursively_List_Files_With_Paths( $namespace_path, \@filenames );
+  Recursively_List_Files( $namespace_path, \@filenames );
 
   foreach my $filename ( @filenames )
   {
-    my $object = $self->_restore_object_without_time_modication( $filename ) or
+    my $object = $self->_restore( $filename ) or
       next;
 
-    my $size = -s $filename or
-      croak( "Couldn't get size for $filename" );
-
-    my $expires_at = $object->get_expires_at( );
-
-    $object->set_size( $size );
-
-    my $accessed_at = ( stat( $filename ) )[8] or
-      croak( "Couldn't get accessed_at" );
-
-    $object->set_accessed_at( $accessed_at );
+    my $size = $object->get_size( );
 
     $cache_meta_data->insert( $object ) or
       croak( "Couldn't insert meta data" );
@@ -210,29 +199,6 @@ sub _initialize_max_size
   return $SUCCESS;
 }
 
-
-
-sub _restore_object_without_time_modication
-{
-  my ( $self, $filename ) = @_;
-
-  defined( $filename ) or
-    croak( "filename required" );
-
-  if ( not -e $filename )
-  {
-    warn( "filename $filename does not exist" );
-    return undef;
-  }
-
-  my $object_dump_ref = Read_File_Without_Time_Modification( $filename ) or
-    return undef;
-
-  my $object = $self->_thaw( $$object_dump_ref ) or
-    croak( "Couldn't thaw object" );
-
-  return $object;
-}
 
 ##
 # Instance properties
@@ -384,6 +350,10 @@ See Cache::Cache for default properties.
 =item B<(get|set)_max_size>
 
 See Cache::SizeAwareCache
+
+=item B<get_identifiers>
+
+See Cache::FileCache
 
 =back
 

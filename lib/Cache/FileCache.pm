@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: FileCache.pm,v 1.12 2001/03/13 03:37:09 dclinton Exp $
+# $Id: FileCache.pm,v 1.13 2001/03/22 21:41:35 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -24,13 +24,14 @@ use Cache::CacheUtils qw ( Build_Object
                            List_Subdirectories
                            Make_Path
                            Object_Has_Expired
-                           Read_File
+                           Read_File_Without_Time_Modification
                            Recursive_Directory_Size
                            Recursively_List_Files
                            Recursively_Remove_Directory
                            Remove_File
                            Split_Word
                            Static_Params
+                           Update_Access_Time
                            Write_File );
 use Cache::Object;
 use Carp;
@@ -218,6 +219,9 @@ sub get
     return undef;
   }
 
+  $self->_update_access_time( $identifier ) or
+    croak( "Couldn't update access time for $identifier" );
+
   return $object->get_data( );
 }
 
@@ -250,7 +254,8 @@ sub purge
 
   foreach my $unique_key ( @unique_keys )
   {
-    my $object = $self->_restore( $unique_key );
+    my $object = $self->_restore( $unique_key ) or
+      next;
 
     my $has_expired = Object_Has_Expired( $object );
 
@@ -420,29 +425,18 @@ sub _restore
   my $object_path = $self->_build_object_path( $unique_key ) or
     croak( "Couldn't build object path" );
 
-  my $object_dump_ref = Read_File( $object_path ) or
+  my $object_dump_ref = Read_File_Without_Time_Modification( $object_path ) or
     return undef;
 
   my $object = $self->_thaw( $$object_dump_ref ) or
     croak( "Couldn't thaw object dump" );
 
+  my $accessed_at = ( stat( $object_path ) )[8] or
+    croak( "Couldn't get accessed_at" );
+
+  $object->set_accessed_at( $accessed_at );
+
   return $object;
-}
-
-
-sub _list_unique_keys
-{
-  my ( $self, $unique_keys_ref ) = @_;
-
-  my $namespace_path = $self->_build_namespace_path( ) or
-    croak( "Couldn't build namespace path" );
-
-  my @unique_keys;
-
-  Recursively_List_Files( $namespace_path, $unique_keys_ref ) or
-    croak( "Couldn't recursively list files at $namespace_path" );
-
-  return $SUCCESS;
 }
 
 
@@ -492,6 +486,42 @@ sub _build_namespace_path
       croak( "Couldn't build namespace path" );
 
   return $namespace_path;
+}
+
+
+sub _list_unique_keys
+{
+  my ( $self, $unique_keys_ref ) = @_;
+
+  my $namespace_path = $self->_build_namespace_path( ) or
+    croak( "Couldn't build namespace path" );
+
+  my @unique_keys;
+
+  Recursively_List_Files( $namespace_path, $unique_keys_ref ) or
+    croak( "Couldn't recursively list files at $namespace_path" );
+
+  return $SUCCESS;
+}
+
+
+sub _update_access_time
+{
+  my ( $self, $identifier ) = @_;
+
+  defined $identifier or
+    croak( "identifier required" );
+
+  my $unique_key = Build_Unique_Key( $identifier ) or
+    croak( "Couldn't build unique key" );
+
+  my $object_path = $self->_build_object_path( $unique_key ) or
+    croak( "Couldn't build object path" );
+
+  Update_Access_Time( $object_path ) or
+    croak( "Couldn't update access time for $object_path" );
+
+  return $SUCCESS;
 }
 
 
@@ -546,6 +576,31 @@ sub set_directory_umask
   $self->{_Directory_Umask} = $directory_umask;
 }
 
+
+sub get_identifiers
+{
+  my ( $self ) = @_;
+
+  my @unique_keys;
+
+  $self->_list_unique_keys( \@unique_keys ) or
+    croak( "Couldn't list unique keys" );
+
+  my @identifiers;
+
+  foreach my $unique_key ( @unique_keys )
+  {
+    my $object = $self->_restore( $unique_key ) or
+      next;
+
+    my $identifier = $object->get_identifier( ) or
+      croak( "Couldn't get identifier" );
+
+    push( @identifiers, $identifier );
+  }
+
+  return @identifiers;
+}
 
 1;
 
@@ -697,6 +752,13 @@ security concern, the actual cache entries are written with the user's
 umask, thus reducing the risk of cache poisoning.  If you desire it to
 only be user writable, set the 'directory_umask' option to '077' or
 similar.
+
+=item B<get_identifiers>
+
+The list of identifiers specifying objects in the namespace associated
+with this cache instance.  For FileCache implementations, the
+get_identifiers routine must actual examine each stored item in the
+cache, and it is therefore an expensive operation.
 
 =back
 
