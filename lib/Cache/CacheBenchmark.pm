@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheBenchmark.pm,v 1.2 2001/03/06 16:48:24 dclinton Exp $
+# $Id: CacheBenchmark.pm,v 1.3 2001/03/21 14:09:59 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -101,7 +101,7 @@ sub Benchmark_File_Cache
 
 sub Benchmark_Shared_Memory_Cache
 {
-  print "Benchmarking Cache::SharedMemoryCache\n";
+  print "Benchmarking Cache::SharedMemoryCache\n\n";
 
   my $shared_memory_cache = new Cache::SharedMemoryCache( ) or
     croak( "Couldn't instantiate shared memory cache" );
@@ -130,7 +130,7 @@ sub Benchmark_Size_Aware_File_Cache_Without_Max_Size
 
 sub Benchmark_Size_Aware_File_Cache_With_Max_Size
 {
-  print "Benchmarking Cache::SizeAwareFileCache (with max_size $MAX_SIZE)\n";
+  print "Benchmarking Cache::SizeAwareFileCache (with max_size $MAX_SIZE)\n\n";
 
   my $options = { 'max_size' => $MAX_SIZE };
 
