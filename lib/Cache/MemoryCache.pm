@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: MemoryCache.pm,v 1.2 2001/02/15 15:45:23 dclinton Exp $
+# $Id: MemoryCache.pm,v 1.3 2001/03/05 19:02:34 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -23,9 +23,6 @@ use Data::Dumper;
 
 my %Cache_Hash;
 
-my $DEFAULT_NAMESPACE = "Default";
-my $DEFAULT_EXPIRES_IN = $EXPIRES_NEVER;
-
 
 sub new
 {
@@ -46,8 +43,10 @@ sub set
 {
   my ( $self, $identifier, $data, $expires_in ) = @_;
 
+  my $default_expires_in = $self->get_default_expires_in( );
+
   my $object =
-    Build_Object( $identifier, $data, $DEFAULT_EXPIRES_IN, $expires_in ) or
+    Build_Object( $identifier, $data, $default_expires_in, $expires_in ) or
       croak( "Couldn't build cache object" );
 
   $self->_store( $identifier, $object ) or
