@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: FileCache.pm,v 1.1.1.1 2001/02/13 01:30:40 dclinton Exp $
+# $Id: FileCache.pm,v 1.2 2001/02/13 02:32:03 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -31,6 +31,8 @@ use Cache::Object;
 use Carp;
 use Data::Dumper;
 
+@ISA = qw ( Cache::Cache );
+
 my $DEFAULT_CACHE_DEPTH = 3;
 my $DEFAULT_CACHE_ROOT = "FileCache";
 my $DEFAULT_EXPIRES_IN = $EXPIRES_NEVER;
@@ -43,7 +45,7 @@ sub new
   my $self  = {};
   bless( $self, $class );
 
-  $self->_initialize( $options_hash_ref ) or
+  $self->_initialize_file_cache( $options_hash_ref ) or
     croak( "Couldn't initialize Cache::FileCache" );
 
   return $self;
@@ -231,7 +233,7 @@ sub Size
 
 
 
-sub _initialize
+sub _initialize_file_cache
 {
   my ( $self, $options_hash_ref ) = @_;
 
