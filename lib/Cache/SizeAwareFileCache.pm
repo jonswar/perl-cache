@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareFileCache.pm,v 1.4 2001/02/16 02:11:36 dclinton Exp $
+# $Id: SizeAwareFileCache.pm,v 1.5 2001/03/05 19:02:09 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -120,7 +120,7 @@ sub limit_size
   my ( $self, $new_size ) = @_;
 
   $new_size >= 0 or
-    croak("size >= 0 required");
+    croak( "size >= 0 required" );
 
   my $namespace_path = $self->_build_namespace_path( ) or
     croak( "Couldn't build namespace path" );
@@ -151,7 +151,7 @@ sub _Choose_Identifier_To_Remove
   defined( $namespace_path ) or
     croak( "namespace_path required" );
 
-  my $next_expiring_indentifier = 
+  my $next_expiring_indentifier =
     _Find_Next_Expiring_Identifier( $namespace_path );
 
   if ( defined $next_expiring_indentifier )
@@ -194,7 +194,7 @@ sub _Find_Next_Expiring_Identifier
 
     my $expires_at = $object->get_expires_at( );
 
-    next if $expires_at = $EXPIRES_NEVER;
+    next if $expires_at eq $EXPIRES_NEVER;
 
     if ( ( not defined $next_expires_at ) or
          ( $expires_at < $next_expires_at ) )
@@ -321,7 +321,7 @@ sub set_max_size
 
 
 
-__END__                                                                         
+__END__
 =pod
 
 =head1 NAME
@@ -343,7 +343,7 @@ the documentation for Cache::FileCache for more information.
 			'default_expires_in' => 600,
                         'max_size' => 10000 );
 
-  my $size_aware_file_cache = 
+  my $size_aware_file_cache =
     new Cache::SizeAwareFileCache( \%cache_options ) or
       croak( "Couldn't instantiate FileCache" );
 
