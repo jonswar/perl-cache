@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareFileCache.pm,v 1.2 2001/02/15 16:39:55 dclinton Exp $
+# $Id: SizeAwareFileCache.pm,v 1.3 2001/02/15 23:29:07 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -318,3 +318,101 @@ sub set_max_size
 
 1;
 
+
+
+__END__                                                                         
+=pod
+
+=head1 NAME
+
+Cache::SizeAwareFileCache -- extends the Cache::FileCache module
+
+=head1 DESCRIPTION
+
+The Cache::SizeAwareFileCache module adds the ability to dynamically
+limit the size of a file system based cache.  It offers the new
+'max_size' option and the 'limit_size( $size )' method.  Please see
+the documentation for Cache::FileCache for more information.
+
+=head1 SYNOPSIS
+
+  use Cache::SizeAwareFileCache;
+
+  my %cache_options = ( 'namespace' => 'MyNamespace',
+			'default_expires_in' => 600,
+                        'max_size' => 10000 );
+
+  my $size_aware_file_cache = 
+    new Cache::SizeAwareFileCache( \%cache_options ) or
+      croak( "Couldn't instantiate FileCache" );
+
+=head1 METHODS
+
+=over 4
+
+=item B<limit_size( $new_size )>
+
+Attempt to resize the cache such that the total disk usage is under
+the 'new_size' parameter.  NOTE: This is not 100% accurate, as the
+current size is calculated from the size of the objects in the cache,
+and does not include the size of the directory inodes.
+
+=item C<$new_size>
+
+The size (in bytes) that the cache should be limited to.  This is
+only a one time adjustment.  To maintain the cache size, consider using
+the 'max_size' option, although it is considered very expensive.
+
+=item Returns
+
+Either $SUCCESS or $FAILURE
+
+=back
+
+=head1 OPTIONS
+
+The options are set by passing in a reference to a hash containing any
+of the following keys.  Also, all of the options available to
+Cache::FileCache apply to this class as well.
+
+=over 4
+
+=item max_size
+
+Sets the max_size property, which is described in detail below.
+Defaults to $NO_MAX_SIZE.
+
+=back
+
+=head1 PROPERTIES
+
+=over 4
+
+=item B<(get|set)_max_size>
+
+If this property is set, then the cache will try not to exceed the max
+size value specified.  NOTE: This causes the size of the cache to be
+checked on every set, and can be considered *very* expensive.  A good
+alternative approach is leave max_size as $NO_MAX_SIZE and to
+periodically limit the size of the cache by calling the
+limit_size( $size ) method.
+
+=back
+
+=head1 SEE ALSO
+
+Cache::Cache, Cache::FileCache
+
+
+=head1 AUTHOR
+
+Original author: DeWitt Clinton <dewitt@unto.net>
+
+Also: Portions of this code are a rewrite of David Coppit's excellent
+extentions to the original File::Cache
+
+Last author:     $Author: dclinton $
+
+Copyright (C) 2001 DeWitt Clinton
+
+=cut
