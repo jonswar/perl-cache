@@ -105,16 +105,12 @@ INCOMPATIBLE CHANGES
 
 SEE ALSO
 
-  File::Cache and IPC::Cache, and the project homepage at:
-
-    http://sourceforge.net/projects/perl-cache/
+  The project homepage at http://perl-cache.sourceforge.net
 
 
 AUTHOR
 
   Original author: DeWitt Clinton <dewitt@unto.net>
-
-  Last author:     $Author: dclinton $
 
   Copyright (C) 2001 DeWitt Clinton
 
