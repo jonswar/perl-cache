@@ -1,3 +1,6 @@
+- Matt Sly <matt@eziba.com> for catching a bug with erroneously
+  importing an unused module
+  
 - Dave Rolsky <autarch@urth.org> for helping me rewrite the Makefile.PL to
   do conditional installation and testing based on dependency detection
 
