@@ -6,6 +6,8 @@ Revision history for Cache
  - replaced non-standard usage of TRUE and FALSE with 1 and 0 
  - migrated from the term "identifier" to the more standard term "key"
    and marked the old public methods with identifier as deprecated
+ - broke out the MemoryBackend and the SharedMemoryBackend into 
+   distinct and reusable classes
 
 0.09 2001-09-10-12-10
  - released version 0.09

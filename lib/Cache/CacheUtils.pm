@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheUtils.pm,v 1.28 2001/11/07 16:54:09 dclinton Exp $
+# $Id: CacheUtils.pm,v 1.29 2001/11/07 17:02:56 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -27,7 +27,6 @@ use Storable qw( freeze thaw );
 @EXPORT_OK = qw( Assert_Defined
                  Build_Expires_At
                  Build_Object
-                 Build_Object_Dump
                  Build_Path
                  Build_Unique_Key
                  Create_Directory
@@ -694,12 +693,10 @@ sub Limit_Size
 
   foreach my $key ( $p_cache_meta_data->build_removal_list( ) )
   {
+    return if $size_estimate <= $p_new_size;
     $size_estimate -= $p_cache_meta_data->build_object_size( $key );
-
     $p_cache->remove( $key );
     $p_cache_meta_data->remove( $key );
-
-    return if $size_estimate <= $p_new_size;
   }
 
   warn( "Couldn't limit size to $p_new_size" );

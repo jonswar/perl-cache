@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SharedMemoryCache.pm,v 1.15 2001/11/06 23:44:08 dclinton Exp $
+# $Id: SharedMemoryCache.pm,v 1.16 2001/11/07 13:10:56 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -18,17 +18,11 @@ use Cache::Cache;
 use Cache::MemoryCache;
 use Cache::CacheUtils qw( Assert_Defined
                           Static_Params );
-use Cache::SharedCacheUtils qw( Restore_Shared_Hash_Ref
-                                Restore_Shared_Hash_Ref_With_Lock
-                                Store_Shared_Hash_Ref
-                                Store_Shared_Hash_Ref_And_Unlock );
+use Cache::SharedMemoryBackend;
 use Error;
 
 
 @ISA = qw ( Cache::MemoryCache );
-
-
-my $IPC_IDENTIFIER = 'ipcc';
 
 
 ##
@@ -36,11 +30,13 @@ my $IPC_IDENTIFIER = 'ipcc';
 ##
 
 
+
 sub Clear
 {
-  my $empty_cache_hash_ref = { };
-
-  _Store_Cache_Hash_Ref( $empty_cache_hash_ref );
+  foreach my $namespace ( _Namespaces( ) )
+  {
+    _Get_Backend( )->delete_namespace( $namespace );
+  }
 }
 
 
@@ -60,7 +56,8 @@ sub Size
 
   foreach my $namespace ( _Namespaces( ) )
   {
-    my $cache = new Cache::SharedMemoryCache( { 'namespace' => $namespace } );
+    my $cache = new Cache::MemoryCache( { 'namespace' => $namespace } );
+
     $size += $cache->size( );
   }
 
@@ -74,52 +71,18 @@ sub Size
 ##
 
 
-sub _Restore_Cache_Hash_Ref
-{
-  return Restore_Shared_Hash_Ref( $IPC_IDENTIFIER );
-}
-
-
-sub _Restore_Cache_Hash_Ref_With_Lock
-{
-  return Restore_Shared_Hash_Ref_With_Lock( $IPC_IDENTIFIER );
-}
-
-
-sub _Store_Cache_Hash_Ref
-{
-  my ( $cache_hash_ref ) = Static_Params( @_ );
-
-  return Store_Shared_Hash_Ref( $IPC_IDENTIFIER, $cache_hash_ref );
-}
-
-
-sub _Store_Cache_Hash_Ref_And_Unlock
-{
-  my ( $cache_hash_ref ) = Static_Params( @_ );
-
-  return Store_Shared_Hash_Ref_And_Unlock( $IPC_IDENTIFIER, $cache_hash_ref );
-}
-
-
-sub _Delete_Namespace
-{
-  my ( $p_namespace ) = Static_Params( @_ );
-
-  Assert_Defined( $p_namespace );
-
-  my $cache_hash_ref = _Restore_Cache_Hash_Ref_With_Lock( );
-
-  delete $cache_hash_ref->{ $p_namespace };
-
-  _Store_Cache_Hash_Ref_And_Unlock( $cache_hash_ref );
-}
-
-
 sub _Namespaces
 {
-  return keys %{ _Restore_Cache_Hash_Ref( ) };
+  return _Get_Backend( )->get_namespaces( );
 }
+
+
+
+sub _Get_Backend
+{
+  return new Cache::SharedMemoryBackend( );
+}
+
 
 
 ##
@@ -138,20 +101,6 @@ sub new
 }
 
 
-sub remove
-{
-  my ( $self, $p_key ) = @_;
-
-  Assert_Defined( $p_key );
-
-  my $cache_hash_ref = _Restore_Cache_Hash_Ref_With_Lock( );
-
-  delete $cache_hash_ref->{ $self->get_namespace( ) }->{ $p_key };
-
-  _Store_Cache_Hash_Ref_And_Unlock( $cache_hash_ref );
-}
-
-
 ##
 # Private instance methods
 ##
@@ -161,78 +110,18 @@ sub _new
 {
   my ( $proto, $p_options_hash_ref ) = @_;
   my $class = ref( $proto ) || $proto;
-  return $class->SUPER::_new( $p_options_hash_ref );
-}
-
-
-sub _store
-{
-  my ( $self, $p_key, $p_object ) = @_;
-
-  Assert_Defined( $p_key );
-
-  my $cache_hash_ref = _Restore_Cache_Hash_Ref_With_Lock( );
-
-  $cache_hash_ref->{ $self->get_namespace( ) }->{ $p_key } =
-    $self->_freeze( $p_object );
-
-  _Store_Cache_Hash_Ref_And_Unlock( $cache_hash_ref );
-}
-
-
-sub _restore
-{
-  my ( $self, $p_key ) = @_;
-
-  Assert_Defined( $p_key );
-
-  my $object_dump = _Restore_Cache_Hash_Ref( )
-    ->{ $self->get_namespace( ) }
-      ->{ $p_key } or
-        return undef;
-
-  return $self->_thaw( \$object_dump );
+  my $self = $class->SUPER::_new( $p_options_hash_ref );
+  $self->_initialize_shared_memory_cache( );
+  return $self;
 }
 
 
 
-sub _build_object_size
-{
-  my ( $self, $p_key ) = @_;
-
-  Assert_Defined( $p_key );
-
-  return length _Restore_Cache_Hash_Ref( )
-    ->{ $self->get_namespace( ) }
-      ->{ $p_key };
-}
-
-
-sub _delete_namespace
-{
-  my ( $self, $p_namespace ) = @_;
-
-  _Delete_Namespace( $p_namespace );
-}
-
-
-##
-# Instance properties
-##
-
-
-sub get_keys
+sub _initialize_shared_memory_cache
 {
   my ( $self ) = @_;
 
-  if ( defined _Restore_Cache_Hash_Ref( )->{ $self->get_namespace( ) } )
-  {
-    return keys %{ _Restore_Cache_Hash_Ref( )->{ $self->get_namespace( ) } };
-  }
-  else
-  {
-    return ( );
-  }
+  $self->_set_backend( new Cache::SharedMemoryBackend( ) );
 }
 
 

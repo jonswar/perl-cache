@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: MemoryCache.pm,v 1.19 2001/11/06 23:44:08 dclinton Exp $
+# $Id: MemoryCache.pm,v 1.20 2001/11/07 13:10:56 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -19,15 +19,12 @@ use Cache::Cache qw( $EXPIRES_NEVER );
 use Cache::CacheUtils qw( Assert_Defined
                           Build_Object
                           Object_Has_Expired
-                          Static_Params
-                          );
+                          Static_Params );
+use Cache::MemoryBackend;
 use Cache::Object;
 use Carp;
 
 @ISA = qw ( Cache::BaseCache );
-
-
-my $_Cache_Hash_Ref = { };
 
 
 ##
@@ -39,7 +36,7 @@ sub Clear
 {
   foreach my $namespace ( _Namespaces( ) )
   {
-    _Delete_Namespace( $namespace );
+    _Get_Backend( )->delete_namespace( $namespace );
   }
 }
 
@@ -49,7 +46,6 @@ sub Purge
   foreach my $namespace ( _Namespaces( ) )
   {
     my $cache = new Cache::MemoryCache( { 'namespace' => $namespace } );
-
     $cache->purge( );
   }
 }
@@ -62,7 +58,6 @@ sub Size
   foreach my $namespace ( _Namespaces( ) )
   {
     my $cache = new Cache::MemoryCache( { 'namespace' => $namespace } );
-
     $size += $cache->size( );
   }
 
@@ -75,29 +70,16 @@ sub Size
 ##
 
 
-sub _Delete_Namespace
+sub _Get_Backend
 {
-  my ( $p_namespace ) = Static_Params( @_ );
-
-  delete _Get_Cache_Hash_Ref( )->{ $p_namespace };
+  return new Cache::MemoryBackend( );
 }
-
 
 sub _Namespaces
 {
-  return keys %{ _Get_Cache_Hash_Ref( ) };
+  return _Get_Backend( )->get_namespaces( );
 }
 
-
-
-##
-# Class properties
-##
-
-sub _Get_Cache_Hash_Ref
-{
-  return $_Cache_Hash_Ref;
-}
 
 
 ##
@@ -124,7 +106,7 @@ sub clear
 {
   my ( $self ) = @_;
 
-  $self->_delete_namespace( $self->get_namespace( ) );
+  $self->_get_backend( )->delete_namespace( $self->get_namespace( ) );
 }
 
 
@@ -155,7 +137,7 @@ sub get_object
 
   Assert_Defined( $p_key );
 
-  return $self->_restore( $p_key );
+  return $self->_get_backend( )->restore( $self->get_namespace( ), $p_key );
 }
 
 
@@ -176,9 +158,7 @@ sub remove
 
   Assert_Defined( $p_key );
 
-  delete $self->_get_cache_hash_ref( )
-    ->{ $self->get_namespace( ) }
-      ->{ $p_key };
+  $self->_get_backend( )->delete_key( $self->get_namespace( ), $p_key );
 }
 
 
@@ -186,13 +166,15 @@ sub set
 {
   my ( $self, $p_key, $p_data, $p_expires_in ) = @_;
 
+  Assert_Defined( $p_key );
+
   $self->_conditionally_auto_purge_on_set( );
 
-  $self->_store( $p_key,
-                 Build_Object( $p_key,
-                               $p_data,
-                               $self->get_default_expires_in( ),
-                               $p_expires_in ) );
+  $self->set_object( $p_key,
+                     Build_Object( $p_key,
+                                   $p_data,
+                                   $self->get_default_expires_in( ),
+                                   $p_expires_in ) );
 }
 
 
@@ -201,7 +183,9 @@ sub set_object
 {
   my ( $self, $p_key, $p_object ) = @_;
 
-  $self->_store( $p_key, $p_object );
+  $self->_get_backend( )->store( $self->get_namespace( ),
+                                 $p_key,
+                                 $p_object );
 }
 
 
@@ -214,7 +198,8 @@ sub size
 
   foreach my $key ( $self->get_keys( ) )
   {
-    $size += $self->_build_object_size( $key );
+    $size += 
+      $self->_get_backend( )->get_object_size( $self->get_namespace( ), $key );
   }
 
   return $size;
@@ -231,45 +216,17 @@ sub _new
 {
   my ( $proto, $p_options_hash_ref ) = @_;
   my $class = ref( $proto ) || $proto;
-  return $class->SUPER::_new( $p_options_hash_ref );
+  my $self = $class->SUPER::_new( $p_options_hash_ref );
+  $self->_initialize_memory_cache( );
+  return $self;
 }
 
 
-sub _store
+sub _initialize_memory_cache
 {
-  my ( $self, $p_key, $p_object ) = @_;
+  my ( $self ) = @_;
 
-  Assert_Defined( $p_key );
-  Assert_Defined( $p_object );
-
-  $self->_get_cache_hash_ref( )
-    ->{ $self->get_namespace( ) }
-      ->{ $p_key } = $self->_freeze( $p_object );
-}
-
-
-sub _restore
-{
-  my ( $self, $p_key ) = @_;
-
-  Assert_Defined( $p_key );
-
-  my $object_dump = $self->_get_cache_hash_ref( )
-    ->{ $self->get_namespace( ) }
-      ->{ $p_key } or
-        return undef;
-
-  return $self->_thaw( \$object_dump );
-}
-
-
-sub _delete_namespace
-{
-  my ( $self, $p_namespace ) = @_;
-
-  Assert_Defined( $p_namespace );
-
-  _Delete_Namespace( $p_namespace );
+  $self->_set_backend( new Cache::MemoryBackend( ) );
 }
 
 
@@ -279,9 +236,7 @@ sub _build_object_size
 
   Assert_Defined( $p_key );
 
-  return length $self->_get_cache_hash_ref( )
-    ->{ $self->get_namespace( ) }
-      ->{ $p_key };
+  return ;
 }
 
 
@@ -289,28 +244,29 @@ sub _build_object_size
 # Instance properties
 ##
 
-sub _get_cache_hash_ref
-{
-  my ( $self ) = @_;
-
-  return _Get_Cache_Hash_Ref( );
-}
-
-
-
 sub get_keys
 {
   my ( $self ) = @_;
 
-  if ( defined $self->_get_cache_hash_ref( )->{ $self->get_namespace( ) } )
-  {
-    return keys %{ $self->_get_cache_hash_ref( )->{ $self->get_namespace() } };
-  }
-  else
-  {
-    return ( );
-  }
+  return $self->_get_backend( )->get_keys( $self->get_namespace( ) );
 }
+
+
+sub _get_backend
+{
+  my ( $self ) = @_;
+
+  return $self->{ _Backend };
+}
+
+
+sub _set_backend
+{
+  my ( $self, $p_backend ) = @_;
+
+  $self->{ _Backend } = $p_backend;
+}
+
 
 
 1;

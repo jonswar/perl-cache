@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareMemoryCache.pm,v 1.12 2001/11/06 23:44:08 dclinton Exp $
+# $Id: SizeAwareMemoryCache.pm,v 1.13 2001/11/07 13:10:56 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -107,22 +107,9 @@ sub get
 
   Assert_Defined( $p_key );
 
-  $self->_conditionally_auto_purge_on_get( );
+  $self->_update_access_time( $p_key );
 
-  my $object = $self->get_object( $p_key ) or
-    return undef;
-
-  if ( Object_Has_Expired( $object ) )
-  {
-    $self->remove( $p_key );
-    return undef;
-  }
-
-  $object->set_accessed_at( time( ) );
-
-  $self->_store( $p_key, $object );
-
-  return $object->get_data( );
+  return $self->SUPER::get( $p_key );
 }
 
 
@@ -130,26 +117,14 @@ sub set
 {
   my ( $self, $p_key, $p_data, $p_expires_in ) = @_;
 
-  $self->_conditionally_auto_purge_on_set( );
+  Assert_Defined( $p_key );
 
-  $self->set_object( $p_key, 
-                     Build_Object( $p_key, 
-                                   $p_data, 
-                                   $self->get_default_expires_in( ), 
-                                   $p_expires_in ) );
+  $self->SUPER::set( $p_key, $p_data, $p_expires_in );
 
   if ( $self->get_max_size( ) != $NO_MAX_SIZE )
   {
     $self->limit_size( $self->get_max_size( ) );
   }
-}
-
-
-sub set_object
-{
-  my ( $self, $p_key, $p_object ) = @_;
-
-  $self->_store( $p_key, $p_object );
 }
 
 
@@ -192,6 +167,20 @@ sub _initialize_max_size
   my ( $self ) = @_;
 
   $self->set_max_size( $self->_read_option( 'max_size', $DEFAULT_MAX_SIZE ) );
+}
+
+
+sub _update_access_time
+{
+  my ( $self, $p_key ) = @_;
+
+  my $object = $self->get_object( $p_key );
+
+  if ( defined $object )
+  {
+    $object->set_accessed_at( time( ) );
+    $self->set_object( $p_key, $object );
+  }
 }
 
 

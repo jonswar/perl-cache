@@ -15,10 +15,12 @@ lib/Cache/CacheMetaData.pm
 lib/Cache/CacheTester.pm
 lib/Cache/CacheUtils.pm
 lib/Cache/FileCache.pm
+lib/Cache/MemoryBackend.pm
 lib/Cache/MemoryCache.pm
 lib/Cache/Object.pm
 lib/Cache/NullCache.pm
 lib/Cache/SharedCacheUtils.pm
+lib/Cache/SharedMemoryBackend.pm
 lib/Cache/SharedMemoryCache.pm
 lib/Cache/SizeAwareCache.pm
 lib/Cache/SizeAwareCacheTester.pm

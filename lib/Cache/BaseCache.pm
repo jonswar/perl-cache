@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: BaseCache.pm,v 1.11 2001/11/07 13:10:56 dclinton Exp $
+# $Id: BaseCache.pm,v 1.12 2001/11/07 17:02:56 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -36,22 +36,6 @@ my $DEFAULT_AUTO_PURGE_ON_GET = 0;
 # namespace that stores the keys used for the auto purge functionality
 
 my $AUTO_PURGE_NAMESPACE = "__AUTO_PURGE__";
-
-
-
-##
-# Constructor
-##
-
-
-sub new
-{
-  my ( $self ) = _new( @_ );
-
-  $self->_complete_initialization( );
-
-  return $self;
-}
 
 
 
