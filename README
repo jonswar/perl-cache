@@ -94,7 +94,9 @@ USAGE
 
 SEE ALSO
 
-  File::Cache and IPC::Cache
+  File::Cache and IPC::Cache, and the project homepage at:
+
+    http://sourceforge.net/projects/perl-cache/
 
 
 AUTHOR
