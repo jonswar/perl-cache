@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheUtils.pm,v 1.25 2001/11/06 23:44:08 dclinton Exp $
+# $Id: CacheUtils.pm,v 1.26 2001/11/07 13:10:56 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -62,8 +62,7 @@ use vars ( @EXPORT_OK );
 # valid filepath characters for tainting. Be sure to accept
 # DOS/Windows style path specifiers (C:\path) also
 
-my $UNTAINTED_PATH_REGEX = '^([-\@\w\\\\~./:]+|[\w]:[-\@\w\\\\~./]+)$';
-
+my $UNTAINTED_PATH_REGEX = qr{^([-\@\w\\\\~./:]+|[\w]:[-\@\w\\\\~./]+)$};
 
 # map of expiration formats to their respective time in seconds
 
@@ -214,7 +213,7 @@ sub Build_Path
     throw Error( "Illegal path characters '..'" );
   }
 
-  return File::Spec->catfile( @p_elements );
+  return Untaint_Path( File::Spec->catfile( @p_elements ) );
 }
 
 

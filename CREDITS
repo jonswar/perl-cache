@@ -2,7 +2,7 @@
   the expiration units
 
 - Ken Williams <ken@forum.swarthmore.edu> submitted a patch to workaround
-  a File::Path bug that was causing make test to pass
+  a File::Path bug that was causing make test to fail
 
 - Randal Schwartz <merlyn@stonehenge.com> discovered a nasty bug on
   the construction of cache instances that use the auto_purge_interval

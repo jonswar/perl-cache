@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheTester.pm,v 1.9 2001/11/06 23:44:08 dclinton Exp $
+# $Id: CacheTester.pm,v 1.10 2001/11/07 13:10:56 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -524,7 +524,7 @@ sub _test_fifteen
 
   $cache->Clear( );
 
-  my $expires_in = "1 second";
+  my $expires_in = "2 second";
 
   $cache->set_auto_purge_interval( $expires_in );
 
@@ -541,7 +541,7 @@ sub _test_fifteen
   ( $fetched_value eq $value ) ?
     $self->ok( ) : $self->not_ok( '$fetched_value eq $value' );
 
-  sleep( $EXPIRES_DELAY );
+  sleep( $EXPIRES_DELAY + 1 );
 
   $cache->set( "Trigger auto_purge", "Empty" );
 
