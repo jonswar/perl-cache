@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheBenchmark.pm,v 1.1 2001/03/05 19:09:15 dclinton Exp $
+# $Id: CacheBenchmark.pm,v 1.2 2001/03/06 16:48:24 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -25,6 +25,8 @@ use Cache::FileCache;
 use Cache::MemoryCache;
 use Cache::SharedMemoryCache;
 use Cache::SizeAwareFileCache;
+use Cache::SizeAwareMemoryCache;
+use Cache::SizeAwareSharedMemoryCache;
 use Carp;
 use Exporter;
 
@@ -33,9 +35,9 @@ use Exporter;
 @EXPORT_OK = qw ( Benchmark_Cache );
 
 
-my @SET_NUM_KEYS = ( 10, 100, 1000, 10000 );
+my @SET_NUM_KEYS = ( 10, 100, 1000 );
 my @SET_OBJECT_SIZE = ( 1, 10, 100, 1000  );
-my @GET_NUM_KEYS = ( 10, 100, 1000, 10000 );
+my @GET_NUM_KEYS = ( 10, 100, 1000 );
 my @GET_OBJECT_SIZE = ( 1, 10, 100, 1000 );
 my $MAX_SIZE = 10000;
 
@@ -49,8 +51,12 @@ sub Benchmark_Cache
   Benchmark_Memory_Cache( );
   Benchmark_File_Cache( );
   Benchmark_Shared_Memory_Cache( );
-  Benchmark_Size_Aware_File_Cache_With_Max_Size( );
+  Benchmark_Size_Aware_Memory_Cache_Without_Max_Size( );
+  Benchmark_Size_Aware_Memory_Cache_With_Max_Size( );
   Benchmark_Size_Aware_File_Cache_Without_Max_Size( );
+  Benchmark_Size_Aware_File_Cache_With_Max_Size( );
+  Benchmark_Size_Aware_Shared_Memory_Cache_Without_Max_Size( );
+  Benchmark_Size_Aware_Shared_Memory_Cache_With_Max_Size( );
 }
 
 
@@ -73,6 +79,8 @@ sub Benchmark_Memory_Cache
 
   Benchmark_Sets( $memory_cache );
   Benchmark_Gets( $memory_cache );
+
+  print "\n";
 }
 
 
@@ -85,6 +93,9 @@ sub Benchmark_File_Cache
 
   Benchmark_Sets( $file_cache );
   Benchmark_Gets( $file_cache );
+
+  print "\n";
+
 }
 
 
@@ -97,6 +108,8 @@ sub Benchmark_Shared_Memory_Cache
 
   Benchmark_Sets( $shared_memory_cache );
   Benchmark_Gets( $shared_memory_cache );
+
+  print "\n";
 }
 
 
@@ -110,6 +123,8 @@ sub Benchmark_Size_Aware_File_Cache_Without_Max_Size
 
   Benchmark_Sets( $size_aware_file_cache );
   Benchmark_Gets( $size_aware_file_cache );
+
+  print "\n";
 }
 
 
@@ -124,7 +139,75 @@ sub Benchmark_Size_Aware_File_Cache_With_Max_Size
 
   Benchmark_Sets( $size_aware_file_cache );
   Benchmark_Gets( $size_aware_file_cache );
+
+  print "\n";
 }
+
+
+sub Benchmark_Size_Aware_Memory_Cache_Without_Max_Size
+{
+  print "Benchmarking Cache::SizeAwareMemoryCache (with no max_size)\n\n";
+
+  my $size_aware_memory_cache = new Cache::SizeAwareMemoryCache( ) or
+    croak( "Couldn't instantiate size aware memory cache" );
+
+  Benchmark_Sets( $size_aware_memory_cache );
+  Benchmark_Gets( $size_aware_memory_cache );
+
+  print "\n";
+}
+
+
+
+sub Benchmark_Size_Aware_Memory_Cache_With_Max_Size
+{
+  print "Benchmarking Cache::SizeAwareMemoryCache (with max_size $MAX_SIZE)\n\n";
+
+  my $options = { 'max_size' => $MAX_SIZE };
+
+  my $size_aware_memory_cache = new Cache::SizeAwareMemoryCache( $options ) or
+    croak( "Couldn't instantiate size aware memory cache" );
+
+  Benchmark_Sets( $size_aware_memory_cache );
+  Benchmark_Gets( $size_aware_memory_cache );
+
+  print "\n";
+}
+
+
+sub Benchmark_Size_Aware_Shared_Memory_Cache_Without_Max_Size
+{
+  print "Benchmarking Cache::SizeAwareSharedMemoryCache (with no max_size)\n\n";
+
+  my $size_aware_shared_memory_cache =
+    new Cache::SizeAwareSharedMemoryCache( ) or
+      croak( "Couldn't instantiate size aware memory cache" );
+
+  Benchmark_Sets( $size_aware_shared_memory_cache );
+  Benchmark_Gets( $size_aware_shared_memory_cache );
+
+  print "\n";
+}
+
+
+
+sub Benchmark_Size_Aware_Shared_Memory_Cache_With_Max_Size
+{
+  print "Benchmarking Cache::SizeAwareSharedMemoryCache (with max_size $MAX_SIZE)\n\n";
+
+  my $options = { 'max_size' => $MAX_SIZE };
+
+  my $size_aware_shared_memory_cache = new Cache::SizeAwareSharedMemoryCache( $options ) or
+    croak( "Couldn't instantiate size aware shared memory cache" );
+
+  Benchmark_Sets( $size_aware_shared_memory_cache );
+  Benchmark_Gets( $size_aware_shared_memory_cache );
+
+  print "\n";
+}
+
+
+
 
 
 sub Benchmark_Sets
@@ -157,8 +240,6 @@ sub Benchmark_Set
   defined $object_size or
     croak( "object_size required" );
 
-  print "method: set, object_size: $object_size, num_keys: $num_keys\n";
-
   $cache->clear( );
 
   my $t;
@@ -167,7 +248,16 @@ sub Benchmark_Set
   {
     $t = timeit( 1, sub { Do_Set( $cache, $num_keys, $object_size ); } );
 
-    print "  " . timestr( $t ) . "\n";
+    my ( $real, $user, $system, $cuser, $csystem, $iterations ) = @$t;
+
+    my $total = $user + $real + $system;
+    my $per_key = $total / $num_keys;
+
+    printf ( "%5d sets of size %8d:  %6.2f total, %.3f per set\n",
+             $num_keys,
+             $object_size,
+             $total,
+             $per_key );
   };
 
   if ( $@ )
@@ -222,8 +312,6 @@ sub Benchmark_Get
   defined $object_size or
     croak( "object_size required" );
 
-  print "method: get, object_size: $object_size, num_keys: $num_keys\n";
-
   $cache->clear( );
 
   my $t;
@@ -239,7 +327,16 @@ sub Benchmark_Get
 
     $t = timeit( 1, sub { Do_Get( $cache, $num_keys, $object_size ); } );
 
-    print "  " . timestr( $t ) . "\n";
+    my ( $real, $user, $system, $cuser, $csystem, $iterations ) = @$t;
+
+    my $total = $user + $real + $system;
+    my $per_key = $total / $num_keys;
+
+    printf ( "%5d gets of size %8d:  %6.2f total, %.3f per get\n",
+             $num_keys,
+             $object_size,
+             $total,
+             $per_key );
   };
 
   if ( $@ )
