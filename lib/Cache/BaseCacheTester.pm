@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheTester.pm,v 1.1.1.1 2001/02/13 01:30:42 dclinton Exp $
+# $Id: AbstractCacheTester.pm,v 1.1 2001/02/15 23:24:00 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -8,7 +8,7 @@
 # rights and limitations under the License.
 ######################################################################
 
-package Cache::AbstractCacheTester;
+package Cache::BaseCacheTester;
 
 use strict;
 use Carp;
