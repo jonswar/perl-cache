@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: Cache.pm,v 1.7 2001/03/10 18:30:42 dclinton Exp $
+# $Id: Cache.pm,v 1.8 2001/03/19 16:02:54 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -138,6 +138,20 @@ corresponding static methods for persisting data across method calls.
 =head1 CONSTANTS
 
 =over 4
+
+=item $SUCCESS
+
+Typically returned from a subroutine, this value is synonymous with 1
+and can be used as the typical perl "boolean" for true
+
+=item $FAILURE
+
+Typically returned from a subroutine, this value is synonymous with 0
+and can be used as the typical perl "boolean" for false
+
+=item $EXPIRES_NEVER
+
+The item being set in the cache will never expire.
 
 =item $EXPIRES_NOW
 
