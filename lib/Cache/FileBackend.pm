@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: FileBackend.pm,v 1.10 2001/12/08 20:55:35 dclinton Exp $
+# $Id: FileBackend.pm,v 1.11 2001/12/09 22:43:03 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -129,13 +129,13 @@ sub restore
 
 sub store
 {
-  my ( $self, $p_namespace, $p_key, $p_value ) = @_;
+  my ( $self, $p_namespace, $p_key, $p_data ) = @_;
 
   Assert_Defined( $p_namespace );
   Assert_Defined( $p_key );
 
   $self->_write_data( $self->_path_to_key( $p_namespace, $p_key ),
-                      [ $p_key, $p_value ] );
+                      [ $p_key, $p_data ] );
 
 }
 
@@ -617,7 +617,7 @@ sub _path_to_unique_key
 }
 
 
-# the data is returned as reference to an array ( key, value )
+# the data is returned as reference to an array ( key, data )
 
 sub _read_data
 {
@@ -632,7 +632,7 @@ sub _read_data
 }
 
 
-# the data is passed as reference to an array ( key, value )
+# the data is passed as reference to an array ( key, data )
 
 sub _write_data
 {
@@ -720,7 +720,7 @@ The umask to be used when creating directories
 
 =head1 SEE ALSO
 
-Cache::Backend, Cache::MemoryBackend, Cache::ShareMemoryBackend
+Cache::Backend, Cache::MemoryBackend, Cache::SharedMemoryBackend
 
 =head1 AUTHOR
 

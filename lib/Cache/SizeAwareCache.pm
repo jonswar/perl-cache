@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareCache.pm,v 1.6 2001/12/03 17:21:33 dclinton Exp $
+# $Id: SizeAwareCache.pm,v 1.7 2001/12/09 22:43:03 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -51,7 +51,6 @@ The SizeAwareCache interface is implemented by classes that support
 all of the Cache::Cache interface in addition to the limit_size and
 max_size features of a size aware cache.
 
-
 =head1 SYNOPSIS
 
   use Cache::SizeAwareCache;
@@ -59,14 +58,17 @@ max_size features of a size aware cache.
 
   @ISA = qw( Cache::SizeAwareCache );
 
-
 =head1 CONSTANTS
 
 Please see Cache::Cache for standard constants
 
+=over
+
 =item I<$NO_MAX_SIZE>
 
 The cache has no size restrictions
+
+=back
 
 =head1 METHODS
 

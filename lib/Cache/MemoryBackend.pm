@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: MemoryBackend.pm,v 1.6 2001/11/29 22:40:39 dclinton Exp $
+# $Id: MemoryBackend.pm,v 1.7 2001/12/09 22:43:03 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -85,9 +85,9 @@ sub restore
 
 sub store
 {
-  my ( $self, $p_namespace, $p_key, $p_value ) = @_;
+  my ( $self, $p_namespace, $p_key, $p_data ) = @_;
 
-  $self->_get_store_ref( )->{ $p_namespace }{ $p_key } = $p_value;
+  $self->_get_store_ref( )->{ $p_namespace }{ $p_key } = $p_data;
 }
 
 

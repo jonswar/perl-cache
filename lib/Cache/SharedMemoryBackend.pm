@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SharedMemoryBackend.pm,v 1.3 2001/11/29 22:40:39 dclinton Exp $
+# $Id: SharedMemoryBackend.pm,v 1.4 2001/12/09 22:43:03 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -57,11 +57,11 @@ sub delete_namespace
 
 sub store
 {
-  my ( $self, $p_namespace, $p_key, $p_value ) = @_;
+  my ( $self, $p_namespace, $p_key, $p_data ) = @_;
 
   my $store_ref = $self->_get_locked_store_ref( );
 
-  $store_ref->{ $p_namespace }{ $p_key } = $p_value;
+  $store_ref->{ $p_namespace }{ $p_key } = $p_data;
 
   $self->_set_locked_store_ref( $store_ref );
 }
