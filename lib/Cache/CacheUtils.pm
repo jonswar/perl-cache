@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheUtils.pm,v 1.2 2001/02/13 02:32:03 dclinton Exp $
+# $Id: CacheUtils.pm,v 1.3 2001/02/15 16:36:49 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -37,6 +37,7 @@ use File::Spec::Functions qw( catdir catfile splitdir splitpath tmpdir );
                  Read_File_Without_Time_Modification
                  Recursive_Directory_Size
                  Recursively_List_Files
+                 Recursively_List_Files_With_Paths
                  Recursively_Remove_Directory
                  Remove_File
                  Split_Word
@@ -344,6 +345,13 @@ sub Read_File_Without_Time_Modification
   defined( $filename ) or
     croak( "filename required" );
 
+  if ( not -e $filename )
+  {
+    warn( "filename $filename doesn't exist" );
+
+    return undef;
+  }
+
   my ( $file_access_time, $file_modified_time ) = ( stat( $filename ) )[8,9];
 
   my $data_ref = Read_File( $filename );
@@ -435,6 +443,44 @@ sub Recursively_List_Files
     else
     {
       push( @$files_ref, $dirent );
+    }
+  }
+
+  return $SUCCESS;
+}
+
+
+
+# recursively list the files of the subdirectories, without the full paths
+
+sub Recursively_List_Files_With_Paths
+{
+  my ( $directory, $files_ref ) = @_;
+
+  opendir( DIR, $directory ) or
+    croak( "Couldn't open directory $directory: $!" );
+
+  my @dirents = readdir( DIR );
+
+  closedir( DIR ) or
+    croak( "Couldn't close directory $directory" );
+
+  my @files;
+
+  foreach my $dirent ( @dirents )
+  {
+    next if $dirent eq '.' or $dirent eq '..';
+
+    my $path = Build_Path( $directory, $dirent );
+
+    if ( -d $path )
+    {
+      Recursively_List_Files_With_Paths( $path, $files_ref ) or
+        croak( "Couldn't recursively list files at $path" );
+    }
+    else
+    {
+      push( @$files_ref, $path );
     }
   }
 
