@@ -1,6 +1,7 @@
 Revision history for Cache
 
 0.05 in progress
+ - updated Storable dependency to 1.011
  - replaced the IPC::Shareable backend with IPC::ShareLite
  - started version 0.05
 

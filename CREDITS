@@ -1,5 +1,5 @@
 - Greg Cope <greg@rubberplant.freeserve.co.uk> suggested that I switch
-  to IPC::ShareLite
+  to IPC::ShareLite, and helped debug version 0.05
 
 - Daniel Little <danl@metrex.net> suggested that I write the 
   SizeAwareMemoryCache module
