@@ -23,8 +23,9 @@ DESCRIPTION
 
   The Perl Cache package provides Cache::Cache, a generic interface
   for creating persistent data stores.  This interface is implemented
-  by the Cache::FileCache, Cache::MemoryCache, and Cache::SharedMemoryCache
-  classes.  This work replaces File::Cache and IPC::Cache.
+  by the Cache::FileCache, Cache::SizeAwareFileCache,
+  Cache::MemoryCache, and Cache::SharedMemoryCache classes.  This work
+  replaces File::Cache and IPC::Cache.
 
 REQUIREMENTS
 
@@ -47,22 +48,17 @@ USAGE
   see perldoc Cache::Cache, Cache::FileCache, etc, but in general it
   is a simple as:
 
+    use Cache::FileCache;  # or Cache::MemoryCache, etc.
 
+    my $cache = new Cache::FileCache( ), # or Cache::MemoryCache, etc.
 
-  use Cache::FileCache;  # or Cache::MemoryCache, etc.
+    my $key = 'foo';
 
-  my $cache = new Cache::FileCache( ), # or Cache::MemoryCache, etc.
+    my $original_object = 'bar';
 
-  my $key = 'foo';
+    $cache->set( $key, $original_object );
 
-  my $original_object = 'bar';
-
-  $cache->set( $key, $original_object );
-
-  my $fetched_object = $cache->get( $key );
-
-  $fetched_object eq $original_object;
-
+    my $fetched_object = $cache->get( $key );
 
 
 SEE ALSO
@@ -73,13 +69,3 @@ SEE ALSO
 NOTES
 
  * I am considering replacing Data::Dumper with Storable
-
- * I am considering removing the static methods (such as Purge, Clear,
-   etc.) from the Cache interface.  Specific instances can implement those
-   methods on a case by case basis
-
- * The full functionality of File::Cache is being ported to the 
-   new implementation class Cache::ExtendedFileCache.  I wanted to 
-   keep Cache::FileCache as simple as possible to allow it to be
-   used as a starting point for new implementations
-
