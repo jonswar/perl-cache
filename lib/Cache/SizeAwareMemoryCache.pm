@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareMemoryCache.pm,v 1.13 2001/11/07 13:10:56 dclinton Exp $
+# $Id: SizeAwareMemoryCache.pm,v 1.14 2001/11/08 23:01:23 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -17,11 +17,7 @@ use vars qw( @ISA );
 use Cache::Cache qw( $EXPIRES_NEVER );
 use Cache::CacheMetaData;
 use Cache::CacheUtils qw ( Assert_Defined
-                           Build_Object
-                           Freeze_Object
-                           Limit_Size
-                           Object_Has_Expired
-                         );
+                           Limit_Size );
 use Cache::MemoryCache;
 use Cache::SizeAwareCache qw( $NO_MAX_SIZE );
 use Carp;
@@ -31,11 +27,6 @@ use Carp;
 
 
 my $DEFAULT_MAX_SIZE = $NO_MAX_SIZE;
-
-
-##
-# Public class methods
-##
 
 
 sub Clear
@@ -56,9 +47,60 @@ sub Size
 }
 
 
-##
-# Private class methods
-##
+sub new
+{
+  my ( $self ) = _new( @_ );
+
+  $self->_complete_initialization( );
+
+  return $self;
+}
+
+
+sub get
+{
+  my ( $self, $p_key ) = @_;
+
+  Assert_Defined( $p_key );
+
+  $self->_update_access_time( $p_key );
+
+  return $self->SUPER::get( $p_key );
+}
+
+
+sub limit_size
+{
+  my ( $self, $p_new_size ) = @_;
+
+  Assert_Defined( $p_new_size );
+
+  Limit_Size( $self, $self->_build_cache_meta_data( ), $p_new_size );
+}
+
+sub set
+{
+  my ( $self, $p_key, $p_data, $p_expires_in ) = @_;
+
+  Assert_Defined( $p_key );
+
+  $self->SUPER::set( $p_key, $p_data, $p_expires_in );
+
+  if ( $self->get_max_size( ) != $NO_MAX_SIZE )
+  {
+    $self->limit_size( $self->get_max_size( ) );
+  }
+}
+
+
+sub _new
+{
+  my ( $proto, $p_options_hash_ref ) = @_;
+  my $class = ref( $proto ) || $proto;
+  my $self  =  $class->SUPER::_new( $p_options_hash_ref );
+  $self->_initialize_max_size( );
+  return $self;
+}
 
 
 sub _build_cache_meta_data
@@ -76,89 +118,6 @@ sub _build_cache_meta_data
   }
 
   return $cache_meta_data;
-}
-
-
-
-##
-# Constructor
-##
-
-
-
-sub new
-{
-  my ( $self ) = _new( @_ );
-
-  $self->_complete_initialization( );
-
-  return $self;
-}
-
-
-##
-# Public instance methods
-##
-
-
-sub get
-{
-  my ( $self, $p_key ) = @_;
-
-  Assert_Defined( $p_key );
-
-  $self->_update_access_time( $p_key );
-
-  return $self->SUPER::get( $p_key );
-}
-
-
-sub set
-{
-  my ( $self, $p_key, $p_data, $p_expires_in ) = @_;
-
-  Assert_Defined( $p_key );
-
-  $self->SUPER::set( $p_key, $p_data, $p_expires_in );
-
-  if ( $self->get_max_size( ) != $NO_MAX_SIZE )
-  {
-    $self->limit_size( $self->get_max_size( ) );
-  }
-}
-
-
-sub limit_size
-{
-  my ( $self, $p_new_size ) = @_;
-
-  Assert_Defined( $p_new_size );
-
-  Limit_Size( $self, $self->_build_cache_meta_data( ), $p_new_size );
-}
-
-
-##
-# Private instance methods
-##
-
-
-
-sub _new
-{
-  my ( $proto, $p_options_hash_ref ) = @_;
-  my $class = ref( $proto ) || $proto;
-  my $self  =  $class->SUPER::_new( $p_options_hash_ref );
-  $self->_initialize_size_aware_memory_cache( );
-  return $self;
-}
-
-
-sub _initialize_size_aware_memory_cache
-{
-  my ( $self ) = @_;
-
-  $self->_initialize_max_size( );
 }
 
 
@@ -182,11 +141,6 @@ sub _update_access_time
     $self->set_object( $p_key, $object );
   }
 }
-
-
-##
-# Instance properties
-##
 
 
 sub get_max_size

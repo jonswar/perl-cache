@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: MemoryCache.pm,v 1.21 2001/11/08 23:01:23 dclinton Exp $
+# $Id: MemoryCache.pm,v 1.22 2001/11/24 21:12:43 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -17,19 +17,12 @@ use vars qw( @ISA );
 use Cache::BaseCache;
 use Cache::Cache qw( $EXPIRES_NEVER );
 use Cache::CacheUtils qw( Assert_Defined
-                          Build_Object
-                          Object_Has_Expired
                           Static_Params );
 use Cache::MemoryBackend;
 use Cache::Object;
 use Carp;
 
 @ISA = qw ( Cache::BaseCache );
-
-
-##
-# Public class methods
-##
 
 
 sub Clear
@@ -45,8 +38,7 @@ sub Purge
 {
   foreach my $namespace ( _Namespaces( ) )
   {
-    my $cache = new Cache::MemoryCache( { 'namespace' => $namespace } );
-    $cache->purge( );
+    _Get_Cache( $namespace )->purge( );
   }
 }
 
@@ -57,17 +49,11 @@ sub Size
 
   foreach my $namespace ( _Namespaces( ) )
   {
-    my $cache = new Cache::MemoryCache( { 'namespace' => $namespace } );
-    $size += $cache->size( );
+    $size += _Get_Cache( $namespace )->size( );
   }
 
   return $size;
 }
-
-
-##
-# Private class methods
-##
 
 
 sub _Get_Backend
@@ -75,16 +61,21 @@ sub _Get_Backend
   return new Cache::MemoryBackend( );
 }
 
+
 sub _Namespaces
 {
   return _Get_Backend( )->get_namespaces( );
 }
 
 
+sub _Get_Cache
+{
+  my ( $p_namespace ) = Static_Params( @_ );
 
-##
-# Constructor
-##
+  Assert_Defined( $p_namespace );
+
+  return new Cache::MemoryCache( { 'namespace' => $p_namespace } );
+}
 
 
 sub new
@@ -95,110 +86,6 @@ sub new
 
   return $self;
 }
-
-
-##
-# Public instance methods
-##
-
-
-sub clear
-{
-  my ( $self ) = @_;
-
-  $self->_get_backend( )->delete_namespace( $self->get_namespace( ) );
-}
-
-
-sub get
-{
-  my ( $self, $p_key ) = @_;
-
-  Assert_Defined( $p_key );
-
-  $self->_conditionally_auto_purge_on_get( );
-
-  my $object = $self->get_object( $p_key ) or
-    return undef;
-
-  if ( Object_Has_Expired( $object ) )
-  {
-    $self->remove( $p_key );
-    return undef;
-  }
-
-  return $object->get_data( );
-}
-
-
-sub get_object
-{
-  my ( $self, $p_key ) = @_;
-
-  Assert_Defined( $p_key );
-
-  return $self->_get_backend( )->restore( $self->get_namespace( ), $p_key );
-}
-
-
-sub remove
-{
-  my ( $self, $p_key ) = @_;
-
-  Assert_Defined( $p_key );
-
-  $self->_get_backend( )->delete_key( $self->get_namespace( ), $p_key );
-}
-
-
-sub set
-{
-  my ( $self, $p_key, $p_data, $p_expires_in ) = @_;
-
-  Assert_Defined( $p_key );
-
-  $self->_conditionally_auto_purge_on_set( );
-
-  $self->set_object( $p_key,
-                     Build_Object( $p_key,
-                                   $p_data,
-                                   $self->get_default_expires_in( ),
-                                   $p_expires_in ) );
-}
-
-
-
-sub set_object
-{
-  my ( $self, $p_key, $p_object ) = @_;
-
-  $self->_get_backend( )->store( $self->get_namespace( ),
-                                 $p_key,
-                                 $p_object );
-}
-
-
-
-sub size
-{
-  my ( $self ) = @_;
-
-  my $size = 0;
-
-  foreach my $key ( $self->get_keys( ) )
-  {
-    $size += 
-      $self->_get_backend( )->get_object_size( $self->get_namespace( ), $key );
-  }
-
-  return $size;
-}
-
-
-##
-# Private instance methods
-##
-
 
 
 sub _new
@@ -217,45 +104,6 @@ sub _initialize_memory_cache
 
   $self->_set_backend( new Cache::MemoryBackend( ) );
 }
-
-
-sub _build_object_size
-{
-  my ( $self, $p_key ) = @_;
-
-  Assert_Defined( $p_key );
-
-  return ;
-}
-
-
-##
-# Instance properties
-##
-
-sub get_keys
-{
-  my ( $self ) = @_;
-
-  return $self->_get_backend( )->get_keys( $self->get_namespace( ) );
-}
-
-
-sub _get_backend
-{
-  my ( $self ) = @_;
-
-  return $self->{ _Backend };
-}
-
-
-sub _set_backend
-{
-  my ( $self, $p_backend ) = @_;
-
-  $self->{ _Backend } = $p_backend;
-}
-
 
 
 1;

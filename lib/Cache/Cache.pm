@@ -1,5 +1,5 @@
 #####################################################################
-# $Id: Cache.pm,v 1.21 2001/11/07 13:10:56 dclinton Exp $
+# $Id: Cache.pm,v 1.22 2001/11/07 16:35:35 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -32,7 +32,7 @@ use Exporter;
 use vars @EXPORT_OK;
 
 
-$VERSION = 1.00;
+$VERSION = 0.99;
 $EXPIRES_NOW = 'now';
 $EXPIRES_NEVER = 'never';
 

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareSharedMemoryCache.pm,v 1.16 2001/11/07 13:10:56 dclinton Exp $
+# $Id: SizeAwareSharedMemoryCache.pm,v 1.17 2001/11/16 19:20:22 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -30,11 +30,6 @@ use Exporter;
 $NO_MAX_SIZE = $Cache::SizeAwareMemoryCache::NO_MAX_SIZE;
 
 
-##
-# Public class methods
-##
-
-
 sub Clear
 {
   return Cache::SharedMemoryCache::Clear( );
@@ -53,12 +48,6 @@ sub Size
 }
 
 
-##
-# Constructor
-##
-
-
-
 sub new
 {
   my ( $self ) = _new( @_ );
@@ -68,27 +57,13 @@ sub new
   return $self;
 }
 
-
-##
-# Private instance methods
-##
-
-
 sub _new
 {
   my ( $proto, $p_options_hash_ref ) = @_;
   my $class = ref( $proto ) || $proto;
   my $self = $class->SUPER::_new( $p_options_hash_ref );
-  $self->_initialize_size_aware_shared_memory_cache( );
-  return $self;
-}
-
-
-sub _initialize_size_aware_shared_memory_cache
-{
-  my ( $self ) = @_;
-
   $self->_set_backend( new Cache::SharedMemoryBackend( ) );
+  return $self;
 }
 
 

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: MemoryBackend.pm,v 1.1 2001/11/08 23:01:23 dclinton Exp $
+# $Id: MemoryBackend.pm,v 1.2 2001/11/24 21:12:43 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -31,7 +31,7 @@ sub store
 {
   my ( $self, $p_namespace, $p_key, $p_value ) = @_;
 
-  $self->_get_store_ref( )->{ $p_namespace }{ $p_key } = 
+  $self->_get_store_ref( )->{ $p_namespace }{ $p_key } =
     $self->_freeze( $p_value );
 }
 
@@ -93,33 +93,29 @@ sub get_object_size
 
 sub _freeze
 {
-  my ( $self, $p_object ) = @_;
+  my ( $self, $p_data ) = @_;
 
-  return undef if not defined $p_object;
+  return undef if not defined $p_data;
 
-  $p_object->set_size( undef );
+  my $frozen_data;
 
-  my $frozen_object;
+  Freeze_Object( \$p_data, \$frozen_data );
 
-  Freeze_Object( \$p_object, \$frozen_object );
-
-  return $frozen_object;
+  return $frozen_data;
 }
 
 
 sub _thaw
 {
-  my ( $self, $p_frozen_object ) = @_;
+  my ( $self, $p_frozen_data ) = @_;
 
-  return undef if not defined $p_frozen_object;
+  return undef if not defined $p_frozen_data;
 
-  my $object;
+  my $data;
 
-  Thaw_Object( \$p_frozen_object, \$object );
+  Thaw_Object( \$p_frozen_data, \$data );
 
-  $object->set_size( length $p_frozen_object );
-
-  return $object;
+  return $data;
 
 }
 

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: BaseCache.pm,v 1.14 2001/11/24 21:12:43 dclinton Exp $
+# $Id: BaseCache.pm,v 1.15 2001/11/29 16:12:11 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -17,9 +17,7 @@ use vars qw( @ISA );
 use Cache::Cache qw( $EXPIRES_NEVER );
 use Cache::CacheUtils qw( Assert_Defined
                           Build_Object
-                          Freeze_Object
                           Object_Has_Expired
-                          Thaw_Object
                         );
 use Error;
 
@@ -44,15 +42,59 @@ my $AUTO_PURGE_NAMESPACE = "__AUTO_PURGE__";
 ##
 
 
-sub get_identifiers
+
+sub clear
 {
   my ( $self ) = @_;
 
-  warn( "get_identifiers has been marked deprepricated.  use get_keys" );
-
-  return $self->get_keys( );
+  $self->_get_backend( )->delete_namespace( $self->get_namespace( ) );
 }
 
+
+sub get
+{
+  my ( $self, $p_key ) = @_;
+
+  Assert_Defined( $p_key );
+
+  $self->_conditionally_auto_purge_on_get( );
+
+  my $object = $self->get_object( $p_key ) or
+    return undef;
+
+  if ( Object_Has_Expired( $object ) )
+  {
+    $self->remove( $p_key );
+    return undef;
+  }
+
+  return $object->get_data( );
+}
+
+
+sub get_keys
+{
+  my ( $self ) = @_;
+
+  return $self->_get_backend( )->get_keys( $self->get_namespace( ) );
+}
+
+
+sub get_object
+{
+  my ( $self, $p_key ) = @_;
+
+  Assert_Defined( $p_key );
+
+  my $object =
+    $self->_get_backend( )->restore( $self->get_namespace( ), $p_key ) or
+      return undef;
+
+  $object->set_size( $self->_get_backend( )->
+                     get_object_size( $self->get_namespace( ), $p_key ) );
+
+  return $object;
+}
 
 
 sub purge
@@ -65,6 +107,69 @@ sub purge
   }
 }
 
+
+sub remove
+{
+  my ( $self, $p_key ) = @_;
+
+  Assert_Defined( $p_key );
+
+  $self->_get_backend( )->delete_key( $self->get_namespace( ), $p_key );
+}
+
+
+sub get_identifiers
+{
+  my ( $self ) = @_;
+
+  warn( "get_identifiers has been marked deprepricated.  use get_keys" );
+
+  return $self->get_keys( );
+}
+
+
+sub set
+{
+  my ( $self, $p_key, $p_data, $p_expires_in ) = @_;
+
+  Assert_Defined( $p_key );
+
+  $self->_conditionally_auto_purge_on_set( );
+
+  $self->set_object( $p_key,
+                     Build_Object( $p_key,
+                                   $p_data,
+                                   $self->get_default_expires_in( ),
+                                   $p_expires_in ) );
+}
+
+
+sub set_object
+{
+  my ( $self, $p_key, $p_object ) = @_;
+
+  $p_object->set_size( undef );
+
+  $self->_get_backend( )->store( $self->get_namespace( ),
+                                 $p_key,
+                                 $p_object );
+}
+
+
+sub size
+{
+  my ( $self ) = @_;
+
+  my $size = 0;
+
+  foreach my $key ( $self->get_keys( ) )
+  {
+    $size += 
+      $self->_get_backend( )->get_object_size( $self->get_namespace( ), $key );
+  }
+
+  return $size;
+}
 
 
 ##
@@ -404,6 +509,23 @@ sub set_auto_purge_on_get
 
   $self->{_Auto_Purge_On_Get} = $auto_purge_on_get;
 }
+
+
+sub _get_backend
+{
+  my ( $self ) = @_;
+
+  return $self->{ _Backend };
+}
+
+
+sub _set_backend
+{
+  my ( $self, $p_backend ) = @_;
+
+  $self->{ _Backend } = $p_backend;
+}
+
 
 
 1;

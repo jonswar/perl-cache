@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SharedMemoryCache.pm,v 1.17 2001/11/08 23:01:23 dclinton Exp $
+# $Id: SharedMemoryCache.pm,v 1.18 2001/11/16 19:20:22 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -25,12 +25,6 @@ use Error;
 @ISA = qw ( Cache::MemoryCache );
 
 
-##
-# Public class methods
-##
-
-
-
 sub Clear
 {
   foreach my $namespace ( _Namespaces( ) )
@@ -44,8 +38,7 @@ sub Purge
 {
   foreach my $namespace ( _Namespaces( ) )
   {
-    my $cache = new Cache::SharedMemoryCache( { 'namespace' => $namespace } );
-    $cache->purge( );
+    _Get_Cache( $namespace )->purge( );
   }
 }
 
@@ -56,19 +49,11 @@ sub Size
 
   foreach my $namespace ( _Namespaces( ) )
   {
-    my $cache = new Cache::SharedMemoryCache( { 'namespace' => $namespace } );
-
-    $size += $cache->size( );
+    $size += _Get_Cache( $namespace )->size( );
   }
 
   return $size;
 }
-
-
-
-##
-# Private class methods
-##
 
 
 sub _Namespaces
@@ -84,11 +69,14 @@ sub _Get_Backend
 }
 
 
+sub _Get_Cache
+{
+  my ( $p_namespace ) = Static_Params( @_ );
 
-##
-# Constructor
-##
+  Assert_Defined( $p_namespace );
 
+  return new Cache::SharedMemoryCache( { 'namespace' => $p_namespace } );
+}
 
 
 sub new
@@ -101,27 +89,13 @@ sub new
 }
 
 
-##
-# Private instance methods
-##
-
-
 sub _new
 {
   my ( $proto, $p_options_hash_ref ) = @_;
   my $class = ref( $proto ) || $proto;
   my $self = $class->SUPER::_new( $p_options_hash_ref );
-  $self->_initialize_shared_memory_cache( );
-  return $self;
-}
-
-
-
-sub _initialize_shared_memory_cache
-{
-  my ( $self ) = @_;
-
   $self->_set_backend( new Cache::SharedMemoryBackend( ) );
+  return $self;
 }
 
 

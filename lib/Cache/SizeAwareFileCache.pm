@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareFileCache.pm,v 1.22 2001/11/24 21:12:43 dclinton Exp $
+# $Id: SizeAwareFileCache.pm,v 1.23 2001/11/29 16:12:11 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -16,15 +16,8 @@ use strict;
 use vars qw( @ISA );
 use Cache::CacheMetaData;
 use Cache::CacheUtils qw ( Assert_Defined
-                           Build_Object
-                           Build_Unique_Key
                            Limit_Size
-                           Make_Path
-                           Object_Has_Expired
-                           Recursively_List_Files
-                           Remove_File
-                           Static_Params
-                           Write_File );
+                           Static_Params );
 use Cache::FileCache;
 use Cache::SizeAwareCache qw( $NO_MAX_SIZE );
 
@@ -33,44 +26,29 @@ use Cache::SizeAwareCache qw( $NO_MAX_SIZE );
 
 my $DEFAULT_MAX_SIZE = $NO_MAX_SIZE;
 
-##
-# Public class methods
-##
-
 
 sub Clear
 {
-  my ( $optional_cache_root ) = Static_Params( @_ );
+  my ( $p_optional_cache_root ) = Static_Params( @_ );
 
-  Cache::FileCache::Clear( $optional_cache_root );
+  Cache::FileCache::Clear( $p_optional_cache_root );
 }
 
 
 sub Purge
 {
-  my ( $optional_cache_root ) = Static_Params( @_ );
+  my ( $p_optional_cache_root ) = Static_Params( @_ );
 
-  Cache::FileCache::Purge( $optional_cache_root );
+  Cache::FileCache::Purge( $p_optional_cache_root );
 }
 
 
 sub Size
 {
-  my ( $optional_cache_root ) = Static_Params( @_ );
+  my ( $p_optional_cache_root ) = Static_Params( @_ );
 
-  Cache::FileCache::Size( $optional_cache_root );
+  Cache::FileCache::Size( $p_optional_cache_root );
 }
-
-
-##
-# Private class methods
-##
-
-
-
-##
-# Constructor
-##
 
 
 sub new
@@ -83,27 +61,16 @@ sub new
 }
 
 
-
-##
-# Public instance methods
-
-
-# TODO:  Get needs to update the access time!
-
-
-
-sub set
+sub get
 {
-  my ( $self, $p_key, $p_data, $p_expires_in ) = @_;
+  my ( $self, $p_key ) = @_;
 
-  $self->SUPER::set( $p_key, $p_data, $p_expires_in );
+  Assert_Defined( $p_key );
 
-  if ( $self->get_max_size( ) != $NO_MAX_SIZE )
-  {
-    $self->limit_size( $self->get_max_size( ) );
-  }
+  $self->_update_access_time( $p_key );
+
+  return $self->SUPER::get( $p_key );
 }
-
 
 
 sub limit_size
@@ -116,37 +83,28 @@ sub limit_size
 }
 
 
-##
-# Private instance methods
-##
+sub set
+{
+  my ( $self, $p_key, $p_data, $p_expires_in ) = @_;
+
+  Assert_Defined( $p_key );
+
+  $self->SUPER::set( $p_key, $p_data, $p_expires_in );
+
+  if ( $self->get_max_size( ) != $NO_MAX_SIZE )
+  {
+    $self->limit_size( $self->get_max_size( ) );
+  }
+}
 
 
 sub _new
 {
   my ( $proto, $p_options_hash_ref ) = @_;
   my $class = ref( $proto ) || $proto;
-
   my $self  =  $class->SUPER::_new( $p_options_hash_ref );
-
-  $self->_initialize_size_aware_file_cache( );
-
-  return $self;
-}
-
-
-sub _initialize_size_aware_file_cache
-{
-  my ( $self ) = @_;
-
   $self->_initialize_max_size( );
-}
-
-
-sub _initialize_max_size
-{
-  my ( $self ) = @_;
-
-  $self->set_max_size( $self->_read_option( 'max_size', $DEFAULT_MAX_SIZE ) );
+  return $self;
 }
 
 
@@ -168,10 +126,26 @@ sub _build_cache_meta_data
 }
 
 
-##
-# Instance properties
-##
+sub _initialize_max_size
+{
+  my ( $self ) = @_;
 
+  $self->set_max_size( $self->_read_option( 'max_size', $DEFAULT_MAX_SIZE ) );
+}
+
+
+sub _update_access_time
+{
+  my ( $self, $p_key ) = @_;
+
+  my $object = $self->get_object( $p_key );
+
+  if ( defined $object )
+  {
+    $object->set_accessed_at( time( ) );
+    $self->set_object( $p_key, $object );
+  }
+}
 
 sub get_max_size
 {
@@ -187,7 +161,6 @@ sub set_max_size
 
   $self->{_Max_Size} = $max_size;
 }
-
 
 
 1;

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: FileCache.pm,v 1.23 2001/11/24 21:12:43 dclinton Exp $
+# $Id: FileCache.pm,v 1.24 2001/11/29 16:12:11 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -19,21 +19,9 @@ use Cache::Cache;
 use Cache::CacheUtils qw ( Assert_Defined
                            Build_Object
                            Build_Path
-                           Build_Unique_Key
-                           Create_Directory
                            Get_Temp_Directory
-                           List_Subdirectories
-                           Make_Path
                            Object_Has_Expired
-                           Read_File_Without_Time_Modification
-                           Recursive_Directory_Size
-                           Recursively_List_Files
-                           Recursively_Remove_Directory
-                           Remove_File
-                           Split_Word
-                           Static_Params
-                           Update_Access_Time
-                           Write_File );
+                           Static_Params );
 use Cache::FileBackend;
 use Cache::Object;
 use Error;
@@ -73,9 +61,7 @@ sub Clear
 
   foreach my $namespace ( _Namespaces( $p_optional_cache_root ) )
   {
-    # TODO:  This is broken -- try changing the root!
-    my $cache = new Cache::FileCache( { 'namespace' => $namespace } );
-    $cache->clear( );
+    _Get_Cache( $namespace, $p_optional_cache_root )->clear( );
   }
 }
 
@@ -86,9 +72,7 @@ sub Purge
 
   foreach my $namespace ( _Namespaces( $p_optional_cache_root ) )
   {
-    # TODO:  This is broken -- try changing the root!
-    my $cache = new Cache::FileCache( { 'namespace' => $namespace } );
-    $cache->purge( );
+    _Get_Cache( $namespace, $p_optional_cache_root )->purge( );
   }
 }
 
@@ -101,9 +85,7 @@ sub Size
 
   foreach my $namespace ( _Namespaces( $p_optional_cache_root ) )
   {
-    # TODO:  This is broken -- try changing the root!
-    my $cache = new Cache::FileCache( { 'namespace' => $namespace } );
-    $size += $cache->size( );
+    $size += _Get_Cache( $namespace, $p_optional_cache_root )->size( );
   }
 
   return $size;
@@ -129,9 +111,14 @@ sub _Build_Cache_Root
 {
   my ( $p_optional_cache_root ) = Static_Params( @_ );
 
-  return defined $p_optional_cache_root ?
-    $p_optional_cache_root :
-      Build_Path( Get_Temp_Directory( ), $DEFAULT_CACHE_ROOT );
+  if ( defined $p_optional_cache_root ) 
+  {
+    return $p_optional_cache_root;
+  }
+  else
+  {
+    return Build_Path( Get_Temp_Directory( ), $DEFAULT_CACHE_ROOT );
+  }
 }
 
 
@@ -142,6 +129,23 @@ sub _Namespaces
   return _Get_Backend( $p_optional_cache_root )->get_namespaces( );
 }
 
+
+sub _Get_Cache
+{
+  my ( $p_namespace, $p_optional_cache_root ) = Static_Params( @_ );
+
+  Assert_Defined( $p_namespace );
+
+  if ( defined $p_optional_cache_root ) 
+  {
+    return new Cache::FileCache( { 'namespace' => $p_namespace,
+                                   'cache_root' => $p_optional_cache_root } );
+  }
+  else
+  {
+    return new Cache::FileCache( { 'namespace' => $p_namespace } );
+  }
+}
 
 ##
 # Constructor
@@ -161,97 +165,6 @@ sub new
 ##
 # Public instance methods
 ##
-
-
-sub clear
-{
-  my ( $self ) = @_;
-
-  $self->_get_backend( )->delete_namespace( $self->get_namespace( ) );
-}
-
-
-sub get
-{
-  my ( $self, $p_key ) = @_;
-
-  Assert_Defined( $p_key );
-
-  $self->_conditionally_auto_purge_on_get( );
-
-  my $object = $self->get_object( $p_key ) or
-    return undef;
-
-  if ( Object_Has_Expired( $object ) )
-  {
-    $self->remove( $p_key );
-    return undef;
-  }
-
-  return $object->get_data( );
-}
-
-
-sub get_object
-{
-  my ( $self, $p_key ) = @_;
-
-  Assert_Defined( $p_key );
-
-  return $self->_get_backend( )->restore( $self->get_namespace( ), $p_key );
-}
-
-
-sub remove
-{
-  my ( $self, $p_key ) = @_;
-
-  Assert_Defined( $p_key );
-
-  $self->_get_backend( )->delete_key( $self->get_namespace( ), $p_key );
-}
-
-
-sub set
-{
-  my ( $self, $p_key, $p_data, $p_expires_in ) = @_;
-
-  Assert_Defined( $p_key );
-
-  $self->_conditionally_auto_purge_on_set( );
-
-  $self->set_object( $p_key,
-                     Build_Object( $p_key,
-                                   $p_data,
-                                   $self->get_default_expires_in( ),
-                                   $p_expires_in ) );
-}
-
-
-sub set_object
-{
-  my ( $self, $p_key, $p_object ) = @_;
-
-  $self->_get_backend( )->store( $self->get_namespace( ),
-                                 $p_key,
-                                 $p_object );
-}
-
-
-sub size
-{
-  my ( $self ) = @_;
-
-  my $size = 0;
-
-  foreach my $key ( $self->get_keys( ) )
-  {
-    $size += 
-      $self->_get_backend( )->get_object_size( $self->get_namespace( ), $key );
-  }
-
-  return $size;
-}
 
 
 ##
@@ -371,32 +284,6 @@ sub set_directory_umask
   my ( $self, $p_directory_umask ) = @_;
 
   $self->_get_backend( )->set_directory_umask( $p_directory_umask );
-}
-
-
-
-sub get_keys
-{
-  my ( $self ) = @_;
-
-  return $self->_get_backend->get_keys( $self->get_namespace( ) );
-}
-
-
-
-sub _get_backend
-{
-  my ( $self ) = @_;
-
-  return $self->{ _Backend };
-}
-
-
-sub _set_backend
-{
-  my ( $self, $p_backend ) = @_;
-
-  $self->{ _Backend } = $p_backend;
 }
 
 

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: FileBackend.pm,v 1.2 2001/11/24 21:12:43 dclinton Exp $
+# $Id: FileBackend.pm,v 1.3 2001/11/29 16:12:11 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -49,11 +49,7 @@ sub store
   Assert_Defined( $p_namespace );
   Assert_Defined( $p_key );
 
-  Make_Path( $self->_path_to_key( $p_namespace, $p_key ),
-             $self->get_directory_umask( ) );
-
-  Write_File( $self->_path_to_key( $p_namespace, $p_key ),
-              \$self->_freeze( $p_value ) );
+  $self->_write_data( $self->_path_to_key( $p_namespace, $p_key ), $p_value );
 }
 
 
@@ -64,7 +60,7 @@ sub restore
   Assert_Defined( $p_namespace );
   Assert_Defined( $p_key );
 
-  return $self->_read_object( $self->_path_to_key( $p_namespace, $p_key ) );
+  return $self->_read_data( $self->_path_to_key( $p_namespace, $p_key ) );
 }
 
 
@@ -99,18 +95,23 @@ sub delete_all_namespaces
 }
 
 
-sub update_access_time
+sub get_file_accessed_at
 {
   my ( $self, $p_namespace, $p_key ) = @_;
 
   Assert_Defined( $p_namespace );
   Assert_Defined( $p_key );
 
-  Update_Access_Time( $self->_path_to_key( $p_namespace, $p_key ) );
+  # TODO:  Verify that this is correct
+
+  return stat( $self->_path_to_key( $p_namespace, $p_key ) )->[8];
 }
 
 
 
+# TODO: This code presumes that the data stored is an Object, which
+# makes FileBackend less generally applicable to any type of data
+# to be stored
 
 sub get_keys
 {
@@ -123,9 +124,9 @@ sub get_keys
   foreach my $unique_key ( $self->get_unique_keys( $p_namespace ) )
   {
     my $object = 
-      $self->_read_object( $self->_path_to_unique_key( $p_namespace,
-                                                       $unique_key ) ) or
-                                                         next;
+      $self->_read_data( $self->_path_to_unique_key( $p_namespace,
+                                                     $unique_key ) ) or
+                                                       next;
 
     push( @keys, $object->get_key( ) );
   }
@@ -260,60 +261,39 @@ sub _path_to_unique_key
 }
 
 
-sub _get_atime
+sub _write_data
+{
+  my ( $self, $p_path, $p_file ) = @_;
+
+  Assert_Defined( $p_path );
+  Assert_Defined( $p_file );
+
+
+  Make_Path( $p_path, $self->get_directory_umask( ) );
+
+  my $frozen_file;
+
+  Freeze_Object( \$p_file, \$frozen_file );
+
+  Write_File( $p_path, \$frozen_file );
+}
+
+
+sub _read_data
 {
   my ( $self, $p_path ) = @_;
 
-  return ( stat( $p_path ) )[8];
-}
+  Assert_Defined( $p_path );
 
-
-sub _freeze
-{
-  my ( $self, $p_object ) = @_;
-
-  return undef if not defined $p_object;
-
-  $p_object->set_size( undef );
-
-  my $frozen_object;
-
-  Freeze_Object( \$p_object, \$frozen_object );
-
-  return $frozen_object;
-}
-
-
-sub _thaw
-{
-  my ( $self, $p_frozen_object ) = @_;
-
-  return undef if not defined $p_frozen_object;
-
-  my $object;
-
-  Thaw_Object( $p_frozen_object, \$object );
-
-  return $object;
-
-}
-
-
-sub _read_object
-{
-  my ( $self, $p_object_path ) = @_;
-
-  Assert_Defined( $p_object_path );
-
-  my $object_dump_ref = Read_File_Without_Time_Modification($p_object_path) or
+  my $frozen_file_ref = Read_File_Without_Time_Modification( $p_path ) or
     return undef;
 
-  my $object = $self->_thaw( $object_dump_ref );
+  my $file;
 
-  $object->set_accessed_at( $self->_get_atime( $p_object_path ) );
-  $object->set_size( -s $p_object_path );
+  Thaw_Object( $frozen_file_ref, \$file );
 
-  return $object;
+  return $file;
 }
+
 
 1;
