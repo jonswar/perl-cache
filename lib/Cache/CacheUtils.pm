@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheUtils.pm,v 1.8 2001/03/06 20:01:52 dclinton Exp $
+# $Id: CacheUtils.pm,v 1.9 2001/03/09 15:21:28 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -730,6 +730,8 @@ sub Build_Object
       croak( "Couldn't build expires at" );
 
   $object->set_expires_at( $expires_at );
+
+  $object->set_accessed_at( $created_at );
 
   return $object;
 }

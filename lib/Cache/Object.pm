@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: Object.pm,v 1.1.1.1 2001/02/13 01:30:41 dclinton Exp $
+# $Id: Object.pm,v 1.2 2001/03/06 18:16:26 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -43,6 +43,21 @@ sub set_created_at
   my ( $self, $created_at ) = @_;
 
   $self->{_Created_At} = $created_at;
+}
+
+
+sub get_accessed_at
+{
+  my ( $self ) = @_;
+
+  return $self->{_Accessed_At};
+}
+
+sub set_accessed_at
+{
+  my ( $self, $accessed_at ) = @_;
+
+  $self->{_Accessed_At} = $accessed_at;
 }
 
 
@@ -136,6 +151,13 @@ Construct a new Cache::Object.
 =head1 PROPERTIES
 
 =over 4
+
+=item B<(get|set)_accessed_at>
+
+The time at which the object was last accessed.  Various cache
+implementations will use the accessed_at property to store information
+for LRU algorithms.  There is no guarentee that all caches will update
+this field, however.
 
 =item B<(get|set)_created_at>
 
