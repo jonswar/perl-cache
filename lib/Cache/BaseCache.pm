@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: BaseCache.pm,v 1.6 2001/04/24 15:18:14 dclinton Exp $
+# $Id: BaseCache.pm,v 1.7 2001/04/25 22:22:04 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -45,6 +45,22 @@ my $AUTO_PURGE_NAMESPACE = "__AUTO_PURGE__";
 
 sub new
 {
+  my ( $self ) = _new( @_ );
+
+  $self->_complete_initialization( ) or
+    croak( "Couldn't complete initialization" );
+
+  return $self;
+}
+
+
+##
+# Private instance methods
+##
+
+
+sub _new
+{
   my ( $proto, $options_hash_ref ) = @_;
   my $class = ref( $proto ) || $proto;
   my $self  = {};
@@ -57,9 +73,15 @@ sub new
 }
 
 
-##
-# Private instance methods
-##
+sub _complete_initialization
+{
+  my ( $self ) = @_;
+
+  $self->_initialize_auto_purge_interval( ) or
+    croak( "Couldn't initialize auto purge interval" );
+
+  return $SUCCESS;
+}
 
 
 sub _initialize_base_cache
@@ -74,9 +96,6 @@ sub _initialize_base_cache
 
   $self->_initialize_default_expires_in( ) or
     croak( "Couldn't initialize default expires in" );
-
-  $self->_initialize_auto_purge_interval( ) or
-    croak( "Couldn't initialize auto purge interval" );
 
   $self->_initialize_auto_purge_on_set( ) or
     croak( "Couldn't initialize auto purge on set" );

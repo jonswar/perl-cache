@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SharedMemoryCache.pm,v 1.11 2001/03/25 18:13:16 dclinton Exp $
+# $Id: SharedMemoryCache.pm,v 1.12 2001/04/08 22:48:37 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -147,13 +147,13 @@ sub _Namespaces
 ##
 
 
+
 sub new
 {
-  my ( $proto, $options_hash_ref ) = @_;
-  my $class = ref( $proto ) || $proto;
+  my ( $self ) = _new( @_ );
 
-  my $self  =  $class->SUPER::new( $options_hash_ref ) or
-    croak( "Couldn't run super constructor" );
+  $self->_complete_initialization( ) or
+    croak( "Couldn't complete initialization" );
 
   return $self;
 }
@@ -184,6 +184,18 @@ sub remove
 ##
 # Private instance methods
 ##
+
+
+sub _new
+{
+  my ( $proto, $options_hash_ref ) = @_;
+  my $class = ref( $proto ) || $proto;
+
+  my $self  =  $class->SUPER::_new( $options_hash_ref ) or
+    croak( "Couldn't run super constructor" );
+
+  return $self;
+}
 
 
 sub _store

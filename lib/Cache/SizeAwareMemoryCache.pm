@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareMemoryCache.pm,v 1.8 2001/04/24 15:18:14 dclinton Exp $
+# $Id: SizeAwareMemoryCache.pm,v 1.9 2001/04/25 22:22:04 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -88,16 +88,13 @@ sub _build_cache_meta_data
 ##
 
 
+
 sub new
 {
-  my ( $proto, $options_hash_ref ) = @_;
-  my $class = ref( $proto ) || $proto;
+  my ( $self ) = _new( @_ );
 
-  my $self  =  $class->SUPER::new( $options_hash_ref ) or
-    croak( "Couldn't run super constructor" );
-
-  $self->_initialize_size_aware_memory_cache( ) or
-    croak( "Couldn't initialize Cache::SizeAwareMemoryCache" );
+  $self->_complete_initialization( ) or
+    croak( "Couldn't complete initialization" );
 
   return $self;
 }
@@ -201,6 +198,22 @@ sub limit_size
 ##
 
 
+
+sub _new
+{
+  my ( $proto, $options_hash_ref ) = @_;
+  my $class = ref( $proto ) || $proto;
+
+  my $self  =  $class->SUPER::_new( $options_hash_ref ) or
+    croak( "Couldn't run super constructor" );
+
+  $self->_initialize_size_aware_memory_cache( ) or
+    croak( "Couldn't initialize Cache::SizeAwareMemoryCache" );
+
+  return $self;
+}
+
+
 sub _initialize_size_aware_memory_cache
 {
   my ( $self, $options_hash_ref ) = @_;
@@ -259,7 +272,7 @@ Cache::SizeAwareMemoryCache -- extends the Cache::MemoryCache module
 =head1 DESCRIPTION
 
 The Cache::SizeAwareMemoryCache module adds the ability to dynamically
-limit the size of a memory based cache.  It offers the new
+limit the size (in bytes) of a memory based cache.  It offers the new
 'max_size' option and the 'limit_size( $size )' method.  Please see
 the documentation for Cache::MemoryCache for more information.
 

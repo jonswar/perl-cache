@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: MemoryCache.pm,v 1.15 2001/04/24 15:18:14 dclinton Exp $
+# $Id: MemoryCache.pm,v 1.16 2001/04/25 22:22:04 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -125,14 +125,10 @@ sub _Get_Cache_Hash_Ref
 
 sub new
 {
-  my ( $proto, $options_hash_ref ) = @_;
-  my $class = ref( $proto ) || $proto;
+  my ( $self ) = _new( @_ );
 
-  my $self  =  $class->SUPER::new( $options_hash_ref ) or
-    croak( "Couldn't run super constructor" );
-
-  $self->_initialize_memory_cache( ) or
-    croak( "Couldn't initialize Cache::MemoryCache" );
+  $self->_complete_initialization( ) or
+    croak( "Couldn't complete initialization" );
 
   return $self;
 }
@@ -279,6 +275,22 @@ sub size
 ##
 # Private instance methods
 ##
+
+
+
+sub _new
+{
+  my ( $proto, $options_hash_ref ) = @_;
+  my $class = ref( $proto ) || $proto;
+
+  my $self  =  $class->SUPER::_new( $options_hash_ref ) or
+    croak( "Couldn't run super constructor" );
+
+  $self->_initialize_memory_cache( ) or
+    croak( "Couldn't initialize Cache::MemoryCache" );
+
+  return $self;
+}
 
 
 sub _initialize_memory_cache

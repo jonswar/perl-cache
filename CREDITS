@@ -1,3 +1,20 @@
+- Randal Schwartz <merlyn@stonehenge.com> discovered a nasty bug on
+  the construction of cache instances that use the auto_purge_interval
+
+- Chris Fairbanks <cfairbanks@site59.com> helped think through
+  the factory-like model for construction using private constructors
+  that allow for the proper initialization of child classes
+
+- Rob Bloodgood <robb@empire2.com> discovered that the documentation
+  should better reflect that size means size in bytes
+
+- Bjorn Jacobsen <maybe@yes.no> suggested that I use the OO interface
+  to File::Spec to avoid inadvertently importing those methods into 
+  the global namespace
+
+- Jay Sachs <jay@eziba.com> for suggesting and writing the NullCache 
+  implementation
+
 - Randal Schwartz <merlyn@stonehenge.com> wrote about an automatic purging
   mechanism for the cache in Web Techniques, and helped me implement
   that feature as part of the framework

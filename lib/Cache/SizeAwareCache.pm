@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareCache.pm,v 1.1 2001/03/13 01:26:38 dclinton Exp $
+# $Id: SizeAwareCache.pm,v 1.2 2001/04/08 22:48:37 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -142,8 +142,8 @@ Please see Cache::Cache for standard options
 
 =item max_size
 
-Sets the max_size property, which is described in detail below.
-Defaults to $NO_MAX_SIZE.
+Sets the max_size property (size in bytes), which is described in
+detail below.  Defaults to $NO_MAX_SIZE.
 
 =back
 
@@ -156,11 +156,11 @@ Please see Cache::Cache for standard properties
 =item B<(get|set)_max_size>
 
 If this property is set, then the cache will try not to exceed the max
-size value specified.  NOTE: This causes the size of the cache to be
-checked on every set, and can be considered *very* expensive in some
-implementations.  A good alternative approach is leave max_size as
-$NO_MAX_SIZE and to periodically limit the size of the cache by
-calling the limit_size( $size ) method.
+size value (in bytes) specified.  NOTE: This causes the size of the
+cache to be checked on every set, and can be considered *very*
+expensive in some implementations.  A good alternative approach is
+leave max_size as $NO_MAX_SIZE and to periodically limit the size of
+the cache by calling the limit_size( $size ) method.
 
 =back
 

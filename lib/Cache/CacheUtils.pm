@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheUtils.pm,v 1.19 2001/04/24 15:23:22 dclinton Exp $
+# $Id: CacheUtils.pm,v 1.20 2001/04/25 22:22:04 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -23,7 +23,7 @@ use Carp;
 use Digest::MD5 qw( md5_hex );
 use Exporter;
 use File::Path qw( mkpath );
-use File::Spec::Functions qw( catdir catfile splitdir splitpath tmpdir );
+use File::Spec::Functions;
 use Storable qw( nfreeze thaw dclone );
 
 @ISA = qw( Exporter );
@@ -47,6 +47,7 @@ use Storable qw( nfreeze thaw dclone );
                  Recursively_List_Files_With_Paths
                  Recursively_Remove_Directory
                  Remove_File
+                 Remove_Directory
                  Restore_Shared_Hash_Ref
                  Restore_Shared_Hash_Ref_With_Lock
                  Split_Word
@@ -285,13 +286,13 @@ sub Extract_Parent_Directory
   defined( $directory ) or
     croak( "directory required" );
 
-  my @directories = splitdir( $directory );
+  my @directories = File::Spec->splitdir( $directory );
 
   pop @directories;
 
   return undef unless @directories;
 
-  my $parent_directory = catdir( @directories );
+  my $parent_directory = File::Spec->catdir( @directories );
 
   return $parent_directory;
 }
@@ -379,7 +380,7 @@ sub Make_Path
 {
   my ( $path, $optional_new_umask ) = @_;
 
-  my ( $volume, $directory, $filename ) = splitpath( $path );
+  my ( $volume, $directory, $filename ) = File::Spec->splitpath( $path );
 
   return $SUCCESS unless $directory;
 
@@ -494,7 +495,7 @@ sub Remove_File
   my ( $filename ) = @_;
 
   defined( $filename ) or
-    croak( "path required" );
+    croak( "directory required" );
 
   if ( -f $filename )
   {
@@ -502,6 +503,28 @@ sub Remove_File
     # processes are in a race and try to remove the object
 
     unlink( $filename );
+  }
+
+  return $SUCCESS;
+}
+
+
+
+# remove a directory
+
+sub Remove_Directory
+{
+  my ( $directory ) = @_;
+
+  defined( $directory ) or
+    croak( "directory required" );
+
+  if ( -d $directory )
+  {
+    # We don't catch the error, because this may fail if two
+    # processes are in a race and try to remove the object
+
+    rmdir( $directory );
   }
 
   return $SUCCESS;
@@ -646,16 +669,16 @@ sub Recursively_Remove_Directory
     {
       my $untainted_path_to_dirent = Untaint_Path( $path_to_dirent );
 
-      unlink( $untainted_path_to_dirent ) or
-        croak( "Couldn't unlink( $untainted_path_to_dirent ): $!\n" );
+      Remove_File( $untainted_path_to_dirent ) or
+        croak( "Couldn't Remove_File( $untainted_path_to_dirent ): $!\n" );
     }
   }
 
   my $untainted_root = Untaint_Path( $root ) or
     croak( "Couldn't untain root" );
 
-  rmdir( $untainted_root ) or
-    croak( "Couldn't rmdir $untainted_root: $!" );
+  Remove_Directory( $untainted_root ) or
+    croak( "Couldn't Remove_Directory( $untainted_root ): $!" );
 
   return $SUCCESS;
 }
@@ -777,7 +800,7 @@ sub Build_Object
 
 sub Get_Temp_Directory
 {
-  my $tmpdir = tmpdir( ) or
+  my $tmpdir = File::Spec->tmpdir( ) or
     croak( "No tmpdir on this system.  Bugs to the authors of File::Spec" );
 
   return $tmpdir;

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareFileCache.pm,v 1.16 2001/04/24 15:18:14 dclinton Exp $
+# $Id: SizeAwareFileCache.pm,v 1.17 2001/04/25 22:22:04 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -76,17 +76,14 @@ sub Size
 
 sub new
 {
-  my ( $proto, $options_hash_ref ) = @_;
-  my $class = ref( $proto ) || $proto;
+  my ( $self ) = _new( @_ );
 
-  my $self  =  $class->SUPER::new( $options_hash_ref ) or
-    croak( "Couldn't run super constructor" );
-
-  $self->_initialize_size_aware_file_cache( ) or
-    croak( "Couldn't initialize Cache::SizeAwareFileCache" );
+  $self->_complete_initialization( ) or
+    croak( "Couldn't complete initialization" );
 
   return $self;
 }
+
 
 
 ##
@@ -146,6 +143,21 @@ sub limit_size
 ##
 # Private instance methods
 ##
+
+
+sub _new
+{
+  my ( $proto, $options_hash_ref ) = @_;
+  my $class = ref( $proto ) || $proto;
+
+  my $self  =  $class->SUPER::_new( $options_hash_ref ) or
+    croak( "Couldn't run super constructor" );
+
+  $self->_initialize_size_aware_file_cache( ) or
+    croak( "Couldn't initialize Cache::SizeAwareFileCache" );
+
+  return $self;
+}
 
 
 sub _initialize_size_aware_file_cache
@@ -239,9 +251,9 @@ Cache::SizeAwareFileCache -- extends the Cache::FileCache module
 =head1 DESCRIPTION
 
 The Cache::SizeAwareFileCache module adds the ability to dynamically
-limit the size of a file system based cache.  It offers the new
-'max_size' option and the 'limit_size( $size )' method.  Please see
-the documentation for Cache::FileCache for more information.
+limit the size (in bytes) of a file system based cache.  It offers the
+new 'max_size' option and the 'limit_size( $size )' method.  Please
+see the documentation for Cache::FileCache for more information.
 
 =head1 SYNOPSIS
 
