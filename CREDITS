@@ -1,3 +1,7 @@
+- Eric Cholet <cholet@logilune.com> offered a patch to fix the missing
+  import in Cache::CacheUtils and is helping debug using a Backend on
+  its own
+
 - Axel Beckert <abe@cs.uni-sb.de> submitted a patch to fix a bug in
   the expiration units
 

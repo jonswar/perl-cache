@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheUtils.pm,v 1.34 2001/12/03 17:21:32 dclinton Exp $
+# $Id: CacheUtils.pm,v 1.35 2001/12/09 22:43:03 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -15,6 +15,7 @@ use vars qw( @ISA @EXPORT_OK );
 use Cache::Cache;
 use Error;
 use Exporter;
+use File::Spec;
 use Storable qw( freeze thaw dclone );
 
 @ISA = qw( Exporter );
