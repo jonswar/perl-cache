@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: FileCache.pm,v 1.5 2001/02/19 04:58:30 jswartz Exp $
+# $Id: FileCache.pm,v 1.6 2001/03/05 19:02:34 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -81,10 +81,7 @@ sub get
   $identifier or
     croak( "identifier required" );
 
-  my $unique_key = Build_Unique_Key( $identifier ) or
-    croak( "Couldn't build unique key" );
-
-  my $object = $self->_restore( $unique_key ) or
+  my $object = $self->get_object( $identifier ) or
     return undef;
 
   my $has_expired = Object_Has_Expired( $object );
@@ -98,6 +95,23 @@ sub get
   }
 
   return $object->get_data( );
+}
+
+
+sub get_object
+{
+  my ( $self, $identifier ) = @_;
+
+  $identifier or
+    croak( "identifier required" );
+
+  my $unique_key = Build_Unique_Key( $identifier ) or
+    croak( "Couldn't build unique key" );
+
+  my $object = $self->_restore( $unique_key ) or
+    return undef;
+
+  return $object;
 }
 
 
@@ -575,7 +589,7 @@ Cache::Cache
 
 Original author: DeWitt Clinton <dewitt@unto.net>
 
-Last author:     $Author: jswartz $
+Last author:     $Author: dclinton $
 
 Copyright (C) 2001 DeWitt Clinton
 

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: Cache.pm,v 1.2 2001/02/15 23:30:37 dclinton Exp $
+# $Id: Cache.pm,v 1.3 2001/02/16 02:10:25 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -35,18 +35,29 @@ use vars qw( @ISA
 
 use vars @EXPORT_OK;
 
-$VERSION = 0.02;
-$EXPIRES_NOW = 0;
-$EXPIRES_NEVER = -1;
+$VERSION = 0.03;
+$EXPIRES_NOW = 'now';
+$EXPIRES_NEVER = 'never';
 $TRUE = 1;
 $FALSE = 0;
 $SUCCESS = 1;
 $FAILURE = 0;
 
+sub Clear;
+
+sub Purge;
+
+sub Size;
 
 sub set;
 
 sub get;
+
+sub get_object;
+
+sub get_namespace;
+
+sub get_default_expires_in;
 
 sub remove;
 
@@ -56,11 +67,6 @@ sub purge;
 
 sub size;
 
-sub Clear;
-
-sub Purge;
-
-sub Size;
 
 1;
 
@@ -94,6 +100,17 @@ corresponding static methods for persisting data across method calls.
 
     return $data;
   }
+
+
+  sub get_object
+  {
+    my ( $self, $identifier ) = @_;
+
+    # ...
+
+    return $object;
+  }
+
 
   sub set
   {
@@ -235,6 +252,36 @@ A string uniquely identifying the data.
 
 The data specified.
 
+=item B<get_object( $identifier )>
+
+Fetch the underlying Cache::Object object that is used to store the
+cached data.  This will not trigger a removal of the cached object
+even if it has expired.
+
+=item C<$identifier>
+
+A string uniquely identifying the data.
+
+=item Returns
+
+The underlying Cache::Object object, which may or may not have expired.
+
+=item B<get_namespace( )>
+
+Get the namespace of this cache instance
+
+=item Returns
+
+The namespace of this cache instance
+
+=item B<get_default_expires_in( )>
+
+Get the default expiration time for objects placed in this cache instance
+
+=item Returns
+
+The default expiration time for objects placed in this cache instance
+
 =item B<remove( $identifier )>
 
 Delete the data associated with the $identifier from the cache.
@@ -261,7 +308,12 @@ A scalar or reference to the object to be stored.
 
 Either the time in seconds until this data should be erased, or the
 constant $EXPIRES_NOW, or the constant $EXPIRES_NEVER.  Defaults to
-$EXPIRES_NEVER.
+$EXPIRES_NEVER.  This variable can also be in the extended format of
+"[number] [unit]", e.g., "10 minutes".  The valid units are s, second,
+seconds, sec, m, minute, minutes, min, h, hour, hours, w, week, weeks,
+M, month, months, y, year, and years.  Additionally, $EXPIRES_NOW can
+be represented as "now" and $EXPIRES_NEVER can be represented as
+"never".
 
 =item Returns
 
@@ -290,8 +342,8 @@ cache instance.
 
 =head1 SEE ALSO
 
-Cache::MemoryCache, Cache::FileCache, Cache::SharedMemoryCache, and
-Cache::SizeAwareFileCache
+Cache::Object, Cache::MemoryCache, Cache::FileCache,
+Cache::SharedMemoryCache, and Cache::SizeAwareFileCache
 
 =head1 AUTHOR
 

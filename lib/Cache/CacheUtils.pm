@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheUtils.pm,v 1.4 2001/02/15 23:26:07 dclinton Exp $
+# $Id: CacheUtils.pm,v 1.5 2001/03/05 19:01:47 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -54,6 +54,16 @@ use vars ( @EXPORT_OK );
 my $UNTAINTED_PATH_REGEX = qr{^([-\@\w\\\\~./:]+|[\w]:[-\@\w\\\\~./]+)$};
 
 
+# map of expiration formats to their respective time in seconds
+
+my %_Expiration_Units = ( map(($_,             1), qw(s second seconds sec)),
+                          map(($_,            60), qw(m minute minutes min)),
+                          map(($_,         60*60), qw(h hour hours)),
+                          map(($_,      60*60*24), qw(w week weeks)),
+                          map(($_,   60*60*24*30), qw(M month months)),
+                          map(($_,  60*60*24*365), qw(y year years)) );
+
+
 # Compare the expires_at to the current time to determine whether or
 # not an object has expired (the time parameter is optional)
 
@@ -66,11 +76,11 @@ sub Object_Has_Expired
   my $expires_at = $object->get_expires_at( ) or
     croak( "Couldn't get expires_at" );
 
-  if ( $expires_at == $EXPIRES_NOW )
+  if ( $expires_at eq $EXPIRES_NOW )
   {
     return $TRUE;
   }
-  elsif ( $expires_at == $EXPIRES_NEVER )
+  elsif ( $expires_at eq $EXPIRES_NEVER )
   {
     return $FALSE;
   }
@@ -103,24 +113,95 @@ sub Build_Unique_Key
 
 # Takes the time the object was created, the default_expires_in and
 # optionally the explicitly set expires_in and returns the time the
-# object will expire.
+# object will expire. Calls _canonicalize_expiration to convert
+# strings like "5m" into second values.
 
 sub Build_Expires_At
 {
   my ( $created_at, $default_expires_in, $explicit_expires_in ) = @_;
 
+  my $expires_at;
+
   if ( defined $explicit_expires_in )
   {
-    return( $created_at + $explicit_expires_in );
-  }
-  elsif ( $default_expires_in ne $EXPIRES_NEVER )
-  {
-    return( $created_at + $default_expires_in );
+    $expires_at = Sum_Expiration_Time( $created_at, $explicit_expires_in );
   }
   else
   {
-    return( $EXPIRES_NEVER );
+    $expires_at = Sum_Expiration_Time( $created_at, $default_expires_in );
   }
+
+  return $expires_at;
+}
+
+
+# Returns the sum of the  base created_at time (in seconds since the epoch)
+# and the canonical form of the expires_at string
+
+
+sub Sum_Expiration_Time
+{
+  my ( $created_at, $expires_in ) = @_;
+
+  defined $created_at or
+    croak( "created_at required" );
+
+  defined $expires_in or
+    croak( "expires_in required" );
+
+  my $expires_at;
+
+  if ( $expires_in eq $EXPIRES_NEVER )
+  {
+    $expires_at = $EXPIRES_NEVER;
+  }
+  else
+  {
+    my $canonical_expires_in = Canonicalize_Expiration_Time( $expires_in );
+
+    $expires_at = $created_at + $canonical_expires_in;
+  }
+
+  return $expires_at;
+}
+
+
+sub Canonicalize_Expiration_Time
+{
+  my ( $expires_in ) = @_;
+
+  print "expires_in: $expires_in\n";
+
+  defined $expires_in or
+    croak( "expires_in required" );
+
+  my $secs;
+
+  if ( uc( $expires_in ) eq uc( $EXPIRES_NOW ) )
+  {
+    $secs = 0;
+  }
+  elsif ( uc( $expires_in ) eq uc( $EXPIRES_NEVER ) )
+  {
+    croak( "Internal error.  expires_in eq $EXPIRES_NEVER" );
+  }
+  elsif ( $expires_in =~ /^\s*([+-]?(?:\d+|\d*\.\d*))\s*$/ )
+  {
+    $secs = $expires_in;
+  }
+  elsif ( $expires_in =~ /^\s*([+-]?(?:\d+|\d*\.\d*))\s*(\w*)\s*$/
+          and exists( $_Expiration_Units{ $2 } ))
+  {
+    $secs = ( $_Expiration_Units{ $2 } ) * $1;
+  }
+  else
+  {
+    croak( "invalid expiration time '$expires_in'" );
+  }
+
+  print "secs: $secs\n";
+
+  return $secs;
 }
 
 
@@ -336,7 +417,7 @@ sub Read_File
 }
 
 
-# read in a file. returns a reference to the data read, without 
+# read in a file. returns a reference to the data read, without
 # modifying the last accessed time
 
 sub Read_File_Without_Time_Modification

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: MemoryCache.pm,v 1.3 2001/03/05 19:02:34 dclinton Exp $
+# $Id: MemoryCache.pm,v 1.4 2001/03/05 19:04:48 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -64,7 +64,7 @@ sub get
   $identifier or
     croak( "identifier required" );
 
-  my $object = $self->_restore( $identifier ) or
+  my $object = $self->get_object( $identifier ) or
     return undef;
 
   my $has_expired = Object_Has_Expired( $object );
@@ -78,6 +78,20 @@ sub get
   }
 
   return $object->get_data( );
+}
+
+
+sub get_object
+{
+  my ( $self, $identifier ) = @_;
+
+  $identifier or
+    croak( "identifier required" );
+
+  my $object = $self->_restore( $identifier ) or
+    return undef;
+
+  return $object;
 }
 
 

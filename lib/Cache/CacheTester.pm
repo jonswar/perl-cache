@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheTester.pm,v 1.2 2001/02/15 23:24:32 dclinton Exp $
+# $Id: CacheTester.pm,v 1.3 2001/03/05 19:01:25 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -37,6 +37,7 @@ sub test
   $self->_test_ten( $cache );
   $self->_test_eleven( $cache );
   $self->_test_twelve( $cache );
+  $self->_test_thirteen( $cache );
 }
 
 
@@ -513,6 +514,36 @@ sub _test_twelve
 }
 
 
+
+# Test the expiration of an object with extended syntax
+
+sub _test_thirteen
+{
+  my ( $self, $cache ) = @_;
+
+  my $expires_in = "1 second";
+
+  my $key = 'Test Key';
+
+  my $value = 'Test Value';
+
+  my $set_status = $cache->set( $key, $value, $expires_in );
+
+  ( $set_status eq $SUCCESS ) ?
+    $self->ok( ) : $self->not_ok( '$set_status eq $SUCCESS' );
+
+  my $fetched_value = $cache->get( $key );
+
+  ( $fetched_value eq $value ) ?
+    $self->ok( ) : $self->not_ok( '$fetched_value eq $value' );
+
+  sleep( $EXPIRES_DELAY );
+
+  my $fetched_expired_value = $cache->get( $key );
+
+  ( not defined $fetched_expired_value ) ?
+    $self->ok( ) : $self->not_ok( 'not defined $fetched_expired_value' );
+}
 
 1;
 
