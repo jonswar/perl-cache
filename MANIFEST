@@ -13,7 +13,9 @@ lib/Cache/FileCache.pm
 lib/Cache/MemoryCache.pm
 lib/Cache/Object.pm
 lib/Cache/SharedMemoryCache.pm
+lib/Cache/SizeAwareFileCache.pm
 t/1_test_cache_interface.t
 t/2_test_memory_cache.t
 t/3_test_file_cache.t
 t/4_test_shared_memory_cache.t
+t/5_test_size_aware_file_cache.t
