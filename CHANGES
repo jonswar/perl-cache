@@ -1,6 +1,9 @@
 Revision history for Cache
 
 0.04 in progress
+ - implemented the SizeAwareMemoryCache and associated tests
+ - implemented the SizeAwareSharedMemoryCache and associated tests
+ - moved max_size logic from the _store method to the set method
  - started version 0.04
 
 0.03 2000-03-10-12-40
