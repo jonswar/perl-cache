@@ -19,6 +19,7 @@ NAME
 
   Cache::Cache
 
+
 DESCRIPTION
 
   The Perl Cache package provides Cache::Cache, a generic interface
@@ -27,6 +28,7 @@ DESCRIPTION
   Cache::MemoryCache, and Cache::SharedMemoryCache classes.  This work
   replaces File::Cache and IPC::Cache.
 
+
 REQUIREMENTS
 
   Data::Dumper
@@ -34,6 +36,7 @@ REQUIREMENTS
   File::Spec
   File::Path
   IPC::Shareable
+
 
 INSTALLATION
 
@@ -45,20 +48,43 @@ INSTALLATION
 
 USAGE
 
-  see perldoc Cache::Cache, Cache::FileCache, etc, but in general it
-  is a simple as:
+  First, choose the best type of cache implementation for your needs.
+  The simplest cache is the MemoryCache, which is suitable for
+  applications that are serving multiple sequential requests, and
+  which to avoid making redundant expensive queries, such as an
+  Apache/mod_perl application talking to a database.  If you wish to
+  share that data between processes, then perhaps the
+  SharedMemoryCache is appropriate, although its behavior is tightly
+  bound to the underlying IPC mechanism, which varies from system to
+  system, and is unsuitable for large objects or large numbers of
+  objects.  When the SharedMemoryCache is not acceptable, then
+  FileCache offers all of the same functionality with similar
+  performance metrics, and it is not limited in terms of the number of
+  objects or their size.  If you wish to maintain a strict limit on
+  the size of a file system based cache, then the SizeAwareFileCache
+  is the way to go.
+ 
+  Using a cache is simple.  Here is some sample code for instantiating
+  and using a MemoryCache:
 
-    use Cache::FileCache;  # or Cache::MemoryCache, etc.
+    use Cache::Cache qw( $EXPIRES_NEVER $EXPIRES_NOW );
+    use Cache::MemoryCache;
 
-    my $cache = new Cache::FileCache( ), # or Cache::MemoryCache, etc.
+    my $options_hash_ref = { 'default_expires_in' => '10 seconds' };
 
-    my $key = 'foo';
+    my $cache = new Cache::MemoryCache( $options_hash_ref );
 
-    my $original_object = 'bar';
+    my $expires_in = '10 minutes';
 
-    $cache->set( $key, $original_object );
+    $cache->set( 'Key', 'Value', $expires_in );
 
-    my $fetched_object = $cache->get( $key );
+    # if the next line is called within 10 minutes, then this 
+    # will return the cache value
+
+    my $value = $cache->get( 'Key' );
+
+  Please refer to the perldoc for Cache::Cache and the related
+  implementations for complete documention.
 
 
 SEE ALSO
@@ -66,6 +92,11 @@ SEE ALSO
   File::Cache and IPC::Cache
 
 
-NOTES
+AUTHOR
 
- * I am considering replacing Data::Dumper with Storable
+  Original author: DeWitt Clinton <dewitt@unto.net>
+
+  Last author:     $Author: dclinton $
+
+  Copyright (C) 2001 DeWitt Clinton
+
