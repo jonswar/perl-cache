@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: MemoryCache.pm,v 1.6 2001/03/06 18:02:58 dclinton Exp $
+# $Id: MemoryCache.pm,v 1.7 2001/03/06 18:26:30 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -323,6 +323,9 @@ sub _restore
 sub _delete_namespace
 {
   my ( $self, $namespace ) = @_;
+
+  defined( $namespace ) or
+    croak( "namespace required" );
 
   _Delete_Namespace( $namespace ) or
     croak( "Couldn't delete namespace $namespace" );
