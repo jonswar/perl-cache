@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheUtils.pm,v 1.27 2001/11/07 16:35:35 dclinton Exp $
+# $Id: CacheUtils.pm,v 1.28 2001/11/07 16:54:09 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -181,7 +181,7 @@ sub Canonicalize_Expiration_Time
   }
   elsif ( uc( $p_expires_in ) eq uc( $EXPIRES_NEVER ) )
   {
-    throw Error( "Internal error.  expires_in eq $EXPIRES_NEVER" );
+    throw Error::Simple( "Internal error.  expires_in eq $EXPIRES_NEVER" );
   }
   elsif ( $p_expires_in =~ /^\s*([+-]?(?:\d+|\d*\.\d*))\s*$/ )
   {
@@ -194,7 +194,7 @@ sub Canonicalize_Expiration_Time
   }
   else
   {
-    throw Error( "invalid expiration time '$p_expires_in'" );
+    throw Error::Simple( "invalid expiration time '$p_expires_in'" );
   }
 
   return $secs;
@@ -210,7 +210,7 @@ sub Build_Path
 
   if ( grep ( /\.\./, @p_elements ) )
   {
-    throw Error( "Illegal path characters '..'" );
+    throw Error::Simple( "Illegal path characters '..'" );
   }
 
   return Untaint_Path( File::Spec->catfile( @p_elements ) );
@@ -235,7 +235,7 @@ sub Create_Directory
   mkpath( $p_directory, 0, $DIRECTORY_MODE );
 
   -d $p_directory or
-    throw Error( "Couldn't create directory: $p_directory: $!" );
+    throw Error::Simple( "Couldn't create directory: $p_directory: $!" );
 
   umask( $old_umask ) if defined $old_umask;
 }
@@ -251,7 +251,7 @@ sub Freeze_Object
   Assert_Defined( $p_frozen_object_ref );
 
   $$p_frozen_object_ref = freeze( $$p_object_ref ) or
-    throw Error( "Couldn't freeze object" );
+    throw Error::Simple( "Couldn't freeze object" );
 }
 
 
@@ -322,7 +322,7 @@ sub Write_File
   my $temp_filename = "$p_filename.tmp$$";
 
   open( FILE, ">$temp_filename" ) or
-    throw Error( "Couldn't open $temp_filename for writing: $!" );
+    throw Error::Simple( "Couldn't open $temp_filename for writing: $!" );
 
   binmode( FILE );
 
@@ -331,7 +331,7 @@ sub Write_File
   close( FILE );
 
   rename( $temp_filename, $p_filename ) or
-    throw Error( "Couldn't rename $temp_filename to $p_filename" );
+    throw Error::Simple( "Couldn't rename $temp_filename to $p_filename" );
 
   chmod( $p_optional_mode, $p_filename ) if defined $p_optional_mode;
 
@@ -566,12 +566,12 @@ sub Read_Dirents
   Assert_Defined( $p_directory );
 
   opendir( DIR, $p_directory ) or
-    throw Error( "Couldn't open directory $p_directory: $!" );
+    throw Error::Simple( "Couldn't open directory $p_directory: $!" );
 
   my @dirents = readdir( DIR );
 
   closedir( DIR ) or
-    throw Error( "Couldn't close directory $p_directory" );
+    throw Error::Simple( "Couldn't close directory $p_directory" );
 
   return @dirents;
 }
@@ -637,7 +637,7 @@ sub Build_Object
 sub Get_Temp_Directory
 {
   my $tmpdir = File::Spec->tmpdir( ) or
-    throw Error( "No tmpdir on this system.  Upgrade File::Spec?" );
+    throw Error::Simple( "No tmpdir on this system.  Upgrade File::Spec?" );
 
   return $tmpdir;
 }
@@ -686,7 +686,7 @@ sub Limit_Size
   Assert_Defined( $p_new_size );
 
   $p_new_size >= 0 or
-    throw Error( "p_new_size >= 0 required" );
+    throw Error::Simple( "p_new_size >= 0 required" );
 
   my $size_estimate = $p_cache_meta_data->get_cache_size( );
 

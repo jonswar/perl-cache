@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SharedCacheUtils.pm,v 1.1 2001/03/25 18:13:16 dclinton Exp $
+# $Id: SharedCacheUtils.pm,v 1.2 2001/11/06 23:44:08 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -16,7 +16,6 @@ use Cache::CacheUtils qw( Assert_Defined
                           Freeze_Object
                           Static_Params
                           Thaw_Object );
-use Error;
 use IPC::ShareLite qw( LOCK_EX LOCK_UN );
 
 

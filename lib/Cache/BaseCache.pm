@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: BaseCache.pm,v 1.10 2001/11/06 23:44:08 dclinton Exp $
+# $Id: BaseCache.pm,v 1.11 2001/11/07 13:10:56 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -479,7 +479,7 @@ implementations.
     my $class = ref( $proto ) || $proto;
 
     my $self  =  $class->SUPER::new( $options_hash_ref ) or
-      throw Error( "Couldn't run super constructor" );
+      throw Error::Simple( "Couldn't run super constructor" );
 
     return $self;
   }

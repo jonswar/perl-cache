@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: FileCache.pm,v 1.20 2001/11/06 23:44:08 dclinton Exp $
+# $Id: FileCache.pm,v 1.21 2001/11/07 13:10:56 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -348,7 +348,7 @@ sub _build_object_path
   Assert_Defined( $p_unique_key );
 
   ( $p_unique_key !~ m|[0-9][a-f][A-F]| ) or
-    throw Error( "unique_key '$p_unique_key' contains illegal characters'" );
+    throw Error::Simple( "key '$p_unique_key' contains illegal characters'" );
 
   return Build_Path( $self->get_cache_root( ),
                      $self->get_namespace( ),
