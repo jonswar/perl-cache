@@ -1,5 +1,10 @@
 Revision history for Cache
 
+0.02 in progress
+ - created SizeAwareFileCache
+ - maked the FileCache and MemoryCache as ISA Cache::Cache
+ - started version 0.02
+
 0.01 2001-02-13-16-16
  - released version 0.01
  - implemented Get_Temp_Dir to make the FileCache root more OS
