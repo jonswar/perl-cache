@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: MemoryBackend.pm,v 1.8 2001/12/09 23:40:52 dclinton Exp $
+# $Id: MemoryBackend.pm,v 1.9 2002/04/07 17:04:46 dclinton Exp $
 # Copyright (C) 2001, 2002 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -14,7 +14,7 @@ use strict;
 use Cache::CacheUtils qw( Clone_Data );
 
 
-my $Store_Ref;
+my $Store_Ref = { };
 
 
 sub new

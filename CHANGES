@@ -5,6 +5,7 @@ Revision history for Cache
  - modified the quoting of the untainted path regex
  - fixed the duplicated get_keys in NullCache
  - applied patch to ensure conistent state if the filesystem fills up
+ - applied patch to ensure inialization of the memory cache hash
 
 1.01 2002-04-14-01-30
  - released version 1.01

@@ -1,3 +1,6 @@
+- Simran <simran@cse.unsw.edu.au> submitted a patch to correctly initialize
+  the MemoryBackend hash
+
 - Rob Mueller <robm@fastmail.fm> and Jeremy Howard <jhoward@fastmail.fm> 
   provided a patch to ensure consistent state if the filesystem fills up
 
