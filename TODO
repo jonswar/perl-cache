@@ -1,11 +1,4 @@
-* Replace Data::Dumper with Storable
-
-* Remove the static methods (such as Purge, Clear, etc.) from the
-  Cache interface.  Specific instances can implement those methods on
-  a case by case basis
-
-* Implement Cache::ExtendedFileCache with the full functionality of
-  File::Cache
+* Replace Data::Dumper with Storable (maybe)
 
 * Write a benchmark class to test the various caches relative
   performance
