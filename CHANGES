@@ -7,6 +7,7 @@ Revision history for Cache
  - further improved the fix to prevent race conditions that caused the
    tests to fail
  - exposed the get_namespaces method on Cache
+ - fixed the failing Win32 tests caused by fileglobs in Makefile.PL
 
 0.99 2001-12-09-18-45
  - released version 0.99

@@ -1,3 +1,7 @@
+- Adam Tricket <ATricket@alarismed.com> and <yves.orton@mciworldcom.de> 
+  helped debug the make test failure (due to fileglobs in Makefile.PL) on 
+  Windows
+
 - Christian Gilmore <cgilmore@tivoli.com> suggested that I expose the
   get_namespaces method through the Cache interface
 

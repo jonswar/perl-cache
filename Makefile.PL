@@ -17,7 +17,11 @@ my $DEFAULT_PREREQ_PM = {
                          Error => ''
                         };
 
-
+my @NON_IPC_TESTS = ( 't/1_test_cache_interface.t',
+                      't/2_test_memory_cache.t',
+                      't/3_test_file_cache.t',
+                      't/5_test_size_aware_file_cache.t',
+                      't/6_test_size_aware_memory_cache.t' );
 
 ##
 # Main
@@ -44,7 +48,7 @@ sub Main
   if ( not Has_Module( 'IPC::ShareLite' ) )
   {
     Print_ShareLite_Missing_Message( );
-    $options{test} = { TESTS => 't/[12356]*.t' };
+    $options{test} = { TESTS => join( ' ', @NON_IPC_TESTS ) };
     delete $options{PREREQ_PM}->{IPC::ShareLite};
   }
 
