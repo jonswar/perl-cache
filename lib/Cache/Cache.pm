@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: Cache.pm,v 1.1.1.1 2001/02/13 01:30:37 dclinton Exp $
+# $Id: Cache.pm,v 1.2 2001/02/15 23:30:37 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -290,7 +290,8 @@ cache instance.
 
 =head1 SEE ALSO
 
-Cache::MemoryCache, Cache::FileCache, Cache::SharedMemoryCache
+Cache::MemoryCache, Cache::FileCache, Cache::SharedMemoryCache, and
+Cache::SizeAwareFileCache
 
 =head1 AUTHOR
 
