@@ -1,5 +1,9 @@
 Revision history for Cache
 
+1.04 2005-03-17-11-23
+ - repair permissions on temp cache files
+ 
+
 1.03 2004-10-04-11-23
  - release version 1.03
  - modified the FileBackend to use the more robust File::Temp

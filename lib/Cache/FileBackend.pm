@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: FileBackend.pm,v 1.25 2003/12/23 23:30:39 dclinton Exp $
+# $Id: FileBackend.pm,v 1.26 2004/10/04 18:29:20 dclinton Exp $
 # Copyright (C) 2001-2003 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -579,8 +579,9 @@ sub _Write_File
     warn( "Temp file '$temp_filename' shouldn't still exist" );
   }
 
-  chmod( $p_optional_mode, _Untaint_Path($p_path) ) if
-    defined $p_optional_mode;
+  $p_optional_mode ||= 0666 - umask( );
+
+  chmod( $p_optional_mode, _Untaint_Path($p_path) );
 
   umask( $old_umask ) if $old_umask;
 }

@@ -1,3 +1,6 @@
+- worked with andrew velikoredchanin <andrew at rodtext.ru> to fix
+  a bug with file permissions at File::Temp
+
 - thomas.acunzo at ubs.com identified some issues with SharedMemoryCache
   which led to better error checking
 
