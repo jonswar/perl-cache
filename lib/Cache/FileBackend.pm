@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: FileBackend.pm,v 1.22 2002/11/15 15:21:58 dclinton Exp $
+# $Id: FileBackend.pm,v 1.23 2003/04/15 14:46:22 dclinton Exp $
 # Copyright (C) 2001-2003 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -641,7 +641,7 @@ sub _read_data
 
   my $data_ref = eval{ Thaw_Data( $$frozen_data_ref ) };
   
-  if ( $@ ) 
+  if ( $@ || ( ref( $data_ref ) ne 'ARRAY' ) ) 
   {
     unlink _Untaint_Path( $p_path );
     return [ undef, undef ];
