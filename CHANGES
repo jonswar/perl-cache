@@ -1,6 +1,8 @@
 Revision history for Cache
 
-0.02 in progress
+0.02 2000-02-15-21-12
+ - released version 0.02
+ - added perldoc to SizeAwareFileCache
  - created SizeAwareFileCache
  - added the SizeAwareCacheTester module
  - refactored common test code into the AbstractCacheTester module
