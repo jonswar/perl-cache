@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareFileCache.pm,v 1.25 2001/11/29 18:33:21 dclinton Exp $
+# $Id: SizeAwareFileCache.pm,v 1.26 2001/12/03 17:21:33 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -148,148 +148,35 @@ __END__
 
 =head1 NAME
 
-Cache::SizeAwareFileCache -- extends the Cache::FileCache module
+Cache::SizeAwareFileCache -- extends Cache::FileCache
 
 =head1 DESCRIPTION
 
-The Cache::SizeAwareFileCache module adds the ability to dynamically
-limit the size (in bytes) of a file system based cache.  It offers the
-new 'max_size' option and the 'limit_size( $size )' method.  Please
-see the documentation for Cache::FileCache for more information.
+The SizeAwareFileCache class adds the ability to dynamically limit the
+size (in bytes) of a file system based cache.  This class also
+implements the SizeAwareCache interface, providing the 'max_size'
+option and the 'limit_size( $size )' method.
 
 =head1 SYNOPSIS
 
   use Cache::SizeAwareFileCache;
 
-  my %cache_options = ( 'namespace' => 'MyNamespace',
-			'default_expires_in' => 600,
-                        'max_size' => 10000 );
-
-  my $size_aware_file_cache =
-    new Cache::SizeAwareFileCache( \%cache_options ) or
-      croak( "Couldn't instantiate FileCache" );
+  my $cache =
+    new Cache::SizeAwareFileCache( { 'namespace' => 'MyNamespace',
+                                     'default_expires_in' => 600,
+                                     'max_size' => 10000 } );
 
 =head1 METHODS
 
-=over 4
-
-=item B<Clear( $optional_cache_root )>
-
-See Cache::Cache
-
-=over 4
-
-=item $optional_cache_root
-
-If specified, this indicates the root on the filesystem of the cache
-to be cleared.
-
-=back
-
-=item B<Purge( $optional_cache_root )>
-
-See Cache::Cache
-
-=over 4
-
-=item $optional_cache_root
-
-If specified, this indicates the root on the filesystem of the cache
-to be purged.
-
-=back
-
-=item B<Size( $optional_cache_root )>
-
-See Cache::Cache
-
-=over 4
-
-=item $optional_cache_root
-
-If specified, this indicates the root on the filesystem of the cache
-to be sized.
-
-=back
-
-=item B<new( $options_hash_ref )>
-
-Constructs a new SizeAwareFileCache
-
-=over 4
-
-=item $options_hash_ref
-
-A reference to a hash containing configuration options for the cache.
-See the section OPTIONS below.
-
-=back
-
-=item B<clear(  )>
-
-See Cache::Cache
-
-=item B<get( $key )>
-
-See Cache::Cache
-
-=item B<get_object( $key )>
-
-See Cache::Cache
-
-=item B<limit_size( $new_size )>
-
-See Cache::SizeAwareCache.  NOTE: This is not 100% accurate, as the
-current size is calculated from the size of the objects in the cache,
-and does not include the size of the directory inodes.
-
-=item B<purge( )>
-
-See Cache::Cache
-
-=item B<remove( $key )>
-
-See Cache::Cache
-
-=item B<set( $key, $data, $expires_in )>
-
-See Cache::Cache
-
-=item B<size(  )>
-
-See Cache::Cache
-
-=back
+See Cache::Cache and Cache::SizeAwareCache for the API documentation.
 
 =head1 OPTIONS
 
-See Cache::Cache for standard options.  Additionally, options are set
-by passing in a reference to a hash containing any of the following
-keys:
-
-=over 4
-
-=item max_size
-
-See Cache::SizeAwareCache
-
-=back
+See Cache::Cache and Cache::SizeAwareCache for the standard options.
 
 =head1 PROPERTIES
 
-See Cache::Cache for default properties.
-
-=over 4
-
-=item B<(get|set)_max_size>
-
-See Cache::SizeAwareCache
-
-=item B<get_keys>
-
-See Cache::FileCache
-
-=back
+See Cache::Cache and Cache::SizeAwareCache for the default properties.
 
 =head1 SEE ALSO
 

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SharedMemoryCache.pm,v 1.19 2001/11/29 18:12:55 dclinton Exp $
+# $Id: SharedMemoryCache.pm,v 1.20 2001/12/03 17:21:32 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -127,70 +127,15 @@ cache.
 
 =head1 METHODS
 
-=over 4
-
-=item B<Clear( )>
-
-See Cache::Cache
-
-=item B<Purge( )>
-
-See Cache::Cache
-
-=item B<Size( )>
-
-See Cache::Cache
-
-=item B<new( $options_hash_ref )>
-
-Constructs a new SharedMemoryCache.
-
-=over 4
-
-=item $options_hash_ref
-
-A reference to a hash containing configuration options for the cache.
-See the section OPTIONS below.
-
-=back
-
-=item B<clear(  )>
-
-See Cache::Cache
-
-=item B<get( $key )>
-
-See Cache::Cache
-
-=item B<get_object( $key )>
-
-See Cache::Cache
-
-=item B<purge( )>
-
-See Cache::Cache
-
-=item B<remove( $key )>
-
-See Cache::Cache
-
-=item B<set( $key, $data, $expires_in )>
-
-See Cache::Cache
-
-=item B<size(  )>
-
-See Cache::Cache
-
-=back
+See Cache::Cache for the API documentation.
 
 =head1 OPTIONS
 
-See Cache::Cache for standard options.
+See Cache::Cache for the standard options.
 
 =head1 PROPERTIES
 
-See Cache::Cache for default properties.
+See Cache::Cache for the default properties.
 
 =head1 SEE ALSO
 

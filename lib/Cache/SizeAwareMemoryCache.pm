@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareMemoryCache.pm,v 1.15 2001/11/29 18:12:55 dclinton Exp $
+# $Id: SizeAwareMemoryCache.pm,v 1.16 2001/12/03 17:21:33 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -132,125 +132,46 @@ sub _set_cache_sizer
 1;
 
 
+
 __END__
 
 =pod
 
 =head1 NAME
 
-Cache::SizeAwareMemoryCache -- extends the Cache::MemoryCache module
+Cache::SizeAwareMemoryCache -- extends Cache::MemoryCache
 
 =head1 DESCRIPTION
 
-The Cache::SizeAwareMemoryCache module adds the ability to dynamically
-limit the size (in bytes) of a memory based cache.  It offers the new
-'max_size' option and the 'limit_size( $size )' method.  Please see
-the documentation for Cache::MemoryCache for more information.
+The SizeAwareMemoryCache class adds the ability to dynamically limit
+the size (in bytes) of a memory based cache.  This class also
+implements the SizeAwareCache interface, providing the 'max_size'
+option and the 'limit_size( $size )' method.
 
 =head1 SYNOPSIS
 
   use Cache::SizeAwareMemoryCache;
 
-  my %cache_options = ( 'namespace' => 'MyNamespace',
-			'default_expires_in' => 600,
-                        'max_size' => 10000 );
-
-  my $size_aware_memory_cache =
-    new Cache::SizeAwareMemoryCache( \%cache_options ) or
-      croak( "Couldn't instantiate SizeAwareMemoryCache" );
+  my $cache = 
+    new Cache::SizeAwareMemoryCache( { 'namespace' => 'MyNamespace',
+                                       'default_expires_in' => 600,
+                                       'max_size' => 10000 } );
 
 =head1 METHODS
 
-=over 4
-
-=item B<Clear( )>
-
-See Cache::Cache
-
-=item B<Purge( )>
-
-See Cache::Cache
-
-=item B<Size( )>
-
-See Cache::Cache
-
-=item B<new( $options_hash_ref )>
-
-Constructs a new SizeAwareMemoryCache
-
-=over 4
-
-=item $options_hash_ref
-
-A reference to a hash containing configuration options for the cache.
-See the section OPTIONS below.
-
-=back
-
-=item B<clear(  )>
-
-See Cache::Cache
-
-=item B<get( $key )>
-
-See Cache::Cache
-
-=item B<get_object( $key )>
-
-See Cache::Cache
-
-=item B<limit_size( $new_size )>
-
-See Cache::SizeAwareCache
-
-=item B<purge( )>
-
-See Cache::Cache
-
-=item B<remove( $key )>
-
-See Cache::Cache
-
-=item B<set( $key, $data, $expires_in )>
-
-See Cache::Cache
-
-=item B<size(  )>
-
-See Cache::Cache
-
-=back
+See Cache::Cache and Cache::SizeAwareCache for the API documentation.
 
 =head1 OPTIONS
 
-See Cache::Cache for standard options.  Additionally, options are set
-by passing in a reference to a hash containing any of the following
-keys:
-
-=over 4
-
-=item max_size
-
-See Cache::SizeAwareCache
-
-=back
+See Cache::Cache and Cache::SizeAwareCache for the standard options.
 
 =head1 PROPERTIES
 
-See Cache::Cache for default properties.
-
-=over 4
-
-=item B<(get|set)_max_size>
-
-See Cache::SizeAwareCache
-
-=back
+See Cache::Cache and Cache::SizeAwareCache for the default properties.
 
 =head1 SEE ALSO
 
-Cache::Cache, Cache::MemoryCache, Cache::SizeAwareFileCache
+Cache::Cache, Cache::SizeAwareCache, Cache::MemoryCache
 
 =head1 AUTHOR
 
@@ -261,3 +182,4 @@ Last author:     $Author: dclinton $
 Copyright (C) 2001 DeWitt Clinton
 
 =cut
+

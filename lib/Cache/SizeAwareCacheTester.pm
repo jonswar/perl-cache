@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareCacheTester.pm,v 1.8 2001/11/16 19:20:22 dclinton Exp $
+# $Id: SizeAwareCacheTester.pm,v 1.9 2001/12/03 17:21:33 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -196,3 +196,57 @@ sub _test_three
 
 
 1;
+
+
+__END__
+
+=pod
+
+=head1 NAME
+
+Cache::SizeAwareCacheTester -- a class for regression testing size aware caches
+
+=head1 DESCRIPTION
+
+The SizeCacheTester is used to verify that a cache implementation honors
+its contract with respect to resizing capabilities
+
+=head1 SYNOPSIS
+
+  use Cache::SizeAwareMemoryCache;
+  use Cache::SizeAwareCacheTester;
+
+  my $cache = new Cache::SizeAwareMemoryCache( );
+
+  my $cache_tester = new Cache::SizeAwareCacheTester( 1 );
+
+  $cache_tester->test( $cache );
+
+=head1 METHODS
+
+=over
+
+=item B<new( $initial_count )>
+
+Construct a new SizeAwareCacheTester object, with the counter starting
+at I<$initial_count>.
+
+=item B<test( )>
+
+Run the tests.
+
+=back
+
+=head1 SEE ALSO
+
+Cache::Cache, Cache::BaseCacheTester, Cache::CacheTester
+
+=head1 AUTHOR
+
+Original author: DeWitt Clinton <dewitt@unto.net>
+
+Last author:     $Author: dclinton $
+
+Copyright (C) 2001 DeWitt Clinton
+
+=cut
