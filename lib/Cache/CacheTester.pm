@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheTester.pm,v 1.1.1.1 2001/02/13 01:30:42 dclinton Exp $
+# $Id: CacheTester.pm,v 1.2 2001/02/15 23:24:32 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -12,12 +12,12 @@ package Cache::CacheTester;
 
 use strict;
 use Carp;
-use Cache::AbstractCacheTester;
+use Cache::BaseCacheTester;
 use Cache::Cache qw( $SUCCESS );
 
 use vars qw( @ISA $EXPIRES_DELAY );
 
-@ISA = qw ( Cache::AbstractCacheTester );
+@ISA = qw ( Cache::BaseCacheTester );
 
 $EXPIRES_DELAY = 1;
 
