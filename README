@@ -53,7 +53,7 @@ USAGE
   First, choose the best type of cache implementation for your needs.
   The simplest cache is the MemoryCache, which is suitable for
   applications that are serving multiple sequential requests, and
-  which to avoid making redundant expensive queries, such as an
+  wish to avoid making redundant expensive queries, such as an
   Apache/mod_perl application talking to a database.  If you wish to
   share that data between processes, then perhaps the
   SharedMemoryCache is appropriate, although its behavior is tightly

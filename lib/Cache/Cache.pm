@@ -1,5 +1,5 @@
 #####################################################################
-# $Id: Cache.pm,v 1.26 2001/12/09 17:00:35 dclinton Exp $
+# $Id: Cache.pm,v 1.27 2001/12/09 22:43:03 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -107,7 +107,7 @@ corresponding static methods for persisting data across method calls.
 
 First, choose the best type of cache implementation for your needs.
 The simplest cache is the MemoryCache, which is suitable for
-applications that are serving multiple sequential requests, and which
+applications that are serving multiple sequential requests, and wish
 to avoid making redundant expensive queries, such as an
 Apache/mod_perl application talking to a database.  If you wish to
 share that data between processes, then perhaps the SharedMemoryCache
