@@ -1,5 +1,8 @@
 Revision history for Cache
 
-0.01 in progress
+0.01 2001-02-13-16-16
+ - implemented Get_Temp_Dir to make the FileCache root more OS
+   independent
  - started version 0.01
+
 
