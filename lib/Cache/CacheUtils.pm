@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheUtils.pm,v 1.3 2001/02/15 16:36:49 dclinton Exp $
+# $Id: CacheUtils.pm,v 1.4 2001/02/15 23:26:07 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -41,6 +41,7 @@ use File::Spec::Functions qw( catdir catfile splitdir splitpath tmpdir );
                  Recursively_Remove_Directory
                  Remove_File
                  Split_Word
+                 Static_Params
                  Write_File
                  Object_Has_Expired );
 
@@ -653,5 +654,36 @@ sub Get_Temp_Directory
 
   return $tmpdir;
 }
+
+
+# Take a parameter list and automatically shift it such that if
+# the method was called as a static method, then $self will be
+# undefined.  This allows the use to write
+#
+#   sub Static_Method
+#   {
+#     my ( $parameter ) = Static_Params( @_ );
+#   }
+#
+# and not worry about whether it is called as:
+#
+#   Class->Static_Method( $param );
+#
+# or
+#
+#   Class::Static_Method( $param );
+
+
+sub Static_Params
+{
+  if ( ( ref $_[0] ) !~ /^(SCALAR|ARRAY|HASH|CODE|REF|GLOB|LVALUE)$/ )
+  {
+    shift( @_ );
+  }
+
+  return @_;
+}
+
+
 
 1;
