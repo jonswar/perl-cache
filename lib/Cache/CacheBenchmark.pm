@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheUtils.pm,v 1.4 2001/02/15 23:26:07 dclinton Exp $
+# $Id: CacheBenchmark.pm,v 1.1 2001/03/05 19:09:15 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -8,7 +8,9 @@
 # rights and limitations under the License.
 ######################################################################
 
+
 package Cache::CacheBenchmark;
+
 
 use strict;
 use vars qw( @ISA @EXPORT_OK );
@@ -23,9 +25,12 @@ use Cache::FileCache;
 use Cache::MemoryCache;
 use Cache::SharedMemoryCache;
 use Cache::SizeAwareFileCache;
-
 use Carp;
 use Exporter;
+
+
+@ISA = qw ( Benchmark );
+@EXPORT_OK = qw ( Benchmark_Cache );
 
 
 my @SET_NUM_KEYS = ( 10, 100, 1000, 10000 );
@@ -34,11 +39,8 @@ my @GET_NUM_KEYS = ( 10, 100, 1000, 10000 );
 my @GET_OBJECT_SIZE = ( 1, 10, 100, 1000 );
 my $MAX_SIZE = 10000;
 
-@ISA = qw ( Benchmark );
 
-@EXPORT_OK = qw ( Benchmark_Cache );
-
-my $uname_command = 'uname -a';
+my $UNAME_COMMAND = 'uname -a';
 
 
 sub Benchmark_Cache
@@ -54,7 +56,7 @@ sub Benchmark_Cache
 
 sub Print_System_Info
 {
-  my $uname = `$uname_command`;
+  my $uname = `$UNAME_COMMAND`;
 
   print "System information:\n\n";
   print $uname ? $uname : "uname unavailable\n";
@@ -190,8 +192,6 @@ sub Do_Set
 }
 
 
-
-
 sub Benchmark_Gets
 {
   my ( $cache ) = @_;
@@ -207,8 +207,6 @@ sub Benchmark_Gets
     }
   }
 }
-
-
 
 
 sub Benchmark_Get
@@ -262,6 +260,7 @@ sub Do_Get
     my $object = $cache->get( $i );
   }
 }
+
 
 1;
 
