@@ -1,6 +1,7 @@
 Revision history for Cache
 
-0.04 in progress
+0.04 2000-03-17-10-43
+ - replaced Data::Dumper with Storable, which is now a requirement
  - implemented the SizeAwareMemoryCache and associated tests
  - implemented the SizeAwareSharedMemoryCache and associated tests
  - added the SizeAwareCache interface
