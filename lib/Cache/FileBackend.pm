@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: FileBackend.pm,v 1.23 2003/04/15 14:46:22 dclinton Exp $
+# $Id: FileBackend.pm,v 1.24 2003/12/23 23:28:56 dclinton Exp $
 # Copyright (C) 2001-2003 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -267,7 +267,7 @@ sub _Read_Dirents
   my @dirents = readdir( Dir );
 
   closedir( Dir ) or
-    throw Error::Simple( "Couldn't close directory $p_directory" );
+    throw Error::Simple( "Couldn't close directory $p_directory: $!" );
 
   return @dirents;
 }
@@ -570,7 +570,7 @@ sub _Write_File
   close( File );
 
   rename( $temp_path, _Untaint_Path( $p_path ) ) or
-    throw Error::Simple( "Couldn't rename $temp_path to $p_path" );
+    throw Error::Simple( "Couldn't rename $temp_path to $p_path: $!" );
 
   chmod( $p_optional_mode, _Untaint_Path($p_path) ) if
     defined $p_optional_mode;
