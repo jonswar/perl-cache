@@ -6,6 +6,7 @@ MANIFEST
 Makefile.PL
 README
 TODO
+lib/Cache/AbstractCacheTester.pm
 lib/Cache/Cache.pm
 lib/Cache/CacheTester.pm
 lib/Cache/CacheUtils.pm
@@ -13,6 +14,7 @@ lib/Cache/FileCache.pm
 lib/Cache/MemoryCache.pm
 lib/Cache/Object.pm
 lib/Cache/SharedMemoryCache.pm
+lib/Cache/SizeAwareCacheTester.pm
 lib/Cache/SizeAwareFileCache.pm
 t/1_test_cache_interface.t
 t/2_test_memory_cache.t
