@@ -5,9 +5,12 @@ DISCLAIMER
 MANIFEST
 Makefile.PL
 README
+STYLE
 TODO
-lib/Cache/AbstractCacheTester.pm
+lib/Cache/BaseCache.pm
+lib/Cache/BaseCacheTester.pm
 lib/Cache/Cache.pm
+lib/Cache/CacheBenchmark.pm
 lib/Cache/CacheTester.pm
 lib/Cache/CacheUtils.pm
 lib/Cache/FileCache.pm

@@ -1,6 +1,19 @@
 Revision history for Cache
 
 0.03 in progress
+ - updated the syntax for expiration times to include the [number] [unit] 
+   format, e.g. "10 seconds"
+ - added the get_object method to the Cache interface, which allows
+   access to the underlying cache object (without potentially expiring
+   the object)
+ - added the get_namespace and get_default_expires_in methods to the
+   Cache interface definition
+ - updated the MANIFEST
+ - checked in preliminary cache benchmarking code
+ - fixed bug fixed bug #406030 -- default_expires_in never invoked
+ - refactored common code into BaseCache
+ - use Static_Params method
+ - fixed default_expires_in bug
  - added coding guidelines to STYLE
  - started version 0.03
 

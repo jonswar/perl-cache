@@ -1,4 +1,1 @@
 * Replace Data::Dumper with Storable (maybe)
-
-* Write a benchmark class to test the various caches relative
-  performance
