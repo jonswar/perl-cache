@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: FileCache.pm,v 1.4 2001/02/16 02:11:04 dclinton Exp $
+# $Id: FileCache.pm,v 1.5 2001/02/19 04:58:30 jswartz Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -12,6 +12,7 @@ package Cache::FileCache;
 
 use strict;
 use vars qw( @ISA );
+use Cache::BaseCache;
 use Cache::Cache qw( $EXPIRES_NEVER $SUCCESS $FAILURE $TRUE $FALSE );
 use Cache::CacheUtils qw ( Build_Object
                            Build_Path
@@ -26,26 +27,26 @@ use Cache::CacheUtils qw ( Build_Object
                            Recursively_Remove_Directory
                            Remove_File
                            Split_Word
+                           Static_Params
                            Write_File );
 use Cache::Object;
 use Carp;
 use Data::Dumper;
 
-@ISA = qw ( Cache::Cache );
+@ISA = qw ( Cache::BaseCache );
 
 my $DEFAULT_CACHE_DEPTH = 3;
 my $DEFAULT_CACHE_ROOT = "FileCache";
-my $DEFAULT_EXPIRES_IN = $EXPIRES_NEVER;
-my $DEFAULT_NAMESPACE = "Default";
 
 sub new
 {
   my ( $proto, $options_hash_ref ) = @_;
   my $class = ref( $proto ) || $proto;
-  my $self  = {};
-  bless( $self, $class );
 
-  $self->_initialize_file_cache( $options_hash_ref ) or
+  my $self  =  $class->SUPER::new( $options_hash_ref ) or
+    croak( "Couldn't run super constructor" );
+
+  $self->_initialize_file_cache( ) or
     croak( "Couldn't initialize Cache::FileCache" );
 
   return $self;
@@ -56,8 +57,10 @@ sub set
 {
   my ( $self, $identifier, $data, $expires_in ) = @_;
 
+  my $default_expires_in = $self->get_default_expires_in( );
+
   my $object =
-    Build_Object( $identifier, $data, $DEFAULT_EXPIRES_IN, $expires_in ) or
+    Build_Object( $identifier, $data, $default_expires_in, $expires_in ) or
       croak( "Couldn't build cache object" );
 
   my $unique_key = Build_Unique_Key( $identifier ) or
@@ -181,7 +184,7 @@ sub size
 
 sub Clear
 {
-  my ( $optional_cache_root ) = @_;
+  my ( $optional_cache_root ) = Static_Params( @_ );
 
   my $cache_root = _Build_Cache_Root( $optional_cache_root ) or
     croak( "Couldn't build cache root" );
@@ -198,7 +201,7 @@ sub Clear
 
 sub Purge
 {
-  my ( $optional_cache_root ) = @_;
+  my ( $optional_cache_root ) = Static_Params( @_ );
 
   my @namespaces;
 
@@ -218,9 +221,11 @@ sub Purge
 }
 
 
+
+
 sub Size
 {
-  my ( $optional_cache_root ) = @_;
+  my ( $optional_cache_root ) = Static_Params( @_ );
 
   my $cache_root = _Build_Cache_Root( $optional_cache_root ) or
     croak( "Couldn't build cache root" );
@@ -235,22 +240,13 @@ sub Size
 
 sub _initialize_file_cache
 {
-  my ( $self, $options_hash_ref ) = @_;
-
-  $self->_initialize_options_hash_ref( $options_hash_ref ) or
-    croak( "Couldn't initialize options hash ref" );
-
-  $self->_initialize_namespace( ) or
-    croak( "Couldn't initialize namespace" );
+  my ( $self ) = @_;
 
   $self->_initialize_cache_depth( ) or
     croak( "Couldn't initialize cache depth" );
 
   $self->_initialize_cache_root( ) or
     croak( "Couldn't initialize cache root" );
-
-  $self->_initialize_default_expires_in( ) or
-    croak( "Couldn't initialize default expires in" );
 
   return $SUCCESS;
 }
@@ -278,28 +274,6 @@ sub _initialize_cache_root
   my $cache_root = _Build_Cache_Root( $optional_cache_root );
 
   $self->set_cache_root( $cache_root );
-
-  return $SUCCESS;
-}
-
-
-sub _initialize_options_hash_ref
-{
-  my ( $self, $options_hash_ref ) = @_;
-
-  $self->_set_options_hash_ref( $options_hash_ref );
-
-  return $SUCCESS;
-}
-
-
-sub _initialize_namespace
-{
-  my ( $self ) = @_;
-
-  my $namespace = $self->_read_option( 'namespace', $DEFAULT_NAMESPACE );
-
-  $self->_set_namespace( $namespace );
 
   return $SUCCESS;
 }
@@ -358,38 +332,6 @@ sub _restore
 
   return $object;
 }
-
-
-
-sub _initialize_default_expires_in
-{
-  my ( $self ) = @_;
-
-  my $default_expires_in =
-    $self->_read_option( 'default_expires_in', $DEFAULT_EXPIRES_IN );
-
-  $self->_set_default_expires_in( $default_expires_in );
-
-  return $SUCCESS;
-}
-
-
-sub _read_option
-{
-  my ( $self, $option_name, $default_value ) = @_;
-
-  my $options_hash_ref = $self->_get_options_hash_ref( );
-
-  if ( defined $options_hash_ref->{$option_name} )
-  {
-    return $options_hash_ref->{$option_name};
-  }
-  else
-  {
-    return $default_value;
-  }
-}
-
 
 
 
@@ -499,54 +441,6 @@ sub _build_namespace_path
 ##
 # Properties
 ##
-
-
-sub _get_options_hash_ref
-{
-  my ( $self ) = @_;
-
-  return $self->{_Options_Hash_Ref};
-}
-
-sub _set_options_hash_ref
-{
-  my ( $self, $options_hash_ref ) = @_;
-
-  $self->{_Options_Hash_Ref} = $options_hash_ref;
-}
-
-
-
-sub get_namespace
-{
-  my ( $self ) = @_;
-
-  return $self->{_Namespace};
-}
-
-
-sub _set_namespace
-{
-  my ( $self, $namespace ) = @_;
-
-  $self->{_Namespace} = $namespace;
-}
-
-
-sub get_default_expires_in
-{
-  my ( $self ) = @_;
-
-  return $self->{_Default_Expires_In};
-}
-
-sub _set_default_expires_in
-{
-  my ( $self, $default_expires_in ) = @_;
-
-  $self->{_Default_Expires_In} = $default_expires_in;
-}
-
 
 
 sub get_cache_depth
@@ -681,7 +575,7 @@ Cache::Cache
 
 Original author: DeWitt Clinton <dewitt@unto.net>
 
-Last author:     $Author: dclinton $
+Last author:     $Author: jswartz $
 
 Copyright (C) 2001 DeWitt Clinton
 

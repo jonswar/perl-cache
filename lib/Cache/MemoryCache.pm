@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: MemoryCache.pm,v 1.1.1.1 2001/02/13 01:30:40 dclinton Exp $
+# $Id: MemoryCache.pm,v 1.2 2001/02/15 15:45:23 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -12,28 +12,31 @@ package Cache::MemoryCache;
 
 use strict;
 use vars qw( @ISA );
+use Cache::BaseCache;
 use Cache::Cache qw( $EXPIRES_NEVER $TRUE $FALSE $SUCCESS $FAILURE );
-use Cache::CacheUtils qw ( Build_Object Object_Has_Expired );
+use Cache::CacheUtils qw ( Build_Object Object_Has_Expired Static_Params );
 use Cache::Object;
 use Carp;
 use Data::Dumper;
 
-@ISA = qw ( Cache::Cache );
+@ISA = qw ( Cache::BaseCache );
 
 my %Cache_Hash;
 
 my $DEFAULT_NAMESPACE = "Default";
 my $DEFAULT_EXPIRES_IN = $EXPIRES_NEVER;
 
+
 sub new
 {
   my ( $proto, $options_hash_ref ) = @_;
   my $class = ref( $proto ) || $proto;
-  my $self  = {};
-  bless( $self, $class );
 
-  $self->_initialize_memory_cache( $options_hash_ref ) or
-    croak( "Couldn't initialize" );
+  my $self  =  $class->SUPER::new( $options_hash_ref ) or
+    croak( "Couldn't run super constructor" );
+
+  $self->_initialize_memory_cache( ) or
+    croak( "Couldn't initialize Cache::MemoryCache" );
 
   return $self;
 }
@@ -196,17 +199,8 @@ sub _initialize_memory_cache
 {
   my ( $self, $options_hash_ref ) = @_;
 
-  $self->_initialize_options_hash_ref( $options_hash_ref ) or
-    croak( "Couldn't initialize options hash ref" );
-
   $self->_initialize_cache_hash_ref( ) or
     croak( "Couldn't initialize cache hash ref" );
-
-  $self->_initialize_namespace( ) or
-    croak( "Couldn't initialize namespace" );
-
-  $self->_initialize_default_expires_in( ) or
-    croak( "Couldn't initialize default expires in" );
 
   return $SUCCESS;
 }
@@ -222,30 +216,6 @@ sub _initialize_cache_hash_ref
 
   return $SUCCESS;
 }
-
-
-
-sub _initialize_options_hash_ref
-{
-  my ( $self, $options_hash_ref ) = @_;
-
-  $self->_set_options_hash_ref( $options_hash_ref );
-
-  return $SUCCESS;
-}
-
-
-sub _initialize_namespace
-{
-  my ( $self ) = @_;
-
-  my $namespace = $self->_read_option( 'namespace', $DEFAULT_NAMESPACE );
-
-  $self->_set_namespace( $namespace );
-
-  return $SUCCESS;
-}
-
 
 
 sub _store
@@ -297,36 +267,6 @@ sub _restore
   my $object = $VAR1;
 
   return $object;
-}
-
-
-sub _initialize_default_expires_in
-{
-  my ( $self ) = @_;
-
-  my $default_expires_in =
-    $self->_read_option( 'default_expires_in', $DEFAULT_EXPIRES_IN );
-
-  $self->_set_default_expires_in( $default_expires_in );
-
-  return $SUCCESS;
-}
-
-
-sub _read_option
-{
-  my ( $self, $option_name, $default_value ) = @_;
-
-  my $options_hash_ref = $self->_get_options_hash_ref( );
-
-  if ( defined $options_hash_ref->{$option_name} )
-  {
-    return $options_hash_ref->{$option_name};
-  }
-  else
-  {
-    return $default_value;
-  }
 }
 
 
@@ -404,54 +344,6 @@ sub _Namespaces
 ##
 # Properties
 ##
-
-
-sub _get_options_hash_ref
-{
-  my ( $self ) = @_;
-
-  return $self->{_Options_Hash_Ref};
-}
-
-sub _set_options_hash_ref
-{
-  my ( $self, $options_hash_ref ) = @_;
-
-  $self->{_Options_Hash_Ref} = $options_hash_ref;
-}
-
-
-
-sub get_namespace
-{
-  my ( $self ) = @_;
-
-  return $self->{_Namespace};
-}
-
-
-sub _set_namespace
-{
-  my ( $self, $namespace ) = @_;
-
-  $self->{_Namespace} = $namespace;
-}
-
-
-sub get_default_expires_in
-{
-  my ( $self ) = @_;
-
-  return $self->{_Default_Expires_In};
-}
-
-sub _set_default_expires_in
-{
-  my ( $self, $default_expires_in ) = @_;
-
-  $self->{_Default_Expires_In} = $default_expires_in;
-}
-
 
 
 sub _get_cache_hash_ref
