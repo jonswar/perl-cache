@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: FileBackend.pm,v 1.12 2001/12/09 23:40:52 dclinton Exp $
+# $Id: FileBackend.pm,v 1.13 2001/12/12 15:14:12 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -490,7 +490,7 @@ sub _Untaint_String
 
   if ( not defined $untainted_string || $untainted_string ne $p_string )
   {
-    warn( "String $p_string contains possible taint" );
+    throw Error::Simple( "String $p_string contains possible taint" );
   }
 
   return $untainted_string;

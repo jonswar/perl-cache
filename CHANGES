@@ -1,5 +1,8 @@
 Revision history for Cache
 
+1.00 in progress
+ - changed _Untaint_String to throw an exception on a taint
+
 0.99 2001-12-09-18-45
  - released version 0.99
  - major refactoring of code
