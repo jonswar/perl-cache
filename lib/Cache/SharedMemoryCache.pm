@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SharedMemoryCache.pm,v 1.2 2001/03/06 18:26:30 dclinton Exp $
+# $Id: SharedMemoryCache.pm,v 1.3 2001/03/12 19:19:33 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -27,7 +27,7 @@ use IPC::Shareable;
 my $IPC_IDENTIFIER = 'ipcc';
 
 
-my %_Cache_Hash;
+my %_Shared_Cache_Hash;
 
 
 
@@ -94,7 +94,10 @@ sub _Delete_Namespace
   defined $namespace or
     croak( "Namespace required" );
 
-  delete $_Cache_Hash{ $namespace };
+  _Tie_Shared_Cache_Hash( ) or
+    croak( "Couldn't tie shared cache hash" );
+
+  delete $_Shared_Cache_Hash{ $namespace };
 
   return $SUCCESS;
 }
@@ -102,7 +105,27 @@ sub _Delete_Namespace
 
 sub _Namespaces
 {
-  return keys %_Cache_Hash;
+  _Tie_Shared_Cache_Hash( ) or
+    croak( "Couldn't tie shared cache hash" );
+
+  return keys %_Shared_Cache_Hash;
+}
+
+
+sub _Tie_Shared_Cache_Hash
+{
+  if ( tied %_Shared_Cache_Hash )
+  {
+    return $SUCCESS;
+  }
+
+  my %ipc_options = ( 'key' =>  $IPC_IDENTIFIER,
+		      'create' => 'yes' );
+
+  tie( %_Shared_Cache_Hash, 'IPC::Shareable', \%ipc_options ) or
+    croak( "Couldn't tie _Shared_Cache_Hash" );
+
+  return $SUCCESS;
 }
 
 
@@ -123,22 +146,39 @@ sub new
 }
 
 
+sub remove
+{
+  my ( $self, $identifier ) = @_;
+
+  $identifier or
+    croak( "identifier required" );
+
+  my $cache_hash_ref = $self->_get_cache_hash_ref( ) or
+    croak( "Couldn't get cache_hash_ref" );
+
+  my $namespace = $self->get_namespace( ) or
+    croak( "Couldn't get namespace" );
+
+  delete $cache_hash_ref->{$namespace}->{$identifier};
+
+  return $SUCCESS;
+}
+
+
 ##
 # Private instance methods
 ##
+
 
 
 sub _initialize_cache_hash_ref
 {
   my ( $self ) = @_;
 
-  my %ipc_options = ( 'key' =>  $IPC_IDENTIFIER,
-		      'create' => 'yes' );
+  _Tie_Shared_Cache_Hash( ) or
+    croak( "Couldn't tie shared cache hash" );
 
-  tie( %_Cache_Hash, 'IPC::Shareable', \%ipc_options ) or
-    croak( "Couldn't tie _Cache_Hash" );
-
-  my $cache_hash_ref = \%_Cache_Hash;
+  my $cache_hash_ref = \%_Shared_Cache_Hash;
 
   $self->_set_cache_hash_ref( $cache_hash_ref );
 
