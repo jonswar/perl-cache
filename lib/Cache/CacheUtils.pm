@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheUtils.pm,v 1.26 2001/11/07 13:10:56 dclinton Exp $
+# $Id: CacheUtils.pm,v 1.27 2001/11/07 16:35:35 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -20,7 +20,7 @@ use Error;
 use Exporter;
 use File::Path qw( mkpath );
 use File::Spec::Functions;
-use Storable qw( nfreeze thaw dclone );
+use Storable qw( freeze thaw );
 
 @ISA = qw( Exporter );
 
@@ -250,7 +250,7 @@ sub Freeze_Object
   Assert_Defined( $p_object_ref );
   Assert_Defined( $p_frozen_object_ref );
 
-  $$p_frozen_object_ref = nfreeze( $$p_object_ref ) or
+  $$p_frozen_object_ref = freeze( $$p_object_ref ) or
     throw Error( "Couldn't freeze object" );
 }
 
