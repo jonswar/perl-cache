@@ -1,5 +1,5 @@
 ######################################################################
-# $Id:  $
+# $Id: CacheUtils.pm,v 1.1.1.1 2001/02/13 01:30:39 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -22,27 +22,31 @@ use Carp;
 use Digest::MD5 qw( md5_hex );
 use Exporter;
 use File::Path qw( mkpath );
-use File::Spec::Functions qw( catfile splitdir splitpath catdir );
+use File::Spec::Functions qw( catdir catfile splitdir splitpath tmpdir );
 
 @ISA = qw( Exporter );
 
-@EXPORT_OK = qw( Object_Has_Expired
-                 Build_Expires_At
+@EXPORT_OK = qw( Build_Expires_At
                  Build_Object
-                 Split_Word
-                 Build_Unique_Key
-                 Write_File
-                 Remove_File
-                 Recursive_Directory_Size
-                 Recursively_Remove_Directory
-                 Recursively_List_Files
-                 List_Subdirectories
-                 Read_File
                  Build_Path
-                 Make_Path );
+                 Build_Unique_Key
+                 Get_Temp_Directory
+                 List_Subdirectories
+                 Make_Path
+                 Read_File
+                 Recursive_Directory_Size
+                 Recursively_List_Files
+                 Recursively_Remove_Directory
+                 Remove_File
+                 Split_Word
+                 Write_File
+                 Object_Has_Expired );
 
 use vars ( @EXPORT_OK );
 
+
+# valid filepath characters for tainting. Be sure to accept
+# DOS/Windows style path specifiers (C:\path) also
 
 my $UNTAINTED_PATH_REGEX = qr{^([-\@\w\\\\~./:]+|[\w]:[-\@\w\\\\~./]+)$};
 
@@ -572,5 +576,15 @@ sub Build_Object
   return $object;
 }
 
+
+# return the OS default temp directory
+
+sub Get_Temp_Directory
+{
+  my $tmpdir = tmpdir( ) or
+    croak( "No tmpdir on this system.  Bugs to the authors of File::Spec" );
+
+  return $tmpdir;
+}
 
 1;

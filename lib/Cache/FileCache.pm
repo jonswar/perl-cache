@@ -1,5 +1,5 @@
 ######################################################################
-# $Id:  $
+# $Id: FileCache.pm,v 1.1.1.1 2001/02/13 01:30:40 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -14,24 +14,25 @@ use strict;
 use vars qw( @ISA );
 use Cache::Cache qw( $EXPIRES_NEVER $SUCCESS $FAILURE $TRUE $FALSE );
 use Cache::CacheUtils qw ( Build_Object
-                           Object_Has_Expired
-                           Split_Word
-                           Build_Unique_Key
-                           Write_File
-                           Remove_File
-                           Recursive_Directory_Size
-                           Recursively_Remove_Directory
-                           Recursively_List_Files
-                           List_Subdirectories
-                           Read_File
                            Build_Path
-                           Make_Path );
+                           Build_Unique_Key
+                           Get_Temp_Directory
+                           List_Subdirectories
+                           Make_Path
+                           Object_Has_Expired
+                           Read_File
+                           Recursive_Directory_Size
+                           Recursively_List_Files
+                           Recursively_Remove_Directory
+                           Remove_File
+                           Split_Word
+                           Write_File );
 use Cache::Object;
 use Carp;
 use Data::Dumper;
 
 my $DEFAULT_CACHE_DEPTH = 3;
-my $DEFAULT_CACHE_ROOT = "/tmp/FileCache";
+my $DEFAULT_CACHE_ROOT = "FileCache";
 my $DEFAULT_EXPIRES_IN = $EXPIRES_NEVER;
 my $DEFAULT_NAMESPACE = "Default";
 
@@ -180,11 +181,11 @@ sub Clear
 {
   my ( $optional_cache_root ) = @_;
 
-  my $cache_path = _Build_Cache_Path( $optional_cache_root ) or
-    croak( "Couldn't build cache path" );
+  my $cache_root = _Build_Cache_Root( $optional_cache_root ) or
+    croak( "Couldn't build cache root" );
 
-  Recursively_Remove_Directory( $cache_path ) or
-    croak( "Couldn't remove $cache_path" );
+  Recursively_Remove_Directory( $cache_root ) or
+    croak( "Couldn't remove $cache_root" );
 
   return $SUCCESS;
 }
@@ -219,10 +220,10 @@ sub Size
 {
   my ( $optional_cache_root ) = @_;
 
-  my $cache_path = _Build_Cache_Path( $optional_cache_root ) or
-    croak( "Couldn't build cache path" );
+  my $cache_root = _Build_Cache_Root( $optional_cache_root ) or
+    croak( "Couldn't build cache root" );
 
-  my $size = Recursive_Directory_Size( $cache_path );
+  my $size = Recursive_Directory_Size( $cache_root );
 
   return $size;
 }
@@ -270,7 +271,9 @@ sub _initialize_cache_root
 {
   my ( $self ) = @_;
 
-  my $cache_root = $self->_read_option( 'cache_root', $DEFAULT_CACHE_ROOT );
+  my $optional_cache_root = $self->_read_option( 'cache_root' );
+
+  my $cache_root = _Build_Cache_Root( $optional_cache_root );
 
   $self->set_cache_root( $cache_root );
 
@@ -408,11 +411,11 @@ sub _List_Namespaces
 {
   my ( $namespaces_ref, $optional_cache_root ) = @_;
 
-  my $cache_path = _Build_Cache_Path( $optional_cache_root ) or
-    croak( "Couldn't build cache path" );
+  my $cache_root = _Build_Cache_Root( $optional_cache_root ) or
+    croak( "Couldn't build cache root" );
 
-  List_Subdirectories( $cache_path, $namespaces_ref ) or
-    croak( "Couldn't list subdirectories of $cache_path" );
+  List_Subdirectories( $cache_root, $namespaces_ref ) or
+    croak( "Couldn't list subdirectories of $cache_root" );
 
   return $SUCCESS;
 }
@@ -450,18 +453,26 @@ sub _build_object_path
 }
 
 
-sub _Build_Cache_Path
+sub _Build_Cache_Root
 {
   my ( $self, $optional_cache_root ) = @_;
 
+  my $cache_root;
+
   if ( defined $optional_cache_root )
   {
-    return $optional_cache_root;
+    $cache_root = $optional_cache_root;
   }
   else
   {
-    return $DEFAULT_CACHE_ROOT;
+    my $tmpdir = Get_Temp_Directory( ) or
+      croak( "Couldn't get temp directory" );
+
+    $cache_root = Build_Path( $tmpdir, $DEFAULT_CACHE_ROOT ) or
+      croak( "Couldn't build cache root" );
   }
+
+  return $cache_root;
 }
 
 
@@ -626,8 +637,9 @@ to $EXPIRES_NEVER if not explicitly set.
 
 =item cache_root
 
-The location in the filesystem that will hold the root of the cache.  Defaults
-to "/tmp/FileCache" unless explicitly set.
+The location in the filesystem that will hold the root of the cache.
+Defaults to the 'FileCache' under the OS default temp directory (
+often '/tmp' on UNIXes ) unless explicitly set.
 
 =item cache_depth
 
@@ -667,7 +679,7 @@ Cache::Cache
 
 Original author: DeWitt Clinton <dewitt@unto.net>
 
-Last author:     $Author: dewitt $
+Last author:     $Author: dclinton $
 
 Copyright (C) 2001 DeWitt Clinton
 
