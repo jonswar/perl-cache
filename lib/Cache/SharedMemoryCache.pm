@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SharedMemoryCache.pm,v 1.5 2001/03/19 16:02:54 dclinton Exp $
+# $Id: SharedMemoryCache.pm,v 1.6 2001/03/20 15:47:32 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -17,8 +17,10 @@ use vars qw( @ISA );
 use Cache::Cache qw( $TRUE $FALSE $SUCCESS $FAILURE );
 use Cache::MemoryCache;
 use Cache::CacheUtils qw( Restore_Shared_Hash_Ref
+                          Restore_Shared_Hash_Ref_With_Lock
                           Static_Params
                           Store_Shared_Hash_Ref
+                          Store_Shared_Hash_Ref_And_Unlock
                           Clone_Object );
 use Carp;
 
@@ -90,11 +92,25 @@ sub _Restore_Cache_Hash_Ref
 }
 
 
+sub _Restore_Cache_Hash_Ref_With_Lock
+{
+  return Restore_Shared_Hash_Ref_With_Lock( $IPC_IDENTIFIER );
+}
+
+
 sub _Store_Cache_Hash_Ref
 {
   my ( $cache_hash_ref ) = Static_Params( @_ );
 
   return Store_Shared_Hash_Ref( $IPC_IDENTIFIER, $cache_hash_ref );
+}
+
+
+sub _Store_Cache_Hash_Ref_And_Unlock
+{
+  my ( $cache_hash_ref ) = Static_Params( @_ );
+
+  return Store_Shared_Hash_Ref_And_Unlock( $IPC_IDENTIFIER, $cache_hash_ref );
 }
 
 
@@ -105,12 +121,12 @@ sub _Delete_Namespace
   defined $namespace or
     croak( "Namespace required" );
 
-  my $cache_hash_ref = _Restore_Cache_Hash_Ref( ) or
+  my $cache_hash_ref = _Restore_Cache_Hash_Ref_With_Lock( ) or
     croak( "Couldn't restore cache hash ref" );
 
   delete $cache_hash_ref->{ $namespace };
 
-  _Store_Cache_Hash_Ref( $cache_hash_ref ) or
+  _Store_Cache_Hash_Ref_And_Unlock( $cache_hash_ref ) or
     croak( "Couldn't store cache hash ref" );
 
   return $SUCCESS;
@@ -153,12 +169,12 @@ sub remove
   my $namespace = $self->get_namespace( ) or
     croak( "Couldn't get namespace" );
 
-  my $cache_hash_ref = _Restore_Cache_Hash_Ref( ) or
+  my $cache_hash_ref = _Restore_Cache_Hash_Ref_With_Lock( ) or
     croak( "Couldn't restore cache hash ref" );
 
   delete $cache_hash_ref->{$namespace}->{$identifier};
 
-  _Store_Cache_Hash_Ref( $cache_hash_ref ) or
+  _Store_Cache_Hash_Ref_And_Unlock( $cache_hash_ref ) or
     croak( "Couldn't store cache hash ref" );
 
   return $SUCCESS;
@@ -185,12 +201,12 @@ sub _store
   Clone_Object( \$object, \$object_dump ) or
     croak( "Couldn't freeze object" );
 
-  my $cache_hash_ref = _Restore_Cache_Hash_Ref( ) or
+  my $cache_hash_ref = _Restore_Cache_Hash_Ref_With_Lock( ) or
     croak( "Couldn't restore cache hash ref" );
 
   $cache_hash_ref->{$namespace}->{$identifier} = $object_dump;
 
-  _Store_Cache_Hash_Ref( $cache_hash_ref ) or
+  _Store_Cache_Hash_Ref_And_Unlock( $cache_hash_ref ) or
     croak( "Couldn't store cache hash ref" );
 
   return $SUCCESS;

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheUtils.pm,v 1.11 2001/03/13 03:37:09 dclinton Exp $
+# $Id: CacheUtils.pm,v 1.12 2001/03/19 16:02:54 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -23,7 +23,7 @@ use Digest::MD5 qw( md5_hex );
 use Exporter;
 use File::Path qw( mkpath );
 use File::Spec::Functions qw( catdir catfile splitdir splitpath tmpdir );
-use IPC::ShareLite;
+use IPC::ShareLite qw( LOCK_EX LOCK_UN );
 use Storable qw( nfreeze thaw dclone );
 
 @ISA = qw( Exporter );
@@ -47,9 +47,11 @@ use Storable qw( nfreeze thaw dclone );
                  Recursively_Remove_Directory
                  Remove_File
                  Restore_Shared_Hash_Ref
+                 Restore_Shared_Hash_Ref_With_Lock
                  Split_Word
                  Static_Params
                  Store_Shared_Hash_Ref
+                 Store_Shared_Hash_Ref_And_Unlock
                  Thaw_Object
                  Write_File
                  Object_Has_Expired );
@@ -873,6 +875,33 @@ sub Restore_Shared_Hash_Ref
 
 
 # this method uses the shared created by Instantiate_Share to
+# transparently retrieve a reference to a shared hash structure, and
+# additionally exlusively locks the share
+
+sub Restore_Shared_Hash_Ref_With_Lock
+{
+  my ( $ipc_identifier ) = Static_Params( @_ );
+
+  defined $ipc_identifier or
+    croak( "ipc_identifier required" );
+
+  my $share = Instantiate_Share( $ipc_identifier ) or
+    croak( "Couldn't instantiate share" );
+
+  $share->lock( LOCK_EX ) or
+    croak( "Couldn't lock share" );
+
+  my $frozen_hash_ref = $share->fetch( ) or
+    return ( { } );
+
+  my $hash_ref = thaw( $frozen_hash_ref ) or
+    croak( "Couldn't thaw frozen hash ref" );
+
+  return $hash_ref;
+}
+
+
+# this method uses the shared created by Instantiate_Share to
 # transparently persist a reference to a shared hash structure
 
 sub Store_Shared_Hash_Ref
@@ -893,6 +922,36 @@ sub Store_Shared_Hash_Ref
 
   $share->store( $frozen_hash_ref ) or
     croak( "Couldn't store frozen_hash_ref" );
+
+  return $SUCCESS;
+}
+
+
+# this method uses the shared created by Instantiate_Share to
+# transparently persist a reference to a shared hash structure and
+# additionally unlocks the share
+
+sub Store_Shared_Hash_Ref_And_Unlock
+{
+  my ( $ipc_identifier, $hash_ref ) = @_;
+
+  defined $ipc_identifier or
+    croak( "ipc_identifier required" );
+
+  defined $hash_ref or
+    croak( "hash_ref required" );
+
+  my $frozen_hash_ref = nfreeze( $hash_ref ) or
+    croak( "Couldn't nfreeze hash_ref" );
+
+  my $share = Instantiate_Share( $ipc_identifier ) or
+    croak( "Couldn't instantiate share" );
+
+  $share->store( $frozen_hash_ref ) or
+    croak( "Couldn't store frozen_hash_ref" );
+
+  $share->unlock( LOCK_UN ) or
+    croak( "Couldn't unlock share" );
 
   return $SUCCESS;
 }

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareSharedMemoryCache.pm,v 1.4 2001/03/19 16:02:54 dclinton Exp $
+# $Id: SizeAwareSharedMemoryCache.pm,v 1.5 2001/03/20 15:47:32 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -16,8 +16,10 @@ use strict;
 use vars qw( @ISA @EXPORT_OK $NO_MAX_SIZE );
 use Cache::Cache qw( $EXPIRES_NEVER $SUCCESS $FAILURE $TRUE $FALSE );
 use Cache::CacheUtils qw( Restore_Shared_Hash_Ref
+                          Restore_Shared_Hash_Ref_With_Lock
                           Static_Params
                           Store_Shared_Hash_Ref
+                          Store_Shared_Hash_Ref_And_Unlock
                           Clone_Object );
 use Cache::SizeAwareMemoryCache;
 use Cache::SharedMemoryCache;
@@ -66,17 +68,28 @@ sub Size
 
 
 
+
 sub _Restore_Cache_Hash_Ref
 {
-  return Restore_Shared_Hash_Ref( $IPC_IDENTIFIER );
+  return Cache::SharedMemoryCache::_Restore_Cache_Hash_Ref( @_ );
+}
+
+
+sub _Restore_Cache_Hash_Ref_With_Lock
+{
+  return Cache::SharedMemoryCache::_Restore_Cache_Hash_Ref_With_Lock( @_ );
 }
 
 
 sub _Store_Cache_Hash_Ref
 {
-  my ( $cache_hash_ref ) = Static_Params( @_ );
+  return Cache::SharedMemoryCache::_Store_Cache_Hash_Ref( @_ );
+}
 
-  return Store_Shared_Hash_Ref( $IPC_IDENTIFIER, $cache_hash_ref );
+
+sub _Store_Cache_Hash_Ref_And_Unlock
+{
+  return Cache::SharedMemoryCache::_Store_Cache_Hash_Ref_And_Unlock( @_ );
 }
 
 

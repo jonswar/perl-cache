@@ -1,6 +1,8 @@
 Revision history for Cache
 
 0.06 in progress
+ - added exclusive locking on the shared cache for operations that
+   will both read and write to the cache
  - replaced the cache_hash_ref instance property in MemoryCache with
    a class property and updated the SharedMemoryCache and 
    SizeAwareSharedMemoryCache modules accordingly
