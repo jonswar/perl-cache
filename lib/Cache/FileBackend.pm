@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: FileBackend.pm,v 1.15 2002/03/05 23:10:33 jswartz Exp $
+# $Id: FileBackend.pm,v 1.16 2002/03/06 00:28:14 jswartz Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -259,12 +259,14 @@ sub _Read_Dirents
   -d $p_directory or
     return ( );
 
-  opendir( DIR, _Untaint_Path( $p_directory ) ) or
+  local *Dir;
+
+  opendir( Dir, _Untaint_Path( $p_directory ) ) or
     throw Error::Simple( "Couldn't open directory $p_directory: $!" );
 
-  my @dirents = readdir( DIR );
+  my @dirents = readdir( Dir );
 
-  closedir( DIR ) or
+  closedir( Dir ) or
     throw Error::Simple( "Couldn't close directory $p_directory" );
 
   return @dirents;
@@ -279,18 +281,20 @@ sub _Read_File
 
   Assert_Defined( $p_path );
 
-  open( FILE, _Untaint_Path( $p_path ) ) or
+  local *File;
+
+  open( File, _Untaint_Path( $p_path ) ) or
     return undef;
 
-  binmode( FILE );
+  binmode( File );
 
   local $/ = undef;
 
   my $data_ref;
 
-  $$data_ref = <FILE>;
+  $$data_ref = <File>;
 
-  close( FILE );
+  close( File );
 
   return $data_ref;
 }
@@ -549,14 +553,16 @@ sub _Write_File
 
   my $temp_path = _Untaint_Path( "$p_path.tmp$$" );
 
-  open( FILE, ">$temp_path" ) or
+  local *File;
+
+  open( File, ">$temp_path" ) or
     throw Error::Simple( "Couldn't open $temp_path for writing: $!" );
 
-  binmode( FILE );
+  binmode( File );
 
-  print FILE $$p_data_ref;
+  print File $$p_data_ref;
 
-  close( FILE );
+  close( File );
 
   rename( $temp_path, _Untaint_Path( $p_path ) ) or
     throw Error::Simple( "Couldn't rename $temp_path to $p_path" );

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareCache.pm,v 1.7 2001/12/09 22:43:03 dclinton Exp $
+# $Id: SizeAwareCache.pm,v 1.8 2001/12/09 23:40:52 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -50,6 +50,13 @@ Cache::SizeAwareCache -- extends the Cache interface.
 The SizeAwareCache interface is implemented by classes that support
 all of the Cache::Cache interface in addition to the limit_size and
 max_size features of a size aware cache.
+
+The default cache size limiting algorithm works by removing cache
+objects in the following order until the desired limit is reached:
+
+  1) objects that have expired
+  2) objects that are least recently accessed
+  3) objects that that expire next
 
 =head1 SYNOPSIS
 

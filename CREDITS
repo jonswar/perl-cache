@@ -1,3 +1,5 @@
+- Jonathan Swartz submitted a patch for a much better untainting regex
+
 - Richard Chen <chenri@snet.net> informed me of a better way to call
   static methods without knowing the type of the class until runtime
 
