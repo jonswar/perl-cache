@@ -50,6 +50,7 @@ sub Main
 
   WriteMakefile( %options );
 
+  Print_Make_Test_Message( );
 }
 
 
@@ -82,3 +83,11 @@ sub Print_ShareLite_Missing_Message
 END
 }
 
+
+sub Print_Make_Test_Message
+{
+  print <<END
+Please be patient while running "make test" as the full test suite
+takes roughly two minutes to complete.
+END
+}

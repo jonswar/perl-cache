@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: FileBackend.pm,v 1.16 2002/03/06 00:28:14 jswartz Exp $
+# $Id: FileBackend.pm,v 1.17 2002/03/12 00:09:10 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -511,6 +511,11 @@ sub _Make_Path
 
   my ( $volume, $directory, $filename ) = File::Spec->splitpath( $p_path );
 
+  if ( defined $directory and defined $volume and $volume )
+  {
+    $directory = File::Spec->catpath( $volume, $directory );
+  }
+
   if ( defined $directory and not -d $directory )
   {
     _Create_Directory( $directory, $p_optional_new_umask );
@@ -732,7 +737,7 @@ Cache::Backend, Cache::MemoryBackend, Cache::SharedMemoryBackend
 
 Original author: DeWitt Clinton <dewitt@unto.net>
 
-Last author:     $Author: jswartz $
+Last author:     $Author: dclinton $
 
 Copyright (C) 2001 DeWitt Clinton
 
