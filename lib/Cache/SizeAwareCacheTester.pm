@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareCacheTester.pm,v 1.1 2001/02/15 23:26:59 dclinton Exp $
+# $Id: SizeAwareCacheTester.pm,v 1.2 2001/03/05 19:01:25 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -26,6 +26,7 @@ sub test
 
   $self->_test_one( $cache );
   $self->_test_two( $cache );
+  $self->_test_three( $cache );
 }
 
 
@@ -91,10 +92,78 @@ sub _test_one
 }
 
 
+
+# Test the limit_size method when a number of objects can expire
+# simultaneously
+
+sub _test_two
+{
+  my ( $self, $cache ) = @_;
+
+  $cache or
+    croak( "cache required" );
+
+  my $clear_status = $cache->clear( );
+
+  ( $clear_status eq $SUCCESS ) ?
+    $self->ok( ) : $self->not_ok( '$clear_status eq $SUCCESS' );
+
+  my $empty_size = $cache->size( );
+
+  ( $empty_size == 0 ) ?
+    $self->ok( ) : $self->not_ok( '$empty_size == 0' );
+
+  my $value = $self;
+
+  my $first_key = 'Key 0';
+
+  my $first_expires_in = 20;
+
+  my $first_set_status = 
+    $cache->set( $first_key, $value, $first_expires_in );
+
+  ( $first_set_status eq $SUCCESS ) ?
+    $self->ok( ) : $self->not_ok( '$first_set_status eq $SUCCESS' );
+
+  my $first_size = $cache->size( );
+
+  ( $first_size > $empty_size ) ?
+    $self->ok( ) : $self->not_ok( '$first_size > $empty_size' );
+
+  my $second_expires_in = $first_expires_in / 2;
+
+  my $num_keys = 10;
+
+  for ( my $i = 1; $i <= $num_keys; $i++ )
+  {
+    my $key = 'Key ' . $i;
+
+    my $set_status = $cache->set( $key, $value, $second_expires_in );
+
+    ( $set_status eq $SUCCESS ) ?
+      $self->ok( ) : $self->not_ok( 'set_status eq $SUCCESS' );
+  }
+
+  my $second_size = $cache->size( );
+
+  ( $second_size > $first_size ) ?
+    $self->ok( ) : $self->not_ok( '$second_size > $first_size' );
+
+  my $size_limit = $first_size;
+
+  $cache->limit_size( $size_limit );
+
+  my $third_size = $cache->size( );
+
+  ( $third_size == $size_limit ) ?
+    $self->ok( ) : $self->not_ok( '$third_size == $size_limit' );
+}
+
+
 # Test the max_size( ) method, which should keep the cache under
 # the given size
 
-sub _test_two
+sub _test_three
 {
   my ( $self, $cache ) = @_;
 
@@ -141,5 +210,6 @@ sub _test_two
   ( $second_size == $max_size ) ?
     $self->ok( ) : $self->not_ok( '$second_size == $max_size' );
 }
+
 
 1;
