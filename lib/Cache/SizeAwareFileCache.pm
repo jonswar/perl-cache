@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareFileCache.pm,v 1.9 2001/03/12 19:20:13 dclinton Exp $
+# $Id: SizeAwareFileCache.pm,v 1.10 2001/03/13 01:27:15 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -22,11 +22,11 @@ use Cache::CacheUtils qw ( Build_Object
                            Read_File_Without_Time_Modification
                            Remove_File
                            Static_Params
+                           Thaw_Object
                            Write_File );
 use Cache::FileCache;
 use Cache::SizeAwareCache qw( $NO_MAX_SIZE );
 use Carp;
-use Data::Dumper;
 
 
 @ISA = qw ( Cache::FileCache Cache::SizeAwareCache );
@@ -149,15 +149,10 @@ sub _Restore_Object_Without_Time_Modication
   my $object_dump_ref = Read_File_Without_Time_Modification( $filename ) or
     return undef;
 
-  no strict 'refs';
+  my $object;
 
-  my $VAR1;
-
-  eval $$object_dump_ref;
-
-  my $object = $VAR1;
-
-  use strict;
+  Thaw_Object( $object_dump_ref, \$object ) or
+    croak( "Couldn't thaw object" );
 
   return $object;
 }

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: MemoryCache.pm,v 1.8 2001/03/06 20:14:00 dclinton Exp $
+# $Id: MemoryCache.pm,v 1.9 2001/03/12 19:19:08 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -16,10 +16,12 @@ use strict;
 use vars qw( @ISA );
 use Cache::BaseCache;
 use Cache::Cache qw( $EXPIRES_NEVER $TRUE $FALSE $SUCCESS $FAILURE );
-use Cache::CacheUtils qw( Build_Object Object_Has_Expired Static_Params );
+use Cache::CacheUtils qw( Build_Object
+                          Clone_Object
+                          Object_Has_Expired
+                          Static_Params );
 use Cache::Object;
 use Carp;
-use Data::Dumper;
 
 @ISA = qw ( Cache::BaseCache );
 
@@ -281,11 +283,10 @@ sub _store
   my $cache_hash_ref = $self->_get_cache_hash_ref( ) or
     croak( "Couldn't get cache_hash_ref" );
 
-  my $data_dumper = new Data::Dumper( [$object] );
+  my $object_dump;
 
-  $data_dumper->Deepcopy( 1 );
-
-  my $object_dump = $data_dumper->Dump( );
+  Clone_Object( \$object, \$object_dump ) or
+    croak( "Couldn't freeze object" );
 
   $cache_hash_ref->{$namespace}->{$identifier} = $object_dump;
 
@@ -306,14 +307,7 @@ sub _restore
   my $namespace = $self->get_namespace( ) or
     croak( "Couldn't get namespace" );
 
-  my $object_dump = $cache_hash_ref->{$namespace}->{$identifier} or
-    return undef;
-
-  my $VAR1;
-
-  eval $object_dump;
-
-  my $object = $VAR1;
+  my $object = $cache_hash_ref->{$namespace}->{$identifier};
 
   return $object;
 }

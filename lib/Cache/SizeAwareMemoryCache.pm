@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareMemoryCache.pm,v 1.1 2001/03/12 19:21:30 dclinton Exp $
+# $Id: SizeAwareMemoryCache.pm,v 1.2 2001/03/13 01:27:42 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -16,11 +16,12 @@ use strict;
 use vars qw( @ISA );
 use Cache::Cache qw( $EXPIRES_NEVER $SUCCESS $FAILURE $TRUE $FALSE );
 use Cache::CacheUtils qw ( Build_Object
-                           Object_Has_Expired );
+                           Freeze_Object
+                           Object_Has_Expired
+                           Thaw_Object );
 use Cache::MemoryCache;
 use Cache::SizeAwareCache qw( $NO_MAX_SIZE );
 use Carp;
-use Data::Dumper;
 
 
 @ISA = qw ( Cache::MemoryCache Cache::SizeAwareCache );

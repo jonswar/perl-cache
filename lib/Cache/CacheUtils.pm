@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheUtils.pm,v 1.9 2001/03/09 15:21:28 dclinton Exp $
+# $Id: CacheUtils.pm,v 1.10 2001/03/12 19:18:33 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -23,6 +23,7 @@ use Digest::MD5 qw( md5_hex );
 use Exporter;
 use File::Path qw( mkpath );
 use File::Spec::Functions qw( catdir catfile splitdir splitpath tmpdir );
+use Storable qw(nfreeze thaw dclone);
 
 @ISA = qw( Exporter );
 
@@ -30,7 +31,9 @@ use File::Spec::Functions qw( catdir catfile splitdir splitpath tmpdir );
                  Build_Object
                  Build_Path
                  Build_Unique_Key
+                 Clone_Object
                  Create_Directory
+                 Freeze_Object
                  Get_Temp_Directory
                  List_Subdirectories
                  Make_Path
@@ -43,6 +46,7 @@ use File::Spec::Functions qw( catdir catfile splitdir splitpath tmpdir );
                  Remove_File
                  Split_Word
                  Static_Params
+                 Thaw_Object
                  Write_File
                  Object_Has_Expired );
 
@@ -309,6 +313,44 @@ sub Create_Directory
 
   return $SUCCESS;
 }
+
+
+# use Storable to freeze an object
+
+sub Freeze_Object
+{
+  my ( $object_ref, $frozen_object_ref  ) = @_;
+
+  $$frozen_object_ref = nfreeze( $$object_ref ) or
+    croak( "Couldn't freeze object" );
+
+  return $SUCCESS;
+}
+
+
+# use Storable to thaw an object
+
+sub Thaw_Object
+{
+  my ( $frozen_object_ref, $object_ref ) = @_;
+
+  $$object_ref = thaw( $$frozen_object_ref );
+
+  return $SUCCESS;
+}
+
+
+# use Storable to clone an object
+
+sub Clone_Object
+{
+  my ( $object_ref, $cloned_object_ref ) = @_;
+
+  $$cloned_object_ref = dclone( $$object_ref );
+
+  return $SUCCESS;
+}
+
 
 
 # return a list of the first $depth letters in the $word

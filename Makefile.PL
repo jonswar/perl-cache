@@ -12,7 +12,8 @@ WriteMakefile
  PREREQ_PM => {
                Digest::MD5 => '2.09',
                File::Spec => '0.82',
-               IPC::Shareable => '0.54'
+               IPC::Shareable => '0.60',
+               Storable => '1.0.10'
               }
 
 );

@@ -32,12 +32,11 @@ DESCRIPTION
 
 REQUIREMENTS
 
-  Data::Dumper
   Digest::MD5
   File::Spec
   File::Path
   IPC::Shareable
-
+  Storable
 
 INSTALLATION
 

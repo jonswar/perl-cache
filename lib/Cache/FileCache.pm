@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: FileCache.pm,v 1.10 2001/03/06 18:26:30 dclinton Exp $
+# $Id: FileCache.pm,v 1.11 2001/03/09 15:21:28 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -20,6 +20,7 @@ use Cache::CacheUtils qw ( Build_Object
                            Build_Path
                            Build_Unique_Key
                            Create_Directory
+                           Freeze_Object
                            Get_Temp_Directory
                            List_Subdirectories
                            Make_Path
@@ -31,10 +32,10 @@ use Cache::CacheUtils qw ( Build_Object
                            Remove_File
                            Split_Word
                            Static_Params
+                           Thaw_Object
                            Write_File );
 use Cache::Object;
 use Carp;
-use Data::Dumper;
 
 
 @ISA = qw ( Cache::BaseCache );
@@ -393,11 +394,10 @@ sub _store
   my $object_path = $self->_build_object_path( $unique_key ) or
     croak( "Couldn't build object path" );
 
-  my $data_dumper = new Data::Dumper( [$object] );
+  my $object_dump;
 
-  $data_dumper->Deepcopy( 1 );
-
-  my $object_dump = $data_dumper->Dump( );
+  Freeze_Object( \$object, \$object_dump ) or
+    croak( "Couldn't freeze object" );
 
   my $directory_umask = $self->get_directory_umask( );
 
@@ -427,15 +427,10 @@ sub _restore
   my $object_dump_ref = Read_File( $object_path ) or
     return undef;
 
-  no strict 'refs';
+  my $object;
 
-  my $VAR1;
-
-  eval $$object_dump_ref;
-
-  my $object = $VAR1;
-
-  use strict;
+  Thaw_Object( $object_dump_ref, \$object ) or
+    croak( "Couldn't thaw object" );
 
   return $object;
 }

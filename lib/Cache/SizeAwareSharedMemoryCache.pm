@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareSharedMemoryCache.pm,v 1.1 2001/03/12 19:21:30 dclinton Exp $
+# $Id: SizeAwareSharedMemoryCache.pm,v 1.2 2001/03/13 01:28:35 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -18,7 +18,6 @@ use Cache::Cache qw( $EXPIRES_NEVER $SUCCESS $FAILURE $TRUE $FALSE );
 use Cache::CacheUtils qw( Static_Params );
 use Cache::SizeAwareMemoryCache;
 use Carp;
-use Data::Dumper;
 use Exporter;
 use IPC::Shareable;
 
