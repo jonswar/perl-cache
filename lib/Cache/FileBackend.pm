@@ -1,6 +1,6 @@
 ######################################################################
-# $Id: FileBackend.pm,v 1.21 2002/06/22 14:31:01 dclinton Exp $
-# Copyright (C) 2001, 2002 DeWitt Clinton  All Rights Reserved
+# $Id: FileBackend.pm,v 1.22 2002/11/15 15:21:58 dclinton Exp $
+# Copyright (C) 2001-2003 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
 # IS" basis, WITHOUT WARRANTY OF ANY KIND, either expressed or
@@ -749,6 +749,6 @@ Original author: DeWitt Clinton <dewitt@unto.net>
 
 Last author:     $Author: dclinton $
 
-Copyright (C) 2001, 2002 DeWitt Clinton
+Copyright (C) 2001-2003 DeWitt Clinton
 
 =cut

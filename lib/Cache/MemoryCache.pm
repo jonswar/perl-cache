@@ -1,6 +1,6 @@
 ######################################################################
-# $Id: MemoryCache.pm,v 1.26 2001/12/09 22:43:03 dclinton Exp $
-# Copyright (C) 2001, 2002 DeWitt Clinton  All Rights Reserved
+# $Id: MemoryCache.pm,v 1.27 2002/04/07 17:04:46 dclinton Exp $
+# Copyright (C) 2001-2003 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
 # IS" basis, WITHOUT WARRANTY OF ANY KIND, either expressed or
@@ -146,6 +146,6 @@ Original author: DeWitt Clinton <dewitt@unto.net>
 
 Last author:     $Author: dclinton $
 
-Copyright (C) 2001, 2002 DeWitt Clinton
+Copyright (C) 2001-2003 DeWitt Clinton
 
 =cut
