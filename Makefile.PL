@@ -3,7 +3,7 @@ use ExtUtils::MakeMaker;
 WriteMakefile
 (
 
- NAME  => 'Cache',
+ NAME  => 'Cache::Cache',
 
  VERSION_FROM => 'lib/Cache/Cache.pm',
 
