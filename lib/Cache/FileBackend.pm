@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: FileBackend.pm,v 1.3 2001/11/29 16:12:11 dclinton Exp $
+# $Id: FileBackend.pm,v 1.4 2001/11/29 18:12:55 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -42,28 +42,6 @@ sub new
 }
 
 
-sub store
-{
-  my ( $self, $p_namespace, $p_key, $p_value ) = @_;
-
-  Assert_Defined( $p_namespace );
-  Assert_Defined( $p_key );
-
-  $self->_write_data( $self->_path_to_key( $p_namespace, $p_key ), $p_value );
-}
-
-
-sub restore
-{
-  my ( $self, $p_namespace, $p_key ) = @_;
-
-  Assert_Defined( $p_namespace );
-  Assert_Defined( $p_key );
-
-  return $self->_read_data( $self->_path_to_key( $p_namespace, $p_key ) );
-}
-
-
 sub delete_key
 {
   my ( $self, $p_namespace, $p_key ) = @_;
@@ -72,7 +50,6 @@ sub delete_key
   Assert_Defined( $p_key );
 
   Remove_File( $self->_path_to_key( $p_namespace, $p_key ) );
-
 }
 
 
@@ -87,31 +64,15 @@ sub delete_namespace
 }
 
 
-sub delete_all_namespaces
-{
-  my ( $self ) = @_;
-
-  Recursively_Remove_Directory( $self->get_root( ) );
-}
-
-
-sub get_file_accessed_at
-{
-  my ( $self, $p_namespace, $p_key ) = @_;
-
-  Assert_Defined( $p_namespace );
-  Assert_Defined( $p_key );
-
-  # TODO:  Verify that this is correct
-
-  return stat( $self->_path_to_key( $p_namespace, $p_key ) )->[8];
-}
-
-
-
 # TODO: This code presumes that the data stored is an Object, which
 # makes FileBackend less generally applicable to any type of data
-# to be stored
+# to be stored.  This can be fixed by simply modifying the cache 
+# implementations to insert the name of the key on retrieval, and
+# then freeze not just objects, but a list that contains both
+# the key and the object.  The has the additional benefit in
+# that even less data needs to be stored.  Again, this is similar
+# to how the size field is handled.
+
 
 sub get_keys
 {
@@ -136,7 +97,6 @@ sub get_keys
 }
 
 
-
 sub get_unique_keys
 {
   my ( $self, $p_namespace ) = @_;
@@ -150,8 +110,6 @@ sub get_unique_keys
 
   return @unique_keys;
 }
-
-
 
 
 sub get_namespaces
@@ -182,6 +140,28 @@ sub get_object_size
   {
     return 0;
   }
+}
+
+
+sub restore
+{
+  my ( $self, $p_namespace, $p_key ) = @_;
+
+  Assert_Defined( $p_namespace );
+  Assert_Defined( $p_key );
+
+  return $self->_read_data( $self->_path_to_key( $p_namespace, $p_key ) );
+}
+
+
+sub store
+{
+  my ( $self, $p_namespace, $p_key, $p_value ) = @_;
+
+  Assert_Defined( $p_namespace );
+  Assert_Defined( $p_key );
+
+  $self->_write_data( $self->_path_to_key( $p_namespace, $p_key ), $p_value );
 }
 
 
@@ -233,8 +213,6 @@ sub set_directory_umask
 }
 
 
-
-
 sub _path_to_key
 {
   my ( $self, $p_namespace, $p_key ) = @_;
@@ -261,24 +239,6 @@ sub _path_to_unique_key
 }
 
 
-sub _write_data
-{
-  my ( $self, $p_path, $p_file ) = @_;
-
-  Assert_Defined( $p_path );
-  Assert_Defined( $p_file );
-
-
-  Make_Path( $p_path, $self->get_directory_umask( ) );
-
-  my $frozen_file;
-
-  Freeze_Object( \$p_file, \$frozen_file );
-
-  Write_File( $p_path, \$frozen_file );
-}
-
-
 sub _read_data
 {
   my ( $self, $p_path ) = @_;
@@ -293,6 +253,23 @@ sub _read_data
   Thaw_Object( $frozen_file_ref, \$file );
 
   return $file;
+}
+
+
+sub _write_data
+{
+  my ( $self, $p_path, $p_file ) = @_;
+
+  Assert_Defined( $p_path );
+  Assert_Defined( $p_file );
+
+  Make_Path( $p_path, $self->get_directory_umask( ) );
+
+  my $frozen_file;
+
+  Freeze_Object( \$p_file, \$frozen_file );
+
+  Write_File( $p_path, \$frozen_file );
 }
 
 

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: BaseCache.pm,v 1.15 2001/11/29 16:12:11 dclinton Exp $
+# $Id: BaseCache.pm,v 1.16 2001/11/29 18:12:55 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -34,12 +34,6 @@ my $DEFAULT_AUTO_PURGE_ON_GET = 0;
 # namespace that stores the keys used for the auto purge functionality
 
 my $AUTO_PURGE_NAMESPACE = "__AUTO_PURGE__";
-
-
-
-##
-# Public instance methods
-##
 
 
 
@@ -80,6 +74,16 @@ sub get_keys
 }
 
 
+sub get_identifiers
+{
+  my ( $self ) = @_;
+
+  warn( "get_identifiers has been marked deprepricated.  use get_keys" );
+
+  return $self->get_keys( );
+}
+
+
 sub get_object
 {
   my ( $self, $p_key ) = @_;
@@ -115,16 +119,6 @@ sub remove
   Assert_Defined( $p_key );
 
   $self->_get_backend( )->delete_key( $self->get_namespace( ), $p_key );
-}
-
-
-sub get_identifiers
-{
-  my ( $self ) = @_;
-
-  warn( "get_identifiers has been marked deprepricated.  use get_keys" );
-
-  return $self->get_keys( );
 }
 
 
@@ -170,11 +164,6 @@ sub size
 
   return $size;
 }
-
-
-##
-# Private instance methods
-##
 
 
 sub _new
@@ -406,11 +395,6 @@ sub _conditionally_auto_purge_on_get
     $self->_auto_purge( );
   }
 }
-
-
-##
-# Instance properties
-##
 
 
 sub _get_options_hash_ref

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareFileCache.pm,v 1.23 2001/11/29 16:12:11 dclinton Exp $
+# $Id: SizeAwareFileCache.pm,v 1.24 2001/11/29 18:12:55 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -23,6 +23,7 @@ use Cache::SizeAwareCache qw( $NO_MAX_SIZE );
 
 
 @ISA = qw ( Cache::FileCache Cache::SizeAwareCache );
+
 
 my $DEFAULT_MAX_SIZE = $NO_MAX_SIZE;
 
@@ -146,6 +147,7 @@ sub _update_access_time
     $self->set_object( $p_key, $object );
   }
 }
+
 
 sub get_max_size
 {

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: MemoryBackend.pm,v 1.2 2001/11/24 21:12:43 dclinton Exp $
+# $Id: MemoryBackend.pm,v 1.3 2001/11/29 18:12:55 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -16,6 +16,7 @@ use Cache::CacheUtils qw( Freeze_Object
 
 my $Store_Ref;
 
+
 sub new
 {
   my ( $proto ) = @_;
@@ -24,23 +25,6 @@ sub new
   $self = bless( $self, $class );
   $self->_initialize_memory_backend( );
   return $self;
-}
-
-
-sub store
-{
-  my ( $self, $p_namespace, $p_key, $p_value ) = @_;
-
-  $self->_get_store_ref( )->{ $p_namespace }{ $p_key } =
-    $self->_freeze( $p_value );
-}
-
-
-sub restore
-{
-  my ( $self, $p_namespace, $p_key ) = @_;
-
-  return $self->_thaw( $self->_get_store_ref( )->{ $p_namespace }{ $p_key } );
 }
 
 
@@ -91,6 +75,23 @@ sub get_object_size
 }
 
 
+sub restore
+{
+  my ( $self, $p_namespace, $p_key ) = @_;
+
+  return $self->_thaw( $self->_get_store_ref( )->{ $p_namespace }{ $p_key } );
+}
+
+
+sub store
+{
+  my ( $self, $p_namespace, $p_key, $p_value ) = @_;
+
+  $self->_get_store_ref( )->{ $p_namespace }{ $p_key } =
+    $self->_freeze( $p_value );
+}
+
+
 sub _freeze
 {
   my ( $self, $p_data ) = @_;
@@ -102,6 +103,17 @@ sub _freeze
   Freeze_Object( \$p_data, \$frozen_data );
 
   return $frozen_data;
+}
+
+
+sub _initialize_memory_backend
+{
+  my ( $self ) = @_;
+
+  if ( not defined $self->_get_store_ref( ) )
+  {
+    $self->_set_store_ref( { } );
+  }
 }
 
 
@@ -120,22 +132,10 @@ sub _thaw
 }
 
 
-sub _initialize_memory_backend
-{
-  my ( $self ) = @_;
-
-  if ( not defined $self->_get_store_ref( ) )
-  {
-    $self->_set_store_ref( { } );
-  }
-}
-
-
 sub _get_store_ref
 {
   return $Store_Ref;
 }
-
 
 
 sub _set_store_ref

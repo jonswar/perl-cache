@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareSharedMemoryCache.pm,v 1.17 2001/11/16 19:20:22 dclinton Exp $
+# $Id: SizeAwareSharedMemoryCache.pm,v 1.18 2001/11/29 18:12:55 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -15,8 +15,6 @@ package Cache::SizeAwareSharedMemoryCache;
 use strict;
 use vars qw( @ISA @EXPORT_OK $NO_MAX_SIZE );
 use Cache::Cache qw( $EXPIRES_NEVER );
-use Cache::CacheUtils qw( Assert_Defined
-                          Static_Params );
 use Cache::SharedMemoryBackend;
 use Cache::SizeAwareMemoryCache;
 use Cache::SharedMemoryCache;
@@ -56,6 +54,7 @@ sub new
 
   return $self;
 }
+
 
 sub _new
 {

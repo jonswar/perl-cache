@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareCache.pm,v 1.3 2001/09/05 14:39:27 dclinton Exp $
+# $Id: SizeAwareCache.pm,v 1.4 2001/11/06 23:44:08 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -37,17 +37,7 @@ $EXPIRES_NEVER = $Cache::Cache::EXPIRES_NEVER;
 $NO_MAX_SIZE = -1;
 
 
-##
-# Public instance methods
-##
-
-
 sub limit_size;
-
-
-##
-# Properties
-##
 
 
 sub get_max_size;

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheMetaData.pm,v 1.4 2001/04/08 22:48:37 dclinton Exp $
+# $Id: SharedMemoryBackend.pm,v 1.1 2001/11/08 23:01:23 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -33,18 +33,6 @@ sub new
 }
 
 
-sub store
-{
-  my ( $self, $p_namespace, $p_key, $p_value ) = @_;
-
-  my $store_ref = $self->_get_locked_store_ref( );
-
-  $store_ref->{ $p_namespace }{ $p_key } = $self->_freeze( $p_value );
-
-  $self->_set_locked_store_ref( $store_ref );
-}
-
-
 sub delete_key
 {
   my ( $self, $p_namespace, $p_key ) = @_;
@@ -64,6 +52,18 @@ sub delete_namespace
   my $store_ref = $self->_get_locked_store_ref( );
 
   delete $store_ref->{ $p_namespace };
+
+  $self->_set_locked_store_ref( $store_ref );
+}
+
+
+sub store
+{
+  my ( $self, $p_namespace, $p_key, $p_value ) = @_;
+
+  my $store_ref = $self->_get_locked_store_ref( );
+
+  $store_ref->{ $p_namespace }{ $p_key } = $self->_freeze( $p_value );
 
   $self->_set_locked_store_ref( $store_ref );
 }

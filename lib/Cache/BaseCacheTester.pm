@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: BaseCacheTester.pm,v 1.3 2001/04/08 22:48:37 dclinton Exp $
+# $Id: BaseCacheTester.pm,v 1.4 2001/11/05 13:34:45 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -13,10 +13,6 @@ package Cache::BaseCacheTester;
 
 
 use strict;
-
-##
-# Constructor
-##
 
 
 sub new
@@ -32,11 +28,6 @@ sub new
 
   return $self;
 }
-
-
-##
-# Public instance methods
-##
 
 
 sub ok
@@ -73,11 +64,6 @@ sub skip
 
   $self->_increment_test_count( );
 }
-
-
-##
-# Instance properties
-##
 
 
 sub _set_test_count

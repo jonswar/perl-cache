@@ -1,5 +1,5 @@
 #####################################################################
-# $Id: Cache.pm,v 1.22 2001/11/07 16:35:35 dclinton Exp $
+# $Id: Cache.pm,v 1.23 2001/11/29 18:12:55 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -36,10 +36,6 @@ $VERSION = 0.99;
 $EXPIRES_NOW = 'now';
 $EXPIRES_NEVER = 'never';
 
-##
-# Public class methods
-##
-
 
 sub Clear;
 
@@ -47,19 +43,7 @@ sub Purge;
 
 sub Size;
 
-
-##
-# Constructor
-##
-
-
 sub new;
-
-
-##
-# Public instance methods
-##
-
 
 sub clear;
 
@@ -76,12 +60,6 @@ sub set;
 sub set_object;
 
 sub size;
-
-
-##
-# Properties
-##
-
 
 sub get_default_expires_in;
 

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: NullCache.pm,v 1.2 2001/11/06 23:44:08 dclinton Exp $
+# $Id: NullCache.pm,v 1.3 2001/11/07 13:10:56 dclinton Exp $
 # Copyright (C) 2001 Jay Sachs  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -17,20 +17,16 @@ use Cache::Cache qw( $EXPIRES_NOW  );
 
 @ISA = qw ( Cache::BaseCache );
 
-use base qw(Cache::Cache);
-
-##
-# Public class methods
-##
-
 
 sub Clear
 {
 }
 
+
 sub Purge
 {
 }
+
 
 sub Size
 {
@@ -38,45 +34,40 @@ sub Size
 }
 
 
-##
-# Constructor
-##
-
-
 sub new
 {
-  my ($proto) = @_;
+  my ( $proto ) = @_;
 
-  return bless( {}, ref($proto) || $proto );
+  return bless( {}, ref( $proto ) || $proto );
 }
-
-
-##
-# Public instance methods
-##
 
 
 sub clear
 {
 }
 
+
 sub get
 {
   return undef;
 }
+
 
 sub get_object
 {
   return undef;
 }
 
+
 sub purge
 {
 }
 
+
 sub remove
 {
 }
+
 
 sub set
 {
@@ -87,15 +78,11 @@ sub set_object
 {
 }
 
+
 sub size
 {
   return 0;
 }
-
-
-##
-# Properties
-##
 
 
 sub get_default_expires_in
@@ -103,42 +90,38 @@ sub get_default_expires_in
   return $EXPIRES_NOW;
 }
 
-sub get_namespace
-{
-  return shift->{_Namespace};
-}
-
-sub set_namespace
-{
-  my ($self, $namespace) = @_;
-  $self->{_Namespace} = $namespace;
-}
 
 sub get_keys
 {
-  return ();
+  return ( );
 }
+
 
 sub get_auto_purge_interval
 {
   return 0;
 }
 
+
 sub set_auto_purge_interval
 {
 }
+
 
 sub get_auto_purge_on_set
 {
 }
 
+
 sub set_auto_purge_on_set
 {
 }
 
+
 sub get_auto_purge_on_get
 {
 }
+
 
 sub set_auto_purge_on_get
 {

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: Object.pm,v 1.4 2001/03/22 21:41:35 dclinton Exp $
+# $Id: Object.pm,v 1.5 2001/11/07 13:10:56 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -10,10 +10,7 @@
 
 package Cache::Object;
 
-
-##
-# Constructor
-##
+use strict;
 
 
 sub new
@@ -24,11 +21,6 @@ sub new
   bless ( $self, $class );
   return $self;
 }
-
-
-##
-# Instance properties
-##
 
 
 sub get_created_at
