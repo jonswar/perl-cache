@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareFileCache.pm,v 1.3 2001/02/15 23:29:07 dclinton Exp $
+# $Id: SizeAwareFileCache.pm,v 1.4 2001/02/16 02:11:36 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -16,6 +16,7 @@ use Cache::Cache qw( $EXPIRES_NEVER $SUCCESS $FAILURE $TRUE $FALSE );
 use Cache::CacheUtils qw ( Make_Path
                            Recursively_List_Files_With_Paths
                            Read_File_Without_Time_Modification
+                           Static_Params
                            Write_File );
 use Cache::FileCache;
 use Carp;
@@ -55,7 +56,7 @@ sub new
 
 sub Clear
 {
-  my ( $optional_cache_root ) = @_;
+  my ( $optional_cache_root ) = Static_Params( @_ );
 
   return Cache::FileCache::Clear( $optional_cache_root );
 }
@@ -63,7 +64,7 @@ sub Clear
 
 sub Purge
 {
-  my ( $optional_cache_root ) = @_;
+  my ( $optional_cache_root ) = Static_Params( @_ );
 
   return Cache::FileCache::Purge( $optional_cache_root );
 }
@@ -71,7 +72,7 @@ sub Purge
 
 sub Size
 {
-  my ( $optional_cache_root ) = @_;
+  my ( $optional_cache_root ) = Static_Params( @_ );
 
   return Cache::FileCache::Size( $optional_cache_root );
 }
