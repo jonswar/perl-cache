@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: MemoryCache.pm,v 1.20 2001/11/07 13:10:56 dclinton Exp $
+# $Id: MemoryCache.pm,v 1.21 2001/11/08 23:01:23 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -138,17 +138,6 @@ sub get_object
   Assert_Defined( $p_key );
 
   return $self->_get_backend( )->restore( $self->get_namespace( ), $p_key );
-}
-
-
-sub purge
-{
-  my ( $self ) = @_;
-
-  foreach my $key ( $self->get_keys( ) )
-  {
-    $self->get( $key );
-  }
 }
 
 

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: BaseCache.pm,v 1.12 2001/11/07 17:02:56 dclinton Exp $
+# $Id: BaseCache.pm,v 1.13 2001/11/08 23:01:23 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -52,6 +52,19 @@ sub get_identifiers
 
   return $self->get_keys( );
 }
+
+
+
+sub purge
+{
+  my ( $self ) = @_;
+
+  foreach my $key ( $self->get_keys( ) )
+  {
+    $self->get( $key );
+  }
+}
+
 
 
 ##

@@ -14,6 +14,7 @@ lib/Cache/CacheBenchmark.pm
 lib/Cache/CacheMetaData.pm
 lib/Cache/CacheTester.pm
 lib/Cache/CacheUtils.pm
+lib/Cache/FileBackend.pm
 lib/Cache/FileCache.pm
 lib/Cache/MemoryBackend.pm
 lib/Cache/MemoryCache.pm

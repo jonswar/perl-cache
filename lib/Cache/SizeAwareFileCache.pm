@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareFileCache.pm,v 1.20 2001/11/06 23:44:08 dclinton Exp $
+# $Id: SizeAwareFileCache.pm,v 1.21 2001/11/07 13:10:56 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -86,7 +86,9 @@ sub new
 
 ##
 # Public instance methods
-##
+
+
+# TODO:  Get needs to update the access time!
 
 
 

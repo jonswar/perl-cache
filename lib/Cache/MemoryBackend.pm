@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheMetaData.pm,v 1.4 2001/04/08 22:48:37 dclinton Exp $
+# $Id: MemoryBackend.pm,v 1.1 2001/11/08 23:01:23 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -31,7 +31,7 @@ sub store
 {
   my ( $self, $p_namespace, $p_key, $p_value ) = @_;
 
-  $self->_get_store_ref( )->{ $p_namespace }{ $p_key } =
+  $self->_get_store_ref( )->{ $p_namespace }{ $p_key } = 
     $self->_freeze( $p_value );
 }
 

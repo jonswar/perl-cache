@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheUtils.pm,v 1.29 2001/11/07 17:02:56 dclinton Exp $
+# $Id: CacheUtils.pm,v 1.30 2001/11/08 23:01:23 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -206,6 +206,10 @@ sub Canonicalize_Expiration_Time
 sub Build_Path
 {
   my ( @p_elements ) = @_;
+
+  # TODO: add this to Untaint_Path or something
+  #  ( $p_unique_key !~ m|[0-9][a-f][A-F]| ) or
+  #  throw Error::Simple( "key '$p_unique_key' contains illegal characters'" );
 
   if ( grep ( /\.\./, @p_elements ) )
   {

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: FileCache.pm,v 1.21 2001/11/07 13:10:56 dclinton Exp $
+# $Id: FileCache.pm,v 1.22 2001/11/07 17:02:56 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -34,8 +34,10 @@ use Cache::CacheUtils qw ( Assert_Defined
                            Static_Params
                            Update_Access_Time
                            Write_File );
+use Cache::FileBackend;
 use Cache::Object;
 use Error;
+
 
 @ISA = qw ( Cache::BaseCache );
 
@@ -69,22 +71,18 @@ sub Clear
 {
   my ( $p_optional_cache_root ) = Static_Params( @_ );
 
-  Recursively_Remove_Directory( _Build_Cache_Root( $p_optional_cache_root ) );
+  _Get_Backend( $p_optional_cache_root )->delete_all_namespaces( );
 }
-
-
-# TODO: It would be more effecient to iterate over the list of cached
-# objects and purge them individually
 
 
 sub Purge
 {
   my ( $p_optional_cache_root ) = Static_Params( @_ );
 
-  foreach my $namespace ( _List_Namespaces( $p_optional_cache_root ) )
+  foreach my $namespace ( _Namespaces( $p_optional_cache_root ) )
   {
+    # TODO:  This is broken -- try changing the root!
     my $cache = new Cache::FileCache( { 'namespace' => $namespace } );
-
     $cache->purge( );
   }
 }
@@ -94,7 +92,7 @@ sub Size
 {
   my ( $p_optional_cache_root ) = Static_Params( @_ );
 
-  return Recursive_Directory_Size( _Build_Cache_Root($p_optional_cache_root) );
+  return _Get_Backend( $p_optional_cache_root )->get_total_size( );
 }
 
 
@@ -102,6 +100,15 @@ sub Size
 ##
 # Private class methods
 ##
+
+
+sub _Get_Backend
+{
+  my ( $p_optional_cache_root ) = Static_Params( @_ );
+
+  return new Cache::FileBackend( _Build_Cache_Root( $p_optional_cache_root ) );
+
+}
 
 
 sub _Build_Cache_Root
@@ -114,16 +121,11 @@ sub _Build_Cache_Root
 }
 
 
-sub _List_Namespaces
+sub _Namespaces
 {
   my ( $p_optional_cache_root ) = Static_Params( @_ );
 
-  my @namespaces;
-
-  List_Subdirectories( _Build_Cache_Root( $p_optional_cache_root ), 
-                       \@namespaces );
-
-  return @namespaces;
+  return _Get_Backend( $p_optional_cache_root )->get_namespaces( );
 }
 
 
@@ -151,7 +153,7 @@ sub clear
 {
   my ( $self ) = @_;
 
-  Recursively_Remove_Directory( $self->_build_namespace_path( ) );
+  $self->_get_backend( )->delete_namespace( $self->get_namespace( ) );
 }
 
 
@@ -172,8 +174,6 @@ sub get
     return undef;
   }
 
-  $self->_update_access_time( $p_key );
-
   return $object->get_data( );
 }
 
@@ -184,24 +184,7 @@ sub get_object
 
   Assert_Defined( $p_key );
 
-  return $self->_restore( Build_Unique_Key( $p_key ) );
-}
-
-
-sub purge
-{
-  my ( $self ) = @_;
-
-  foreach my $unique_key ( $self->_list_unique_keys( ) )
-  {
-    my $object = $self->_restore( $unique_key ) or
-      next;
-
-    if ( Object_Has_Expired( $object ) )
-    {
-      $self->remove( $object->get_key( ) );
-    }
-  }
+  return $self->_get_backend( )->restore( $self->get_namespace( ), $p_key );
 }
 
 
@@ -211,7 +194,7 @@ sub remove
 
   Assert_Defined( $p_key );
 
-  Remove_File( $self->_build_object_path( Build_Unique_Key($p_key) ) );
+  $self->_get_backend( )->delete_key( $self->get_namespace( ), $p_key );
 }
 
 
@@ -219,13 +202,15 @@ sub set
 {
   my ( $self, $p_key, $p_data, $p_expires_in ) = @_;
 
+  Assert_Defined( $p_key );
+
   $self->_conditionally_auto_purge_on_set( );
 
-  $self->_store( Build_Unique_Key( $p_key ),
-                 Build_Object( $p_key,
-                               $p_data,
-                               $self->get_default_expires_in( ),
-                               $p_expires_in ) );
+  $self->set_object( $p_key,
+                     Build_Object( $p_key,
+                                   $p_data,
+                                   $self->get_default_expires_in( ),
+                                   $p_expires_in ) );
 }
 
 
@@ -233,7 +218,9 @@ sub set_object
 {
   my ( $self, $p_key, $p_object ) = @_;
 
-  $self->_store( Build_Unique_Key( $p_key ), $p_object );
+  $self->_get_backend( )->store( $self->get_namespace( ),
+                                 $p_key,
+                                 $p_object );
 }
 
 
@@ -241,7 +228,7 @@ sub size
 {
   my ( $self ) = @_;
 
-  return Recursive_Directory_Size( $self->_build_namespace_path( ) );
+  return $self->_get_backend( )->get_namespace_size( $self->get_namespace( ) );
 }
 
 
@@ -267,123 +254,48 @@ sub _initialize_file_cache
 {
   my ( $self ) = @_;
 
-  $self->_initialize_cache_depth( );
-  $self->_initialize_cache_root( );
-  $self->_initialize_directory_umask( );
+  $self->_initialize_file_backend( );
 }
 
 
-sub _initialize_cache_depth
+sub _initialize_file_backend
 {
   my ( $self ) = @_;
 
-  $self->set_cache_depth( $self->_read_option( 'cache_depth',
-                                               $DEFAULT_CACHE_DEPTH ) );
+  $self->_set_backend( new Cache::FileBackend( $self->_get_initial_root( ),
+                                               $self->_get_initial_depth( ),
+                                               $self->_get_initial_umask( ) ));
 }
 
 
-sub _initialize_cache_root
+sub _get_initial_root
 {
   my ( $self ) = @_;
 
-  $self->set_cache_root(_Build_Cache_Root($self->_read_option('cache_root')));
+  if ( defined $self->_read_option( 'cache_root' ) )
+  {
+    return $self->_read_option( 'cache_root' );
+  }
+  else
+  {
+    return Build_Path( Get_Temp_Directory( ), $DEFAULT_CACHE_ROOT );
+  }
 }
 
 
-sub _initialize_directory_umask
+sub _get_initial_depth
 {
   my ( $self ) = @_;
 
-  $self->set_directory_umask( $self->_read_option( 'directory_umask',
-                                                   $DEFAULT_DIRECTORY_UMASK ));
-
+  return $self->_read_option( 'cache_depth', $DEFAULT_CACHE_DEPTH );
 }
 
 
-sub _store
-{
-  my ( $self, $p_unique_key, $p_object ) = @_;
-
-  Assert_Defined( $p_unique_key );
-
-  Make_Path( $self->_build_object_path( $p_unique_key ),
-             $self->get_directory_umask( ) );
-
-  Write_File( $self->_build_object_path( $p_unique_key ),
-              \$self->_freeze( $p_object ) );
-}
-
-
-sub _restore
-{
-  my ( $self, $p_unique_key ) = @_;
-
-  Assert_Defined( $p_unique_key );
-
-  my $object_path = $self->_build_object_path( $p_unique_key );
-
-  my $object_dump_ref = Read_File_Without_Time_Modification( $object_path ) or
-    return undef;
-
-  my $object = $self->_thaw( $object_dump_ref );
-
-  $object->set_accessed_at( $self->_get_atime( $object_path ) );
-
-  return $object;
-}
-
-
-sub _get_atime
-{
-  my ( $self, $p_path ) = @_;
-
-  return ( stat( $p_path ) )[8];
-}
-
-
-sub _build_object_path
-{
-  my ( $self, $p_unique_key ) = @_;
-
-  Assert_Defined( $p_unique_key );
-
-  ( $p_unique_key !~ m|[0-9][a-f][A-F]| ) or
-    throw Error::Simple( "key '$p_unique_key' contains illegal characters'" );
-
-  return Build_Path( $self->get_cache_root( ),
-                     $self->get_namespace( ),
-                     Split_Word( $p_unique_key, $self->get_cache_depth( ) ),
-                     $p_unique_key );
-}
-
-
-sub _build_namespace_path
+sub _get_initial_umask
 {
   my ( $self ) = @_;
 
-  return Build_Path( $self->get_cache_root( ), $self->get_namespace( ) );
-}
-
-
-sub _list_unique_keys
-{
-  my ( $self ) = @_;
-
-  my @unique_keys;
-
-  Recursively_List_Files( $self->_build_namespace_path( ), \@unique_keys );
-
-  return @unique_keys;
-}
-
-
-sub _update_access_time
-{
-  my ( $self, $p_key ) = @_;
-
-  Assert_Defined( $p_key );
-
-  Update_Access_Time( $self->_build_object_path( Build_Unique_Key($p_key) ) );
+  return $self->_read_option( 'directory_umask', $DEFAULT_DIRECTORY_UMASK );
 }
 
 
@@ -396,14 +308,15 @@ sub get_cache_depth
 {
   my ( $self ) = @_;
 
-  return $self->{_Cache_Depth};
+  return $self->_get_backend( )->get_depth( );
 }
+
 
 sub set_cache_depth
 {
-  my ( $self, $cache_depth ) = @_;
+  my ( $self, $p_cache_depth ) = @_;
 
-  $self->{_Cache_Depth} = $cache_depth;
+  $self->_get_backend( )->set_depth( $p_cache_depth );
 }
 
 
@@ -411,15 +324,15 @@ sub get_cache_root
 {
   my ( $self ) = @_;
 
-  return $self->{_Cache_Root};
+  return $self->_get_backend( )->get_root( );
 }
 
 
 sub set_cache_root
 {
-  my ( $self, $cache_root ) = @_;
+  my ( $self, $p_cache_root ) = @_;
 
-  $self->{_Cache_Root} = $cache_root;
+  $self->_get_backend( )->set_root( $p_cache_root );
 }
 
 
@@ -427,33 +340,41 @@ sub get_directory_umask
 {
   my ( $self ) = @_;
 
-  return $self->{_Directory_Umask};
+  return $self->_get_backend( )->get_directory_umask( );
 }
 
 
 sub set_directory_umask
 {
-  my ( $self, $directory_umask ) = @_;
+  my ( $self, $p_directory_umask ) = @_;
 
-  $self->{_Directory_Umask} = $directory_umask;
+  $self->_get_backend( )->set_directory_umask( $p_directory_umask );
 }
+
 
 
 sub get_keys
 {
   my ( $self ) = @_;
 
-  my @keys;
+  return $self->_get_backend->get_keys( $self->get_namespace( ) );
+}
 
-  foreach my $unique_key ( $self->_list_unique_keys( ) )
-  {
-    my $object = $self->_restore( $unique_key ) or
-      next;
 
-    push( @keys, $object->get_key( ) );
-  }
 
-  return @keys;
+sub _get_backend
+{
+  my ( $self ) = @_;
+
+  return $self->{ _Backend };
+}
+
+
+sub _set_backend
+{
+  my ( $self, $p_backend ) = @_;
+
+  $self->{ _Backend } = $p_backend;
 }
 
 
