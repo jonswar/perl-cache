@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheUtils.pm,v 1.10 2001/03/12 19:18:33 dclinton Exp $
+# $Id: CacheUtils.pm,v 1.11 2001/03/13 03:37:09 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -23,7 +23,8 @@ use Digest::MD5 qw( md5_hex );
 use Exporter;
 use File::Path qw( mkpath );
 use File::Spec::Functions qw( catdir catfile splitdir splitpath tmpdir );
-use Storable qw(nfreeze thaw dclone);
+use IPC::ShareLite;
+use Storable qw( nfreeze thaw dclone );
 
 @ISA = qw( Exporter );
 
@@ -35,6 +36,7 @@ use Storable qw(nfreeze thaw dclone);
                  Create_Directory
                  Freeze_Object
                  Get_Temp_Directory
+                 Instantiate_Share
                  List_Subdirectories
                  Make_Path
                  Read_File
@@ -44,8 +46,10 @@ use Storable qw(nfreeze thaw dclone);
                  Recursively_List_Files_With_Paths
                  Recursively_Remove_Directory
                  Remove_File
+                 Restore_Shared_Hash_Ref
                  Split_Word
                  Static_Params
+                 Store_Shared_Hash_Ref
                  Thaw_Object
                  Write_File
                  Object_Has_Expired );
@@ -818,6 +822,79 @@ sub Static_Params
   }
 
   return @_;
+}
+
+
+
+# create a IPC::ShareLite share under the ipc_identifier
+
+sub Instantiate_Share
+{
+  my ( $ipc_identifier ) = Static_Params( @_ );
+
+  defined $ipc_identifier or
+    croak( "ipc_identifier required" );
+
+  my %ipc_options = (
+                     -key       =>  $ipc_identifier,
+                     -create    => 'yes',
+                     -destroy   => 'no',
+                     -exclusive => 'no'
+                    );
+
+  my $share = new IPC::ShareLite( %ipc_options ) or
+    croak( "Couldn't instantiate new IPC::ShareLite" );
+
+  return $share;
+}
+
+
+# this method uses the shared created by Instantiate_Share to
+# transparently retrieve a reference to a shared hash structure
+
+sub Restore_Shared_Hash_Ref
+{
+  my ( $ipc_identifier ) = Static_Params( @_ );
+
+  defined $ipc_identifier or
+    croak( "ipc_identifier required" );
+
+  my $share = Instantiate_Share( $ipc_identifier ) or
+    croak( "Couldn't instantiate share" );
+
+  my $frozen_hash_ref = $share->fetch( ) or
+    return ( { } );
+
+  my $hash_ref = thaw( $frozen_hash_ref ) or
+    croak( "Couldn't thaw frozen hash ref" );
+
+  return $hash_ref;
+}
+
+
+# this method uses the shared created by Instantiate_Share to
+# transparently persist a reference to a shared hash structure
+
+sub Store_Shared_Hash_Ref
+{
+  my ( $ipc_identifier, $hash_ref ) = @_;
+
+  defined $ipc_identifier or
+    croak( "ipc_identifier required" );
+
+  defined $hash_ref or
+    croak( "hash_ref required" );
+
+  my $frozen_hash_ref = nfreeze( $hash_ref ) or
+    croak( "Couldn't nfreeze hash_ref" );
+
+  my $share = Instantiate_Share( $ipc_identifier ) or
+    croak( "Couldn't instantiate share" );
+
+  $share->store( $frozen_hash_ref ) or
+    croak( "Couldn't store frozen_hash_ref" );
+
+  return $SUCCESS;
 }
 
 

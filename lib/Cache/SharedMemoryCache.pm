@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SharedMemoryCache.pm,v 1.3 2001/03/12 19:19:33 dclinton Exp $
+# $Id: SharedMemoryCache.pm,v 1.4 2001/03/13 01:28:17 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -16,19 +16,17 @@ use strict;
 use vars qw( @ISA );
 use Cache::Cache qw( $TRUE $FALSE $SUCCESS $FAILURE );
 use Cache::MemoryCache;
-use Cache::CacheUtils qw( Static_Params );
+use Cache::CacheUtils qw( Restore_Shared_Hash_Ref
+                          Static_Params
+                          Store_Shared_Hash_Ref
+                          Clone_Object );
 use Carp;
-use IPC::Shareable;
 
 
 @ISA = qw ( Cache::MemoryCache );
 
 
 my $IPC_IDENTIFIER = 'ipcc';
-
-
-my %_Shared_Cache_Hash;
-
 
 
 ##
@@ -38,11 +36,10 @@ my %_Shared_Cache_Hash;
 
 sub Clear
 {
-  foreach my $namespace ( _Namespaces( ) )
-  {
-    _Delete_Namespace( $namespace ) or
-      croak( "Couldn't delete namespace $namespace" );
-  }
+  my $empty_cache_hash_ref = { };
+
+  _Store_Cache_Hash_Ref( $empty_cache_hash_ref ) or
+    croak( "Couldn't store empty cache hash ref" );
 
   return $SUCCESS;
 }
@@ -87,6 +84,20 @@ sub Size
 ##
 
 
+sub _Restore_Cache_Hash_Ref
+{
+  return Restore_Shared_Hash_Ref( $IPC_IDENTIFIER );
+}
+
+
+sub _Store_Cache_Hash_Ref
+{
+  my ( $cache_hash_ref ) = Static_Params( @_ );
+
+  return Store_Shared_Hash_Ref( $IPC_IDENTIFIER, $cache_hash_ref );
+}
+
+
 sub _Delete_Namespace
 {
   my ( $namespace ) = Static_Params( @_ );
@@ -94,10 +105,13 @@ sub _Delete_Namespace
   defined $namespace or
     croak( "Namespace required" );
 
-  _Tie_Shared_Cache_Hash( ) or
-    croak( "Couldn't tie shared cache hash" );
+  my $cache_hash_ref = _Restore_Cache_Hash_Ref( ) or
+    croak( "Couldn't restore cache hash ref" );
 
-  delete $_Shared_Cache_Hash{ $namespace };
+  delete $cache_hash_ref->{ $namespace };
+
+  _Store_Cache_Hash_Ref( $cache_hash_ref ) or
+    croak( "Couldn't store cache hash ref" );
 
   return $SUCCESS;
 }
@@ -105,27 +119,10 @@ sub _Delete_Namespace
 
 sub _Namespaces
 {
-  _Tie_Shared_Cache_Hash( ) or
-    croak( "Couldn't tie shared cache hash" );
+  my $cache_hash_ref = _Restore_Cache_Hash_Ref( ) or
+    croak( "Couldn't restore cache hash ref" );
 
-  return keys %_Shared_Cache_Hash;
-}
-
-
-sub _Tie_Shared_Cache_Hash
-{
-  if ( tied %_Shared_Cache_Hash )
-  {
-    return $SUCCESS;
-  }
-
-  my %ipc_options = ( 'key' =>  $IPC_IDENTIFIER,
-		      'create' => 'yes' );
-
-  tie( %_Shared_Cache_Hash, 'IPC::Shareable', \%ipc_options ) or
-    croak( "Couldn't tie _Shared_Cache_Hash" );
-
-  return $SUCCESS;
+  return keys %{ $cache_hash_ref };
 }
 
 
@@ -153,13 +150,16 @@ sub remove
   $identifier or
     croak( "identifier required" );
 
-  my $cache_hash_ref = $self->_get_cache_hash_ref( ) or
-    croak( "Couldn't get cache_hash_ref" );
-
   my $namespace = $self->get_namespace( ) or
     croak( "Couldn't get namespace" );
 
+  my $cache_hash_ref = _Restore_Cache_Hash_Ref( ) or
+    croak( "Couldn't restore cache hash ref" );
+
   delete $cache_hash_ref->{$namespace}->{$identifier};
+
+  _Store_Cache_Hash_Ref( $cache_hash_ref ) or
+    croak( "Couldn't store cache hash ref" );
 
   return $SUCCESS;
 }
@@ -170,19 +170,87 @@ sub remove
 ##
 
 
+sub _store
+{
+  my ( $self, $identifier, $object ) = @_;
 
-sub _initialize_cache_hash_ref
+  $identifier or
+    croak( "identifier required" );
+
+  my $namespace = $self->get_namespace( ) or
+    croak( "Couldn't get namespace" );
+
+  my $object_dump;
+
+  Clone_Object( \$object, \$object_dump ) or
+    croak( "Couldn't freeze object" );
+
+  my $cache_hash_ref = _Restore_Cache_Hash_Ref( ) or
+    croak( "Couldn't restore cache hash ref" );
+
+  $cache_hash_ref->{$namespace}->{$identifier} = $object_dump;
+
+  _Store_Cache_Hash_Ref( $cache_hash_ref ) or
+    croak( "Couldn't store cache hash ref" );
+
+  return $SUCCESS;
+}
+
+
+sub _restore
+{
+  my ( $self, $identifier ) = @_;
+
+  $identifier or
+    croak( "identifier required" );
+
+  my $namespace = $self->get_namespace( ) or
+    croak( "Couldn't get namespace" );
+
+  my $cache_hash_ref = _Restore_Cache_Hash_Ref( ) or
+    croak( "Couldn't restore cache hash ref" );
+
+  my $object = $cache_hash_ref->{$namespace}->{$identifier};
+
+  return $object;
+}
+
+
+sub _identifiers
 {
   my ( $self ) = @_;
 
-  _Tie_Shared_Cache_Hash( ) or
-    croak( "Couldn't tie shared cache hash" );
+  my $namespace = $self->get_namespace( ) or
+    croak( "Couldn't get namespace" );
 
-  my $cache_hash_ref = \%_Shared_Cache_Hash;
+  my $cache_hash_ref = _Restore_Cache_Hash_Ref( ) or
+    croak( "Couldn't restore cache hash ref" );
 
-  $self->_set_cache_hash_ref( $cache_hash_ref );
+  return ( ) unless defined $cache_hash_ref->{$namespace};
 
-  return $SUCCESS;
+  return keys %{$cache_hash_ref->{$namespace}};
+}
+
+
+sub _build_object_size
+{
+  my ( $self, $identifier ) = @_;
+
+  $identifier or
+    croak( "identifier required" );
+
+  my $namespace = $self->get_namespace( ) or
+    croak( "Couldn't get namespace" );
+
+  my $cache_hash_ref = _Restore_Cache_Hash_Ref( ) or
+    croak( "Couldn't restore cache hash ref" );
+
+  my $object_dump = $cache_hash_ref->{$namespace}->{$identifier} or
+    return 0;
+
+  my $size = length $object_dump;
+
+  return $size;
 }
 
 
@@ -194,6 +262,27 @@ sub _delete_namespace
     croak( "Couldn't delete namespace $namespace" );
 
   return $SUCCESS;
+}
+
+
+sub _initialize_cache_hash_ref
+{
+  # no op, because we don't use the per-instance cache_hash_ref
+
+  return $SUCCESS;
+}
+
+
+sub _get_cache_hash_ref
+{
+  croak( "Use _Restore_Cache_Hash_Ref instead" );
+}
+
+
+
+sub _set_cache_hash_ref
+{
+  croak( "Use _Store_Cache_Hash_Ref instead" );
 }
 
 

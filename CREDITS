@@ -1,3 +1,8 @@
+- Greg Cope <greg@rubberplant.freeserve.co.uk> suggested that I switch
+  to IPC::ShareLite
+
+- Daniel Little <danl@metrex.net> suggested that I write the 
+  SizeAwareMemoryCache module
 
 - Jonathan Swartz <jswartz@users.sourceforge.net>, a Perl Cache
   project developer, for the expanded expiration format code and all of

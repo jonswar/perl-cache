@@ -35,7 +35,7 @@ REQUIREMENTS
   Digest::MD5
   File::Spec
   File::Path
-  IPC::Shareable
+  IPC::ShareLite
   Storable
 
 INSTALLATION
