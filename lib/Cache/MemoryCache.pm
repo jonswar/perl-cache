@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: MemoryCache.pm,v 1.4 2001/03/05 19:04:48 dclinton Exp $
+# $Id: MemoryCache.pm,v 1.5 2001/03/06 07:07:43 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -8,7 +8,9 @@
 # rights and limitations under the License.
 ######################################################################
 
+
 package Cache::MemoryCache;
+
 
 use strict;
 use vars qw( @ISA );
@@ -19,9 +21,88 @@ use Cache::Object;
 use Carp;
 use Data::Dumper;
 
+
 @ISA = qw ( Cache::BaseCache );
 
+
 my %Cache_Hash;
+
+
+##
+# Public class methods
+##
+
+
+sub Clear
+{
+  foreach my $namespace ( _Namespaces( ) )
+  {
+    _Delete_Namespace( $namespace ) or
+      croak( "Couldn't delete namespace $namespace" );
+  }
+
+  return $SUCCESS;
+}
+
+
+sub Purge
+{
+  foreach my $namespace ( _Namespaces( ) )
+  {
+    my $cache = new Cache::MemoryCache( { 'namespace' => $namespace } ) or
+      croak( "Couldn't construct cache with namespace $namespace" );
+
+    $cache->purge( ) or
+      croak( "Couldn't purge cache with namespace $namespace" );
+  }
+
+  return $SUCCESS;
+}
+
+
+sub Size
+{
+  my $size = 0;
+
+  foreach my $namespace ( _Namespaces( ) )
+  {
+    my $cache = new Cache::MemoryCache( { 'namespace' => $namespace } ) or
+      croak( "Couldn't construct cache with namespace $namespace" );
+
+    $size += $cache->size( );
+  }
+
+  return $size;
+}
+
+
+##
+# Private class methods
+##
+
+
+sub _Delete_Namespace
+{
+  my ( $namespace ) = Static_Params( @_ );
+
+  defined $namespace or
+    croak( "Namespace required" );
+
+  delete $Cache_Hash{ $namespace };
+
+  return $SUCCESS;
+}
+
+
+sub _Namespaces
+{
+  return keys %Cache_Hash;
+}
+
+
+##
+# Constructor
+##
 
 
 sub new
@@ -39,22 +120,23 @@ sub new
 }
 
 
-sub set
+##
+# Public instance methods
+##
+
+
+sub clear
 {
-  my ( $self, $identifier, $data, $expires_in ) = @_;
+  my ( $self ) = @_;
 
-  my $default_expires_in = $self->get_default_expires_in( );
+  my $namespace = $self->get_namespace( ) or
+    croak( "Namespace required" );
 
-  my $object =
-    Build_Object( $identifier, $data, $default_expires_in, $expires_in ) or
-      croak( "Couldn't build cache object" );
-
-  $self->_store( $identifier, $object ) or
-    croak( "Couldn't store $identifier" );
+  $self->_delete_namespace( $namespace ) or
+    croak( "Couldn't delete namespace $namespace" );
 
   return $SUCCESS;
 }
-
 
 
 sub get
@@ -95,6 +177,18 @@ sub get_object
 }
 
 
+sub purge
+{
+  my ( $self ) = @_;
+
+  foreach my $identifier ( $self->_identifiers( ) )
+  {
+    $self->get( $identifier );
+  }
+
+  return $SUCCESS;
+}
+
 
 sub remove
 {
@@ -115,31 +209,18 @@ sub remove
 }
 
 
-
-
-sub clear
+sub set
 {
-  my ( $self ) = @_;
+  my ( $self, $identifier, $data, $expires_in ) = @_;
 
-  my $namespace = $self->get_namespace( ) or
-    croak( "Namespace required" );
+  my $default_expires_in = $self->get_default_expires_in( );
 
-  $self->_delete_namespace( $namespace ) or
-    croak( "Couldn't delete namespace $namespace" );
+  my $object =
+    Build_Object( $identifier, $data, $default_expires_in, $expires_in ) or
+      croak( "Couldn't build cache object" );
 
-  return $SUCCESS;
-}
-
-
-
-sub purge
-{
-  my ( $self ) = @_;
-
-  foreach my $identifier ( $self->_identifiers( ) )
-  {
-    $self->get( $identifier );
-  }
+  $self->_store( $identifier, $object ) or
+    croak( "Couldn't store $identifier" );
 
   return $SUCCESS;
 }
@@ -160,52 +241,9 @@ sub size
 }
 
 
-
-
-sub Clear
-{
-  foreach my $namespace ( _Namespaces( ) )
-  {
-    _Delete_Namespace( $namespace ) or
-      croak( "Couldn't delete namespace $namespace" );
-  }
-
-  return $SUCCESS;
-}
-
-
-sub Purge
-{
-  foreach my $namespace ( _Namespaces( ) )
-  {
-    my $cache =
-      new Cache::MemoryCache( { 'namespace' => $namespace } ) or
-	croak( "Couldn't construct cache with namespace $namespace" );
-
-    $cache->purge( ) or
-      croak( "Couldn't purge cache with namespace $namespace" );
-  }
-
-  return $SUCCESS;
-}
-
-
-sub Size
-{
-  my $size = 0;
-
-  foreach my $namespace ( _Namespaces( ) )
-  {
-    my $cache = new Cache::MemoryCache( { 'namespace' => $namespace } ) or
-      croak( "Couldn't construct cache with namespace $namespace" );
-
-    $size += $cache->size( );
-  }
-
-  return $size;
-}
-
-
+##
+# Private instance methods
+##
 
 
 sub _initialize_memory_cache
@@ -254,7 +292,6 @@ sub _store
 
   return $SUCCESS;
 }
-
 
 
 sub _restore
@@ -332,26 +369,9 @@ sub _build_object_size
 }
 
 
-sub _Delete_Namespace
-{
-  my ( $namespace ) = @_;
-
-  defined $namespace or
-    croak( "Namespace required" );
-
-  delete $Cache_Hash{ $namespace };
-
-  return $SUCCESS;
-}
-
-
-
-sub _Namespaces
-{
-  return keys %Cache_Hash;
-}
-
-
+##
+# Instance properties
+##
 
 
 ##
@@ -375,7 +395,6 @@ sub _set_cache_hash_ref
 
 
 1;
-
 
 
 __END__
@@ -407,6 +426,18 @@ MemoryCache.
 
 =over 4
 
+=item B<Clear( )>
+
+See Cache::Cache
+
+=item B<Purge( )>
+
+See Cache::Cache
+
+=item B<Size( )>
+
+See Cache::Cache
+
 =item B<new( $options_hash_ref )>
 
 Constructs a new MemoryCache.
@@ -416,40 +447,43 @@ Constructs a new MemoryCache.
 A reference to a hash containing configuration options for the cache.
 See the section OPTIONS below.
 
+=item B<clear(  )>
+
+See Cache::Cache
+
+=item B<get( $identifier )>
+
+See Cache::Cache
+
+=item B<get_object( $identifier )>
+
+See Cache::Cache
+
+=item B<purge( )>
+
+See Cache::Cache
+
+=item B<remove( $identifier )>
+
+See Cache::Cache
+
+=item B<set( $identifier, $data, $expires_in )>
+
+See Cache::Cache
+
+=item B<size(  )>
+
+See Cache::Cache
+
 =back
 
 =head1 OPTIONS
 
-The options are set by passing in a reference to a hash containing any
-of the following keys:
-
-=over 4
-
-=item namespace
-
-The namespace associated with this cache.  Defaults to "Default" if
-not explicitly set.
-
-=item default_expires_in
-
-The default expiration time for objects place in the cache.  Defaults
-to $EXPIRES_NEVER if not explicitly set.
-
-=back
+See Cache::Cache for standard options.
 
 =head1 PROPERTIES
 
-=over 4
-
-=item B<get_default_expires_in>
-
-The default expiration time for objects place in the cache.
-
-=item B<get_namespace>
-
-The namespace associated with this cache.
-
-=back
+See Cache::Cache for default properties.
 
 =head1 SEE ALSO
 
