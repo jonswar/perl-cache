@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: Cache.pm,v 1.11 2001/03/23 13:34:26 dclinton Exp $
+# $Id: Cache.pm,v 1.12 2001/03/25 18:13:16 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -132,10 +132,50 @@ corresponding static methods for persisting data across method calls.
 
 =head1 SYNOPSIS
 
+To implement the Cache::Cache interface:
+
+  package Cache::MyCache;
+
   use Cache::Cache;
   use vars qw( @ISA );
 
   @ISA = qw( Cache::Cache );
+
+  sub get
+  {
+    my ( $self, $identifier ) = @_;
+
+    # implement the get method here
+  }
+
+  sub set
+  {
+    my ( $self, $identifier, $data, $expires_in ) = @_;
+
+    # implement the set method here
+  }
+
+  # implement the other interface methods here
+
+
+To use a Cache implementation, such as Cache::MemoryCache:
+
+
+  use Cache::Cache qw( $EXPIRES_NEVER $EXPIRES_NOW );
+  use Cache::MemoryCache;
+
+  my $options_hash_ref = { 'default_expires_in' => '10 seconds' };
+
+  my $cache = new Cache::MemoryCache( $options_hash_ref );
+
+  my $expires_in = '10 minutes';
+
+  $cache->set( 'Key', 'Value', $expires_in );
+
+  # if the next line is called within 10 minutes, then this 
+  # will return the cache value
+
+  my $value = $cache->get( 'Key' );
 
 
 =head1 CONSTANTS
