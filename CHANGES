@@ -8,7 +8,7 @@ Revision history for Cache
    to fix the auto_purge_interval functionality
  - updated the documentation to better reflect that size means
    size in bytes
-
+ - started version 0.09
 
 0.08 2001-04-26-08-53
  - released version 0.08
