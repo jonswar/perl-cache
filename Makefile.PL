@@ -10,11 +10,12 @@ my $VERSION_FROM = 'lib/Cache/Cache.pm';
 my $COMPRESS = 'gzip';
 my $SUFFIX = '.gz';
 my $DEFAULT_PREREQ_PM = {
-                         Digest::MD5 => '2.09',
+                         Digest::MD5 => '2.16',
                          File::Spec => '0.82',
-                         Storable => '1.011',
+                         Storable => '1.014',
+                         Storable => '1.014',
                          IPC::ShareLite => '0.08',
-                         Error => ''
+                         Error => '0.15'
                         };
 
 my @NON_IPC_TESTS = ( 't/1_test_cache_interface.t',
