@@ -1,5 +1,8 @@
 Revision history for Cache
 
+0.04 in progress
+ - started version 0.04
+
 0.03 2000-03-10-12-40
  - released version 0.03
  - made the FileCache more multi-user friendly by allowing a more

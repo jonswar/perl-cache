@@ -84,7 +84,7 @@ USAGE
     my $value = $cache->get( 'Key' );
 
   Please refer to the perldoc for Cache::Cache and the related
-  implementations for complete documention.
+  implementations for complete documentation.
 
 
 SEE ALSO
