@@ -88,7 +88,6 @@ USAGE
   Please refer to the perldoc for Cache::Cache and the related
   implementations for complete documentation.
 
-
 INCOMPATIBLE CHANGES
 
   Cache::Cache 0.99 contains the following incompatible changes:
@@ -102,6 +101,24 @@ INCOMPATIBLE CHANGES
       necessitating a clearing of the cache while upgrading (make test 
       does this for the standard cache root)
 
+  Also note that Storable is not forward compatable between all 
+  releases.  That is, older versions of the Cache will not always
+  be able to read objects written by newer versions.  This is
+  unlikely to ever be an issue in production scenarios.
+
+
+ON LOCKING:
+
+  The FileCache backend uses an temp file and an atomic rename to
+  avoid requiring a lock during the write.  This has proven safe
+  across all platforms to date.
+
+  The MemoryCache backend relies on Perl's atomic write to a hash to
+  ensure that a lock is not required.
+
+  The SharedMemoryCache backend uses ShareLite's locking mechanism
+  to ensure safety.
+
 
 SEE ALSO
 
@@ -112,5 +129,5 @@ AUTHOR
 
   Original author: DeWitt Clinton <dewitt@unto.net>
 
-  Copyright (C) 2001, 2002 DeWitt Clinton
+  Copyright (C) 2001-2003 DeWitt Clinton
 

@@ -3,6 +3,7 @@ Revision history for Cache
 1.02 in progress
  - require Digest::SHA1 2.02, optionally IPC::ShareLite 0.09
  - use Storable's "nfreeze" instead of "freeze"
+ - added notes on locking and Storable to the README
  - updated documentation on expiration units
  - modified the quoting of the untainted path regex
  - fixed the duplicated get_keys in NullCache
