@@ -1,6 +1,7 @@
 Revision history for Cache
 
-1.03 in progress
+1.03 2004-10-04-11-23
+ - modified the FileBackend to use the more robust File::Temp
  - "officially" recommend FileCache over SharedMemoryCache
  - added more robust error checking for shared memory caches
  - added a check for invalid frozen data
