@@ -9,7 +9,7 @@
 # Change 1..1 below to 1..last_test_to_print .
 # (It may become useful if the test is moved to ./t subdirectory.)
 
-BEGIN { $| = 1; print "1..51\n"; }
+BEGIN { $| = 1; print "1..64\n"; }
 END {print "not ok 1\n" unless $loaded;}
 
 use Cache::Cache qw( $EXPIRES_NOW
@@ -20,7 +20,7 @@ use Cache::Cache qw( $EXPIRES_NOW
                      $FAILURE );
 
 use Cache::CacheTester;
-
+use Cache::SizeAwareCacheTester;
 use Cache::SizeAwareFileCache;
 
 
@@ -44,6 +44,12 @@ my $cache_tester = new Cache::CacheTester( $TEST_COUNT ) or
 
 $cache_tester->test( $cache );
 
+$TEST_COUNT = $cache_tester->_get_test_count( );
+
+my $size_aware_cache_tester = new Cache::SizeAwareCacheTester( $TEST_COUNT ) or
+  not_ok( "Couldn't create new CacheTester" );
+
+$size_aware_cache_tester->test( $cache );
 
 sub ok
 {
