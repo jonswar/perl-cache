@@ -1,6 +1,7 @@
 Revision history for Cache
 
 0.03 in progress
+ - updated documentation and code style
  - completely rewrote and improved the limit_size method for a major
    performance gain
  - updated the syntax for expiration times to include the [number] [unit] 
