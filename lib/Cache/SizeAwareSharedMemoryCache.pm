@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareSharedMemoryCache.pm,v 1.18 2001/11/29 18:12:55 dclinton Exp $
+# $Id: SizeAwareSharedMemoryCache.pm,v 1.19 2001/11/29 18:33:21 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -22,6 +22,8 @@ use Exporter;
 
 
 @ISA = qw ( Cache::SizeAwareMemoryCache Exporter );
+
+
 @EXPORT_OK = qw( $NO_MAX_SIZE );
 
 

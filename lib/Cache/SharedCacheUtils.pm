@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SharedCacheUtils.pm,v 1.4 2001/11/29 22:14:11 dclinton Exp $
+# $Id: SharedCacheUtils.pm,v 1.5 2001/11/29 22:40:39 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -12,10 +12,7 @@ package Cache::SharedCacheUtils;
 
 use strict;
 use vars qw( @ISA @EXPORT_OK );
-use Cache::CacheUtils qw( Assert_Defined
-                          Freeze_Data
-                          Static_Params
-                          Thaw_Data );
+use Cache::CacheUtils qw( Assert_Defined Freeze_Data Static_Params Thaw_Data );
 use IPC::ShareLite qw( LOCK_EX LOCK_UN );
 
 

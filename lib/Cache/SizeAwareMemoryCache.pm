@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareMemoryCache.pm,v 1.14 2001/11/08 23:01:23 dclinton Exp $
+# $Id: SizeAwareMemoryCache.pm,v 1.15 2001/11/29 18:12:55 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -14,13 +14,10 @@ package Cache::SizeAwareMemoryCache;
 
 use strict;
 use vars qw( @ISA );
-use Cache::Cache qw( $EXPIRES_NEVER );
-use Cache::CacheMetaData;
-use Cache::CacheUtils qw ( Assert_Defined
-                           Limit_Size );
+use Cache::Cache;
+use Cache::CacheSizer;
 use Cache::MemoryCache;
 use Cache::SizeAwareCache qw( $NO_MAX_SIZE );
-use Carp;
 
 
 @ISA = qw ( Cache::MemoryCache Cache::SizeAwareCache );
@@ -50,9 +47,7 @@ sub Size
 sub new
 {
   my ( $self ) = _new( @_ );
-
   $self->_complete_initialization( );
-
   return $self;
 }
 
@@ -61,10 +56,7 @@ sub get
 {
   my ( $self, $p_key ) = @_;
 
-  Assert_Defined( $p_key );
-
-  $self->_update_access_time( $p_key );
-
+  $self->_get_cache_sizer( )->update_access_time( $p_key );
   return $self->SUPER::get( $p_key );
 }
 
@@ -73,23 +65,16 @@ sub limit_size
 {
   my ( $self, $p_new_size ) = @_;
 
-  Assert_Defined( $p_new_size );
-
-  Limit_Size( $self, $self->_build_cache_meta_data( ), $p_new_size );
+  $self->_get_cache_sizer( )->limit_size( $p_new_size );
 }
+
 
 sub set
 {
   my ( $self, $p_key, $p_data, $p_expires_in ) = @_;
 
-  Assert_Defined( $p_key );
-
   $self->SUPER::set( $p_key, $p_data, $p_expires_in );
-
-  if ( $self->get_max_size( ) != $NO_MAX_SIZE )
-  {
-    $self->limit_size( $self->get_max_size( ) );
-  }
+  $self->_get_cache_sizer( )->limit_size( $self->get_max_size( ) );
 }
 
 
@@ -98,48 +83,17 @@ sub _new
   my ( $proto, $p_options_hash_ref ) = @_;
   my $class = ref( $proto ) || $proto;
   my $self  =  $class->SUPER::_new( $p_options_hash_ref );
-  $self->_initialize_max_size( );
+  $self->_initialize_cache_sizer( );
   return $self;
 }
 
 
-sub _build_cache_meta_data
+sub _initialize_cache_sizer
 {
   my ( $self ) = @_;
 
-  my $cache_meta_data = new Cache::CacheMetaData( );
-
-  foreach my $key ( $self->get_keys( ) )
-  {
-    my $object = $self->get_object( $key ) or
-      next;
-
-    $cache_meta_data->insert( $object );
-  }
-
-  return $cache_meta_data;
-}
-
-
-sub _initialize_max_size
-{
-  my ( $self ) = @_;
-
-  $self->set_max_size( $self->_read_option( 'max_size', $DEFAULT_MAX_SIZE ) );
-}
-
-
-sub _update_access_time
-{
-  my ( $self, $p_key ) = @_;
-
-  my $object = $self->get_object( $p_key );
-
-  if ( defined $object )
-  {
-    $object->set_accessed_at( time( ) );
-    $self->set_object( $p_key, $object );
-  }
+  my $max_size = $self->_read_option( 'max_size', $DEFAULT_MAX_SIZE );
+  $self->_set_cache_sizer( new Cache::CacheSizer( $self, $max_size ) );
 }
 
 
@@ -147,15 +101,31 @@ sub get_max_size
 {
   my ( $self ) = @_;
 
-  return $self->{_Max_Size};
+  return $self->_get_cache_sizer( )->get_max_size( );
 }
 
 
 sub set_max_size
 {
-  my ( $self, $max_size ) = @_;
+  my ( $self, $p_max_size ) = @_;
 
-  $self->{_Max_Size} = $max_size;
+  $self->_get_cache_sizer( )->set_max_size( $p_max_size );
+}
+
+
+sub _get_cache_sizer
+{
+  my ( $self ) = @_;
+
+  return $self->{_Cache_Sizer};
+}
+
+
+sub _set_cache_sizer
+{
+  my ( $self, $p_cache_sizer ) = @_;
+
+  $self->{_Cache_Sizer} = $p_cache_sizer;
 }
 
 

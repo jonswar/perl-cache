@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheMetaData.pm,v 1.7 2001/11/07 13:10:56 dclinton Exp $
+# $Id: CacheMetaData.pm,v 1.8 2001/11/29 20:24:47 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -12,7 +12,6 @@ package Cache::CacheMetaData;
 
 use strict;
 use Cache::Cache qw( $EXPIRES_NOW $EXPIRES_NEVER );
-use Carp;
 
 #
 # the cache meta data structure looks something like the following:

@@ -11,6 +11,7 @@ lib/Cache/BaseCache.pm
 lib/Cache/BaseCacheTester.pm
 lib/Cache/Cache.pm
 lib/Cache/CacheMetaData.pm
+lib/Cache/CacheSizer.pm
 lib/Cache/CacheTester.pm
 lib/Cache/CacheUtils.pm
 lib/Cache/FileBackend.pm

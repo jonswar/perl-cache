@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: BaseCache.pm,v 1.19 2001/11/29 22:14:11 dclinton Exp $
+# $Id: BaseCache.pm,v 1.20 2001/11/29 22:40:39 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -14,12 +14,9 @@ package Cache::BaseCache;
 
 use strict;
 use vars qw( @ISA );
-use Cache::Cache qw( $EXPIRES_NEVER );
-use Cache::CacheUtils qw( Assert_Defined
-                          Build_Object
-                          Clone_Data
-                          Object_Has_Expired
-                        );
+use Cache::Cache qw( $EXPIRES_NEVER $EXPIRES_NOW );
+use Cache::CacheUtils qw( Assert_Defined Clone_Data );
+use Cache::Object;
 use Error;
 
 
@@ -35,6 +32,150 @@ my $DEFAULT_AUTO_PURGE_ON_GET = 0;
 # namespace that stores the keys used for the auto purge functionality
 
 my $AUTO_PURGE_NAMESPACE = "__AUTO_PURGE__";
+
+
+# map of expiration formats to their respective time in seconds
+
+my %_Expiration_Units = ( map(($_,             1), qw(s second seconds sec)),
+                          map(($_,            60), qw(m minute minutes min)),
+                          map(($_,         60*60), qw(h hour hours)),
+                          map(($_,      60*60*24), qw(d day days)),
+                          map(($_,    60*60*24*7), qw(w week weeks)),
+                          map(($_,   60*60*24*30), qw(M month months)),
+                          map(($_,  60*60*24*365), qw(y year years)) );
+
+
+
+# Takes the time the object was created, the default_expires_in and
+# optionally the explicitly set expires_in and returns the time the
+# object will expire. Calls _canonicalize_expiration to convert
+# strings like "5m" into second values.
+
+sub Build_Expires_At
+{
+  my ( $p_created_at, $p_default_expires_in, $p_explicit_expires_in ) = @_;
+
+  my $expires_in = defined $p_explicit_expires_in ?
+    $p_explicit_expires_in : $p_default_expires_in;
+
+  return Sum_Expiration_Time( $p_created_at, $expires_in );
+}
+
+
+# Return a Cache::Object object
+
+sub Build_Object
+{
+  my ( $p_key, $p_data, $p_default_expires_in, $p_expires_in ) = @_;
+
+  Assert_Defined( $p_key );
+  Assert_Defined( $p_default_expires_in );
+
+  my $now = time( );
+
+  my $object = new Cache::Object( );
+
+  $object->set_key( $p_key );
+  $object->set_data( $p_data );
+  $object->set_created_at( $now );
+  $object->set_accessed_at( $now );
+  $object->set_expires_at( Build_Expires_At( $now,
+                                             $p_default_expires_in,
+                                             $p_expires_in ) );
+  return $object;
+}
+
+
+# Compare the expires_at to the current time to determine whether or
+# not an object has expired (the time parameter is optional)
+
+sub Object_Has_Expired
+{
+  my ( $p_object, $p_time ) = @_;
+
+  if ( not defined $p_object )
+  {
+    return 1;
+  }
+
+  $p_time = $p_time || time( );
+
+  if ( $p_object->get_expires_at( ) eq $EXPIRES_NOW )
+  {
+    return 1;
+  }
+  elsif ( $p_object->get_expires_at( ) eq $EXPIRES_NEVER )
+  {
+    return 0;
+  }
+  elsif ( $p_time >= $p_object->get_expires_at( ) )
+  {
+    return 1;
+  }
+  else
+  {
+    return 0;
+  }
+}
+
+
+# Returns the sum of the  base created_at time (in seconds since the epoch)
+# and the canonical form of the expires_at string
+
+
+sub Sum_Expiration_Time
+{
+  my ( $p_created_at, $p_expires_in ) = @_;
+
+  Assert_Defined( $p_created_at );
+  Assert_Defined( $p_expires_in );
+
+  if ( $p_expires_in eq $EXPIRES_NEVER )
+  {
+    return $EXPIRES_NEVER;
+  }
+  else
+  {
+    return $p_created_at + Canonicalize_Expiration_Time( $p_expires_in );
+  }
+}
+
+
+# turn a string in the form "[number] [unit]" into an explicit number
+# of seconds from the present.  E.g, "10 minutes" returns "600"
+
+sub Canonicalize_Expiration_Time
+{
+  my ( $p_expires_in ) = @_;
+
+  Assert_Defined( $p_expires_in );
+
+  my $secs;
+
+  if ( uc( $p_expires_in ) eq uc( $EXPIRES_NOW ) )
+  {
+    $secs = 0;
+  }
+  elsif ( uc( $p_expires_in ) eq uc( $EXPIRES_NEVER ) )
+  {
+    throw Error::Simple( "Internal error.  expires_in eq $EXPIRES_NEVER" );
+  }
+  elsif ( $p_expires_in =~ /^\s*([+-]?(?:\d+|\d*\.\d*))\s*$/ )
+  {
+    $secs = $p_expires_in;
+  }
+  elsif ( $p_expires_in =~ /^\s*([+-]?(?:\d+|\d*\.\d*))\s*(\w*)\s*$/
+          and exists( $_Expiration_Units{ $2 } ))
+  {
+    $secs = ( $_Expiration_Units{ $2 } ) * $1;
+  }
+  else
+  {
+    throw Error::Simple( "invalid expiration time '$p_expires_in'" );
+  }
+
+  return $secs;
+}
 
 
 
@@ -269,7 +410,7 @@ sub _initialize_auto_purge_on_get
 
 # _read_option looks for an option named 'option_name' in the
 # option_hash associated with this instance.  If it is not found, then
-# 'default_value' will be returned instance
+# 'default_value' will be returned instead
 
 sub _read_option
 {

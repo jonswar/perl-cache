@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: MemoryCache.pm,v 1.23 2001/11/29 18:12:55 dclinton Exp $
+# $Id: MemoryCache.pm,v 1.24 2001/11/29 20:24:47 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -16,11 +16,8 @@ use strict;
 use vars qw( @ISA );
 use Cache::BaseCache;
 use Cache::Cache qw( $EXPIRES_NEVER );
-use Cache::CacheUtils qw( Assert_Defined
-                          Static_Params );
+use Cache::CacheUtils qw( Assert_Defined Static_Params );
 use Cache::MemoryBackend;
-use Cache::Object;
-use Carp;
 
 @ISA = qw ( Cache::BaseCache );
 

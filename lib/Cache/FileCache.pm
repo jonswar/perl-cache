@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: FileCache.pm,v 1.26 2001/11/29 20:24:47 dclinton Exp $
+# $Id: FileCache.pm,v 1.27 2001/11/29 22:40:39 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -16,15 +16,11 @@ use strict;
 use vars qw( @ISA );
 use Cache::BaseCache;
 use Cache::Cache;
-use Cache::CacheUtils qw ( Assert_Defined
-                           Build_Object
-                           Build_Path
-                           Get_Temp_Directory
-                           Object_Has_Expired
-                           Static_Params );
+use Cache::CacheUtils qw ( Assert_Defined Build_Path Static_Params );
 use Cache::FileBackend;
 use Cache::Object;
 use Error;
+use File::Spec::Functions;
 
 
 @ISA = qw ( Cache::BaseCache );
@@ -58,6 +54,17 @@ sub Clear
   {
     _Get_Cache( $namespace, $p_optional_cache_root )->clear( );
   }
+}
+
+
+# return the OS default temp directory
+
+sub Get_Temp_Directory
+{
+  my $tmpdir = File::Spec->tmpdir( ) or
+    throw Error::Simple( "No tmpdir on this system.  Upgrade File::Spec?" );
+
+  return $tmpdir;
 }
 
 
@@ -125,7 +132,7 @@ sub _Get_Cache
 
   Assert_Defined( $p_namespace );
 
-  if ( defined $p_optional_cache_root ) 
+  if ( defined $p_optional_cache_root )
   {
     return new Cache::FileCache( { 'namespace' => $p_namespace,
                                    'cache_root' => $p_optional_cache_root } );

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareCache.pm,v 1.4 2001/11/06 23:44:08 dclinton Exp $
+# $Id: SizeAwareCache.pm,v 1.5 2001/11/29 18:33:21 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -14,23 +14,12 @@ package Cache::SizeAwareCache;
 
 use strict;
 use Cache::Cache;
-use vars qw( @ISA
-             @EXPORT_OK
-             $EXPIRES_NOW
-             $EXPIRES_NEVER
-             $NO_MAX_SIZE );
+use vars qw( @ISA @EXPORT_OK $EXPIRES_NOW $EXPIRES_NEVER $NO_MAX_SIZE );
 use Exporter;
-
 
 @ISA = qw( Cache::Cache Exporter );
 
-@EXPORT_OK = qw( $EXPIRES_NOW
-                 $EXPIRES_NEVER
-                 $NO_MAX_SIZE );
-
-
-use vars @EXPORT_OK;
-
+@EXPORT_OK = qw( $EXPIRES_NOW $EXPIRES_NEVER $NO_MAX_SIZE );
 
 $EXPIRES_NOW = $Cache::Cache::EXPIRES_NOW;
 $EXPIRES_NEVER = $Cache::Cache::EXPIRES_NEVER;

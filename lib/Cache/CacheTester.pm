@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheTester.pm,v 1.12 2001/11/16 19:20:22 dclinton Exp $
+# $Id: CacheTester.pm,v 1.13 2001/11/29 22:40:39 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -11,7 +11,6 @@
 package Cache::CacheTester;
 
 use strict;
-use Carp;
 use Cache::BaseCacheTester;
 use Cache::Cache;
 use Error qw( :try );

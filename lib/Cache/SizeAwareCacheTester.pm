@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareCacheTester.pm,v 1.7 2001/11/06 23:44:08 dclinton Exp $
+# $Id: SizeAwareCacheTester.pm,v 1.8 2001/11/16 19:20:22 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -11,7 +11,6 @@
 package Cache::SizeAwareCacheTester;
 
 use strict;
-use Carp;
 use Cache::BaseCacheTester;
 use Cache::Cache;
 

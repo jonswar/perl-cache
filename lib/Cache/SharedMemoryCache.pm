@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SharedMemoryCache.pm,v 1.18 2001/11/16 19:20:22 dclinton Exp $
+# $Id: SharedMemoryCache.pm,v 1.19 2001/11/29 18:12:55 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -16,8 +16,7 @@ use strict;
 use vars qw( @ISA );
 use Cache::Cache;
 use Cache::MemoryCache;
-use Cache::CacheUtils qw( Assert_Defined
-                          Static_Params );
+use Cache::CacheUtils qw( Assert_Defined Static_Params );
 use Cache::SharedMemoryBackend;
 use Error;
 
