@@ -1,0 +1,8 @@
+* Replace Data::Dumper with Storable
+
+* Remove the static methods (such as Purge, Clear, etc.) from the
+  Cache interface.  Specific instances can implement those methods on
+  a case by case basis
+
+* Implement Cache::ExtendedFileCache with the full functionality of
+  File::Cache
