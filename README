@@ -24,9 +24,10 @@ DESCRIPTION
 
   The Perl Cache package provides Cache::Cache, a generic interface
   for creating persistent data stores.  This interface is implemented
-  by the Cache::FileCache, Cache::SizeAwareFileCache,
-  Cache::MemoryCache, and Cache::SharedMemoryCache classes.  This work
-  replaces File::Cache and IPC::Cache.
+  by the Cache::MemoryCache, Cache::SharedMemoryCache, Cache::FileCache, 
+  Cache::SizeAwareFileCache, Cache::SizeAwareMemoryCache, and 
+  Cache::SizeAwareSharedMemoryCache classes.  This work replaces 
+  File::Cache and IPC::Cache.
 
 
 REQUIREMENTS
@@ -62,7 +63,9 @@ USAGE
   performance metrics, and it is not limited in terms of the number of
   objects or their size.  If you wish to maintain a strict limit on
   the size of a file system based cache, then the SizeAwareFileCache
-  is the way to go.
+  is the way to go.  Similarly, the SizeAwareMemoryCache and the
+  SizeAwareSharedMemoryCache add size management functionality
+  to the MemoryCache and SharedMemoryCache classes respectively.
  
   Using a cache is simple.  Here is some sample code for instantiating
   and using a MemoryCache:
