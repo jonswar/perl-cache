@@ -14,9 +14,22 @@ outline the style for this project.
                     -----------------------------
 
 Avoid tabs.  Instead, use exactly 2 spaces to indent code.  Lines
-should break at 80 columns.
+should break at 80 columns.  Whitespace greatly increases readability,
+and should be used between adjacent statements.  An example subroutine:
 
+  sub build_something_else
+  {
+     my ( $self, $param ) = @_;
 
+     defined $param or
+       throw new Exception( );
+
+     my $something = calculate_something( $param );
+
+     my $something_else = calculate_something_else( $something );
+
+     return $something_else;
+  }
 
 
                               ----------
@@ -284,9 +297,8 @@ follows:
   # rights and limitations under the License.
   ######################################################################
 
-The "Id:" keyword is optional, though highly recommended if the code
-is being managed with CVS.  Note that there should not be a space
-between the '$' and the 'Id:' keyword if you want it to be expanded.
+The "Id" keyword is optional, though highly recommended if the code is
+being managed with CVS.
 
 
 After the copyright disclaimer, there should be a blank line, and then
@@ -360,13 +372,17 @@ Finally, the class should be documented according to this template:
 
   Description of the method
 
-  =item C<$parameter>
+  =over 4 
+
+  =item $parameter
 
   Description of the $parameter
 
   =item Returns
 
   Description of the return value
+
+  =back
 
   =back
 
