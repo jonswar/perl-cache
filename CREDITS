@@ -1,3 +1,6 @@
+- Richard Chen <chenri@snet.net> informed me of a better way to call
+  static methods without knowing the type of the class until runtime
+
 - Christophe Marcant <christophe@marcant.org> offered a patch to allow
   spaces to be used in the filenames
 
