@@ -1,3 +1,6 @@
+- Axel Beckert <abe@cs.uni-sb.de> submitted a patch to fix a bug in
+  the expiration units
+
 - Ken Williams <ken@forum.swarthmore.edu> submitted a patch to workaround
   a File::Path bug that was causing make test to pass
 

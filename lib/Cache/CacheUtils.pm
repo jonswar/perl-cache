@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheUtils.pm,v 1.21 2001/09/05 14:39:27 dclinton Exp $
+# $Id: CacheUtils.pm,v 1.22 2001/09/09 18:27:51 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -73,7 +73,8 @@ my $UNTAINTED_PATH_REGEX = qr{^([-\@\w\\\\~./:]+|[\w]:[-\@\w\\\\~./]+)$};
 my %_Expiration_Units = ( map(($_,             1), qw(s second seconds sec)),
                           map(($_,            60), qw(m minute minutes min)),
                           map(($_,         60*60), qw(h hour hours)),
-                          map(($_,      60*60*24), qw(w week weeks)),
+                          map(($_,      60*60*24), qw(d day days)),
+                          map(($_,    60*60*24*7), qw(w week weeks)),
                           map(($_,   60*60*24*30), qw(M month months)),
                           map(($_,  60*60*24*365), qw(y year years)) );
 

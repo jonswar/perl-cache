@@ -1,7 +1,8 @@
 Revision history for Cache
 
 0.09 in progress
- - applied Ken Williams's patch to pass all tests
+ - applied Axel Beckert patch to fix the expiration units
+ - applied Ken Williams's directory creation patch to pass all tests
  - changed the license to be either the GPL or the Artistic license
  - added Jay Sachs' implementation of NullCache
  - modified the remove methods to avoid croaking if two cache
