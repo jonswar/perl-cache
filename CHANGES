@@ -1,6 +1,7 @@
 Revision history for Cache
 
 1.03 in progress
+ - added more robust error checking for shared memory caches
  - added a check for invalid frozen data
  - added $1 to all error messages
 

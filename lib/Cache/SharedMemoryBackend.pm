@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SharedMemoryBackend.pm,v 1.6 2002/04/07 17:04:46 dclinton Exp $
+# $Id: SharedMemoryBackend.pm,v 1.7 2003/04/15 14:46:23 dclinton Exp $
 # Copyright (C) 2001-2003 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -82,7 +82,10 @@ sub _Instantiate_Share
                      -exclusive => 'no'
                     );
 
-  return new IPC::ShareLite( %ipc_options );
+  my $share = new IPC::ShareLite( %ipc_options ) or
+    throw Error::Simple( "Couldn't instantiate IPC::ShareLite: $!" );
+
+  return $share;
 }
 
 
