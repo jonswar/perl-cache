@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: MemoryCache.pm,v 1.7 2001/03/06 18:26:30 dclinton Exp $
+# $Id: MemoryCache.pm,v 1.8 2001/03/06 20:14:00 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -21,11 +21,10 @@ use Cache::Object;
 use Carp;
 use Data::Dumper;
 
-
 @ISA = qw ( Cache::BaseCache );
 
 
-my %Cache_Hash;
+my %_Cache_Hash;
 
 
 ##
@@ -88,7 +87,7 @@ sub _Delete_Namespace
   defined $namespace or
     croak( "Namespace required" );
 
-  delete $Cache_Hash{ $namespace };
+  delete $_Cache_Hash{ $namespace };
 
   return $SUCCESS;
 }
@@ -96,7 +95,7 @@ sub _Delete_Namespace
 
 sub _Namespaces
 {
-  return keys %Cache_Hash;
+  return keys %_Cache_Hash;
 }
 
 
@@ -261,7 +260,7 @@ sub _initialize_cache_hash_ref
 {
   my ( $self ) = @_;
 
-  my $cache_hash_ref = \%Cache_Hash;
+  my $cache_hash_ref = \%_Cache_Hash;
 
   $self->_set_cache_hash_ref( $cache_hash_ref );
 

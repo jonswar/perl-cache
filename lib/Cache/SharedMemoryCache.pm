@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SharedMemoryCache.pm,v 1.1.1.1 2001/02/13 01:30:41 dclinton Exp $
+# $Id: SharedMemoryCache.pm,v 1.2 2001/03/06 18:26:30 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -27,7 +27,7 @@ use IPC::Shareable;
 my $IPC_IDENTIFIER = 'ipcc';
 
 
-my %Cache_Hash;
+my %_Cache_Hash;
 
 
 
@@ -94,7 +94,7 @@ sub _Delete_Namespace
   defined $namespace or
     croak( "Namespace required" );
 
-  delete $Cache_Hash{ $namespace };
+  delete $_Cache_Hash{ $namespace };
 
   return $SUCCESS;
 }
@@ -102,7 +102,7 @@ sub _Delete_Namespace
 
 sub _Namespaces
 {
-  return keys %Cache_Hash;
+  return keys %_Cache_Hash;
 }
 
 
@@ -135,10 +135,10 @@ sub _initialize_cache_hash_ref
   my %ipc_options = ( 'key' =>  $IPC_IDENTIFIER,
 		      'create' => 'yes' );
 
-  tie( %Cache_Hash, 'IPC::Shareable', \%ipc_options ) or
-    croak( "Couldn't tie Cache_Hash" );
+  tie( %_Cache_Hash, 'IPC::Shareable', \%ipc_options ) or
+    croak( "Couldn't tie _Cache_Hash" );
 
-  my $cache_hash_ref = \%Cache_Hash;
+  my $cache_hash_ref = \%_Cache_Hash;
 
   $self->_set_cache_hash_ref( $cache_hash_ref );
 
