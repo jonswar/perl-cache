@@ -1,11 +1,13 @@
 Revision history for Cache
 
-0.05 in progress
+0.05 2000-03-20-10-25
+ - released version 0.05
  - updated Storable dependency to 1.011
  - replaced the IPC::Shareable backend with IPC::ShareLite
  - started version 0.05
 
 0.04 2000-03-17-10-43
+ - released version 0.04
  - replaced Data::Dumper with Storable, which is now a requirement
  - implemented the SizeAwareMemoryCache and associated tests
  - implemented the SizeAwareSharedMemoryCache and associated tests
