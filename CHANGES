@@ -6,10 +6,13 @@ Revision history for Cache
  - replaced non-standard usage of TRUE and FALSE with 1 and 0 
  - migrated from the term "identifier" to the more standard term "key"
    and marked the old public methods with identifier as deprecated
- - broke out the MemoryBackend and the SharedMemoryBackend into 
+ - broke out the MemoryBackend, FileBackend, SharedMemoryBackend into 
    distinct and reusable classes
  - fixed a long outstanding bug in the unit tests that made working
    caches appear to fail
+ - changed the meaning of object and cache size for file system based
+   caches to consistently reflect the total size of the objects on disk,
+   but not including the directory overhead
 
 0.09 2001-09-10-12-10
  - released version 0.09

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: FileBackend.pm,v 1.1 2001/11/24 19:15:48 dclinton Exp $
+# $Id: FileBackend.pm,v 1.2 2001/11/24 21:12:43 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -120,7 +120,7 @@ sub get_keys
 
   my @keys;
 
-  foreach my $unique_key ( $self->_list_unique_keys( $p_namespace ) )
+  foreach my $unique_key ( $self->get_unique_keys( $p_namespace ) )
   {
     my $object = 
       $self->_read_object( $self->_path_to_unique_key( $p_namespace,
@@ -133,6 +133,24 @@ sub get_keys
   return @keys;
 
 }
+
+
+
+sub get_unique_keys
+{
+  my ( $self, $p_namespace ) = @_;
+
+  Assert_Defined( $p_namespace );
+
+  my @unique_keys;
+
+  Recursively_List_Files( Build_Path( $self->get_root( ), $p_namespace ),
+                          \@unique_keys );
+
+  return @unique_keys;
+}
+
+
 
 
 sub get_namespaces
@@ -150,25 +168,19 @@ sub get_namespaces
 sub get_object_size
 {
   my ( $self, $p_namespace, $p_key ) = @_;
-}
-
-
-sub get_namespace_size
-{
-  my ( $self, $p_namespace ) = @_;
 
   Assert_Defined( $p_namespace );
+  Assert_Defined( $p_key );
 
-  return Recursive_Directory_Size( Build_Path( $self->get_root( ),
-                                               $p_namespace ) );
-}
+  if ( -e $self->_path_to_key( $p_namespace, $p_key ) )
+  {
+    return -s $self->_path_to_key( $p_namespace, $p_key );
 
-
-sub get_total_size
-{
-  my ( $self ) = @_;
-
-  return Recursive_Directory_Size( $self->get_root( ) );
+  }
+  else
+  {
+    return 0;
+  }
 }
 
 
@@ -282,27 +294,9 @@ sub _thaw
 
   Thaw_Object( $p_frozen_object, \$object );
 
-  $object->set_size( length $p_frozen_object );
-
   return $object;
 
 }
-
-
-sub _list_unique_keys
-{
-  my ( $self, $p_namespace ) = @_;
-
-  Assert_Defined( $p_namespace );
-
-  my @unique_keys;
-
-  Recursively_List_Files( Build_Path( $self->get_root( ), $p_namespace ),
-                          \@unique_keys );
-
-  return @unique_keys;
-}
-
 
 
 sub _read_object
@@ -317,6 +311,7 @@ sub _read_object
   my $object = $self->_thaw( $object_dump_ref );
 
   $object->set_accessed_at( $self->_get_atime( $p_object_path ) );
+  $object->set_size( -s $p_object_path );
 
   return $object;
 }

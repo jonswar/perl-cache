@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareFileCache.pm,v 1.21 2001/11/07 13:10:56 dclinton Exp $
+# $Id: SizeAwareFileCache.pm,v 1.22 2001/11/24 21:12:43 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -42,7 +42,7 @@ sub Clear
 {
   my ( $optional_cache_root ) = Static_Params( @_ );
 
-  return Cache::FileCache::Clear( $optional_cache_root );
+  Cache::FileCache::Clear( $optional_cache_root );
 }
 
 
@@ -50,7 +50,7 @@ sub Purge
 {
   my ( $optional_cache_root ) = Static_Params( @_ );
 
-  return Cache::FileCache::Purge( $optional_cache_root );
+  Cache::FileCache::Purge( $optional_cache_root );
 }
 
 
@@ -58,7 +58,7 @@ sub Size
 {
   my ( $optional_cache_root ) = Static_Params( @_ );
 
-  return Cache::FileCache::Size( $optional_cache_root );
+  Cache::FileCache::Size( $optional_cache_root );
 }
 
 
@@ -156,13 +156,9 @@ sub _build_cache_meta_data
 
   my $cache_meta_data = new Cache::CacheMetaData( );
 
-  my @filenames;
-
-  Recursively_List_Files( $self->_build_namespace_path( ), \@filenames );
-
-  foreach my $filename ( @filenames )
+  foreach my $key ( $self->get_keys( ) )
   {
-    my $object = $self->_restore( $filename ) or
+    my $object = $self->get_object( $key ) or
       next;
 
     $cache_meta_data->insert( $object );

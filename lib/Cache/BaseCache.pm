@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: BaseCache.pm,v 1.13 2001/11/08 23:01:23 dclinton Exp $
+# $Id: BaseCache.pm,v 1.14 2001/11/24 21:12:43 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -188,40 +188,6 @@ sub _read_option
   {
     return $p_default_value;
   }
-}
-
-
-sub _freeze
-{
-  my ( $self, $p_object ) = @_;
-
-  Assert_Defined( $p_object );
-
-  $p_object->set_size( undef );
-
-  my $object_dump;
-
-  Freeze_Object( \$p_object, \$object_dump );
-
-  return $object_dump;
-}
-
-
-sub _thaw
-{
-  my ( $self, $p_object_dump_ref ) = @_;
-
-  Assert_Defined( $p_object_dump_ref );
-
-  my $object;
-
-  Thaw_Object( $p_object_dump_ref, \$object );
-
-  Assert_Defined( $object );
-
-  $object->set_size( length $$p_object_dump_ref );
-
-  return $object;
 }
 
 

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: FileCache.pm,v 1.22 2001/11/07 17:02:56 dclinton Exp $
+# $Id: FileCache.pm,v 1.23 2001/11/24 21:12:43 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -71,7 +71,12 @@ sub Clear
 {
   my ( $p_optional_cache_root ) = Static_Params( @_ );
 
-  _Get_Backend( $p_optional_cache_root )->delete_all_namespaces( );
+  foreach my $namespace ( _Namespaces( $p_optional_cache_root ) )
+  {
+    # TODO:  This is broken -- try changing the root!
+    my $cache = new Cache::FileCache( { 'namespace' => $namespace } );
+    $cache->clear( );
+  }
 }
 
 
@@ -92,7 +97,16 @@ sub Size
 {
   my ( $p_optional_cache_root ) = Static_Params( @_ );
 
-  return _Get_Backend( $p_optional_cache_root )->get_total_size( );
+  my $size = 0;
+
+  foreach my $namespace ( _Namespaces( $p_optional_cache_root ) )
+  {
+    # TODO:  This is broken -- try changing the root!
+    my $cache = new Cache::FileCache( { 'namespace' => $namespace } );
+    $size += $cache->size( );
+  }
+
+  return $size;
 }
 
 
@@ -228,7 +242,15 @@ sub size
 {
   my ( $self ) = @_;
 
-  return $self->_get_backend( )->get_namespace_size( $self->get_namespace( ) );
+  my $size = 0;
+
+  foreach my $key ( $self->get_keys( ) )
+  {
+    $size += 
+      $self->_get_backend( )->get_object_size( $self->get_namespace( ), $key );
+  }
+
+  return $size;
 }
 
 
