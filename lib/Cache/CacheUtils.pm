@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheUtils.pm,v 1.30 2001/11/08 23:01:23 dclinton Exp $
+# $Id: CacheUtils.pm,v 1.31 2001/11/24 21:12:43 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -30,7 +30,7 @@ use Storable qw( freeze thaw );
                  Build_Path
                  Build_Unique_Key
                  Create_Directory
-                 Freeze_Object
+                 Freeze_Data
                  Get_Temp_Directory
                  Instantiate_Share
                  Limit_Size
@@ -51,7 +51,7 @@ use Storable qw( freeze thaw );
                  Store_Shared_Hash_Ref
                  Store_Shared_Hash_Ref_And_Unlock
                  Update_Access_Time
-                 Thaw_Object
+                 Thaw_Data
                  Write_File
                  Object_Has_Expired );
 
@@ -246,7 +246,7 @@ sub Create_Directory
 
 # use Storable to freeze an object
 
-sub Freeze_Object
+sub Freeze_Data
 {
   my ( $p_object_ref, $p_frozen_object_ref  ) = @_;
 
@@ -260,7 +260,7 @@ sub Freeze_Object
 
 # use Storable to thaw an object
 
-sub Thaw_Object
+sub Thaw_Data
 {
   my ( $p_frozen_object_ref, $p_object_ref ) = @_;
 

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: BaseCache.pm,v 1.17 2001/11/29 18:33:21 dclinton Exp $
+# $Id: BaseCache.pm,v 1.18 2001/11/29 20:24:47 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -95,7 +95,7 @@ sub get_object
       return undef;
 
   $object->set_size( $self->_get_backend( )->
-                     get_object_size( $self->get_namespace( ), $p_key ) );
+                     get_size( $self->get_namespace( ), $p_key ) );
 
   $object->set_key( $p_key );
 
@@ -144,6 +144,8 @@ sub set_object
 {
   my ( $self, $p_key, $p_object ) = @_;
 
+  # TODO, this should first clone the object!
+
   $p_object->set_size( undef );
   $p_object->set_key( undef );
 
@@ -161,8 +163,7 @@ sub size
 
   foreach my $key ( $self->get_keys( ) )
   {
-    $size += 
-      $self->_get_backend( )->get_object_size( $self->get_namespace( ), $key );
+    $size += $self->_get_backend( )->get_size( $self->get_namespace( ), $key );
   }
 
   return $size;

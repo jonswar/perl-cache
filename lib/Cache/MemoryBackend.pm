@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: MemoryBackend.pm,v 1.3 2001/11/29 18:12:55 dclinton Exp $
+# $Id: MemoryBackend.pm,v 1.4 2001/11/29 18:33:21 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -11,8 +11,8 @@
 package Cache::MemoryBackend;
 
 use strict;
-use Cache::CacheUtils qw( Freeze_Object
-                          Thaw_Object );
+use Cache::CacheUtils qw( Freeze_Data
+                          Thaw_Data );
 
 my $Store_Ref;
 
@@ -60,7 +60,7 @@ sub get_namespaces
 }
 
 
-sub get_object_size
+sub get_size
 {
   my ( $self, $p_namespace, $p_key ) = @_;
 
@@ -100,7 +100,7 @@ sub _freeze
 
   my $frozen_data;
 
-  Freeze_Object( \$p_data, \$frozen_data );
+  Freeze_Data( \$p_data, \$frozen_data );
 
   return $frozen_data;
 }
@@ -125,7 +125,7 @@ sub _thaw
 
   my $data;
 
-  Thaw_Object( \$p_frozen_data, \$data );
+  Thaw_Data( \$p_frozen_data, \$data );
 
   return $data;
 

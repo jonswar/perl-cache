@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SharedCacheUtils.pm,v 1.2 2001/11/06 23:44:08 dclinton Exp $
+# $Id: SharedCacheUtils.pm,v 1.3 2001/11/07 17:02:56 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -13,9 +13,9 @@ package Cache::SharedCacheUtils;
 use strict;
 use vars qw( @ISA @EXPORT_OK );
 use Cache::CacheUtils qw( Assert_Defined
-                          Freeze_Object
+                          Freeze_Data
                           Static_Params
-                          Thaw_Object );
+                          Thaw_Data );
 use IPC::ShareLite qw( LOCK_EX LOCK_UN );
 
 
@@ -65,7 +65,7 @@ sub Restore_Shared_Hash_Ref
   my $frozen_hash_ref = Instantiate_Share( $p_ipc_identifier )->fetch( ) or
     return $hash_ref;
 
-  Thaw_Object( \$frozen_hash_ref, \$hash_ref );
+  Thaw_Data( \$frozen_hash_ref, \$hash_ref );
 
   return $hash_ref;
 }
@@ -90,7 +90,7 @@ sub Restore_Shared_Hash_Ref_With_Lock
   my $frozen_hash_ref = $share->fetch( ) or
     return $hash_ref;
 
-  Thaw_Object( \$frozen_hash_ref, \$hash_ref );
+  Thaw_Data( \$frozen_hash_ref, \$hash_ref );
 
   return $hash_ref;
 }
@@ -108,7 +108,7 @@ sub Store_Shared_Hash_Ref
 
   my $frozen_hash_ref = { };
 
-  Freeze_Object( \$p_hash_ref, \$frozen_hash_ref );
+  Freeze_Data( \$p_hash_ref, \$frozen_hash_ref );
 
   Instantiate_Share( $p_ipc_identifier )->store( $frozen_hash_ref );
 }
@@ -127,7 +127,7 @@ sub Store_Shared_Hash_Ref_And_Unlock
 
   my $frozen_hash_ref = { };
 
-  Freeze_Object( \$p_hash_ref, \$frozen_hash_ref );
+  Freeze_Data( \$p_hash_ref, \$frozen_hash_ref );
 
   my $share = Instantiate_Share( $p_ipc_identifier );
 

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: FileBackend.pm,v 1.5 2001/11/29 18:33:21 dclinton Exp $
+# $Id: FileBackend.pm,v 1.6 2001/11/29 20:24:47 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -17,14 +17,14 @@ use Cache::CacheUtils qw ( Assert_Defined
                            Split_Word
                            List_Subdirectories
                            Make_Path
-                           Freeze_Object
+                           Freeze_Data
                            Read_File_Without_Time_Modification
                            Recursive_Directory_Size
                            Recursively_List_Files
                            Recursively_Remove_Directory
                            Remove_File
                            Update_Access_Time
-                           Thaw_Object
+                           Thaw_Data
                            Write_File );
 use Error;
 
@@ -112,7 +112,7 @@ sub get_namespaces
 }
 
 
-sub get_object_size
+sub get_size
 {
   my ( $self, $p_namespace, $p_key ) = @_;
 
@@ -229,7 +229,7 @@ sub _path_to_unique_key
 }
 
 
-# the data is returned as reference to an array ( key, object )
+# the data is returned as reference to an array ( key, value )
 
 sub _read_data
 {
@@ -242,13 +242,13 @@ sub _read_data
 
   my $data;
 
-  Thaw_Object( $frozen_file_ref, \$data );
+  Thaw_Data( $frozen_file_ref, \$data );
 
   return $data;
 }
 
 
-# the data is passed as reference to an array ( key, object )
+# the data is passed as reference to an array ( key, value )
 
 sub _write_data
 {
@@ -261,7 +261,7 @@ sub _write_data
 
   my $frozen_file;
 
-  Freeze_Object( \$p_data, \$frozen_file );
+  Freeze_Data( \$p_data, \$frozen_file );
 
   Write_File( $p_path, \$frozen_file );
 }
