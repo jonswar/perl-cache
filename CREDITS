@@ -1,3 +1,8 @@
+- siracusa@mindspring.com suggested using $1 on all error messages
+
+- Stephen Edmonds <Stephen.Edmonds@its.monash.edu.au> caught a bug where
+  invalid frozen data could be returned.
+
 - Shailen Bellare <Shailen.Bellare@lehman.com> assisted in the work 
   required to migrated to Storable's "nfreeze" instead of "freeze" 
 
