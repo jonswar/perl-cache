@@ -2,7 +2,11 @@ Revision history for Cache
 
 0.02 in progress
  - created SizeAwareFileCache
- - maked the FileCache and MemoryCache as ISA Cache::Cache
+ - added the SizeAwareCacheTester module
+ - refactored common test code into the AbstractCacheTester module
+ - added the Recursively_List_Files_With_Paths routine to CacheUtils
+ - marked the FileCache and MemoryCache as ISA Cache::Cache
+ - updated the MANIFEST
  - started version 0.02
 
 0.01 2001-02-13-16-16
