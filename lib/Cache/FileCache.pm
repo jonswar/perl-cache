@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: FileCache.pm,v 1.8 2001/03/06 17:02:01 dclinton Exp $
+# $Id: FileCache.pm,v 1.9 2001/03/06 17:05:24 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -470,7 +470,7 @@ sub _build_namespace_path
 
 
 ##
-# Properties
+# Instance properties
 ##
 
 

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: MemoryCache.pm,v 1.5 2001/03/06 07:07:43 dclinton Exp $
+# $Id: MemoryCache.pm,v 1.6 2001/03/06 18:02:58 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -16,7 +16,7 @@ use strict;
 use vars qw( @ISA );
 use Cache::BaseCache;
 use Cache::Cache qw( $EXPIRES_NEVER $TRUE $FALSE $SUCCESS $FAILURE );
-use Cache::CacheUtils qw ( Build_Object Object_Has_Expired Static_Params );
+use Cache::CacheUtils qw( Build_Object Object_Has_Expired Static_Params );
 use Cache::Object;
 use Carp;
 use Data::Dumper;
@@ -371,11 +371,6 @@ sub _build_object_size
 
 ##
 # Instance properties
-##
-
-
-##
-# Properties
 ##
 
 
