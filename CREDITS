@@ -1,3 +1,11 @@
+
+- Jonathan Swartz <jswartz@users.sourceforge.net>, a Perl Cache
+  project developer, for the expanded expiration format code and all of
+  the great dialog in the list server
+
+- Sergey Polyakov <alexei@samara.net> for numerous bug reports and for
+  being an ealry adopter of Perl Cache
+
 # The follow credits were copied from File::Cache, the previous
 # incarnation of this library
 
