@@ -6,6 +6,7 @@ Revision history for Cache
  - changed _Untaint_String to throw an exception on a taint
  - further improved the fix to prevent race conditions that caused the
    tests to fail
+ - exposed the get_namespaces method on Cache
 
 0.99 2001-12-09-18-45
  - released version 0.99
