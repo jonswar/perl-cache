@@ -1,3 +1,6 @@
+- Glady.Junsay <Glady.Junsay@target.com> noticed that get_keys was 
+  defined twice in NullCache
+
 - Sterling Swartwout <sterling_swartwout@standardandpoors.com> helped
   track down an issue with the regex quoting in older versions of perl
 
