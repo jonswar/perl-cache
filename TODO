@@ -6,3 +6,6 @@
 
 * Implement Cache::ExtendedFileCache with the full functionality of
   File::Cache
+
+* Write a benchmark class to test the various caches relative
+  performance
