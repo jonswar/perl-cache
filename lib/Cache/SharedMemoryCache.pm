@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SharedMemoryCache.pm,v 1.23 2003/04/15 14:46:23 dclinton Exp $
+# $Id: SharedMemoryCache.pm,v 1.24 2004/04/24 15:46:47 dclinton Exp $
 # Copyright (C) 2001-2003 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -125,7 +125,7 @@ buffer and cache file system accesses very well.
 cached objects, whereas the SharedMemoryCache has limits, and rather
 low ones at that.
 
-3) FileCache works well on every OS, wherease the SharedMemoryCache
+3) FileCache works well on every OS, whereas the SharedMemoryCache
 works only on systems that support IPC::ShareLite.  And IPC::ShareLite
 is an impressive effort -- but think about how hard it is to get
 shared memory working properly on *one* system.  Now imagine writing a
