@@ -1,5 +1,5 @@
 ######################################################################
-# $Id:  $
+# $Id: MemoryCache.pm,v 1.1.1.1 2001/02/13 01:30:40 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -13,10 +13,12 @@ package Cache::MemoryCache;
 use strict;
 use vars qw( @ISA );
 use Cache::Cache qw( $EXPIRES_NEVER $TRUE $FALSE $SUCCESS $FAILURE );
-use Carp;
 use Cache::CacheUtils qw ( Build_Object Object_Has_Expired );
 use Cache::Object;
+use Carp;
 use Data::Dumper;
+
+@ISA = qw ( Cache::Cache );
 
 my %Cache_Hash;
 
@@ -30,7 +32,7 @@ sub new
   my $self  = {};
   bless( $self, $class );
 
-  $self->_initialize( $options_hash_ref ) or
+  $self->_initialize_memory_cache( $options_hash_ref ) or
     croak( "Couldn't initialize" );
 
   return $self;
@@ -190,7 +192,7 @@ sub Size
 
 
 
-sub _initialize
+sub _initialize_memory_cache
 {
   my ( $self, $options_hash_ref ) = @_;
 
@@ -552,7 +554,7 @@ Cache::Cache
 
 Original author: DeWitt Clinton <dewitt@unto.net>
 
-Last author:     $Author: dewitt $
+Last author:     $Author: dclinton $
 
 Copyright (C) 2001 DeWitt Clinton
 
