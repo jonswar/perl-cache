@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: FileCache.pm,v 1.5 2001/02/19 04:58:30 jswartz Exp $
+# $Id: BaseCache.pm,v 1.1 2001/03/05 19:00:40 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -20,6 +20,11 @@ use Carp;
 my $DEFAULT_EXPIRES_IN = $EXPIRES_NEVER;
 my $DEFAULT_NAMESPACE = "Default";
 
+
+##
+# Constructor
+##
+
 sub new
 {
   my ( $proto, $options_hash_ref ) = @_;
@@ -33,6 +38,10 @@ sub new
   return $self;
 }
 
+
+##
+# Private instance methods
+##
 
 sub _initialize_base_cache
 {
@@ -61,7 +70,6 @@ sub _initialize_options_hash_ref
 }
 
 
-
 sub _initialize_namespace
 {
   my ( $self ) = @_;
@@ -87,6 +95,9 @@ sub _initialize_default_expires_in
 }
 
 
+# _read_option looks for an option named 'option_name' in the
+# option_hash associated with this instance.  If it is not found, then
+# 'default_value' will be returned instance
 
 sub _read_option
 {
@@ -106,6 +117,9 @@ sub _read_option
 
 
 
+##
+# Instance properties
+##
 
 sub _get_options_hash_ref
 {
@@ -113,6 +127,7 @@ sub _get_options_hash_ref
 
   return $self->{_Options_Hash_Ref};
 }
+
 
 sub _set_options_hash_ref
 {
@@ -146,6 +161,7 @@ sub get_default_expires_in
   return $self->{_Default_Expires_In};
 }
 
+
 sub _set_default_expires_in
 {
   my ( $self, $default_expires_in ) = @_;
@@ -155,3 +171,78 @@ sub _set_default_expires_in
 
 
 1;
+
+
+  __END__
+
+
+=pod
+
+=head1 NAME
+
+Cache::BaseCache -- abstract cache base class
+
+=head1 DESCRIPTION
+
+BaseCache provides functionality common to all instances of a cache.
+It differes from the CacheUtils package insofar as it is designed to
+be used as superclass for cache implementations.
+
+=head1 SYNOPSIS
+
+Cache::BaseCache is to be used as a superclass for cache
+implementations.
+
+  package Cache::MyCache;
+
+  use vars qw( @ISA );
+  use Cache::BaseCache;
+
+  @ISA = qw( Cache::BaseCache );
+
+  sub new
+  {
+    my ( $proto, $options_hash_ref ) = @_;
+    my $class = ref( $proto ) || $proto;
+
+    my $self  =  $class->SUPER::new( $options_hash_ref ) or
+      croak( "Couldn't run super constructor" );
+
+    return $self;
+  }
+
+  sub get
+  {
+    my ( $self, $identifier ) = @_;
+
+    #...
+  }
+
+
+=head1 PROPERTIES
+
+=over 4
+
+=item B<get_namespace>
+
+See Cache::Cache
+
+=item B<get_default_expires_in>
+
+See Cache::Cache
+
+=back
+
+=head1 SEE ALSO
+
+Cache::Cache, Cache::FileCache, Cache::MemoryCache
+
+=head1 AUTHOR
+
+Original author: DeWitt Clinton <dewitt@unto.net>
+
+Last author:     $Author: dclinton $
+
+Copyright (C) 2001 DeWitt Clinton
+
+=cut
