@@ -1,6 +1,7 @@
 Revision history for Cache
 
-1.01 in progress
+1.01 2002-04-14-01-30
+ - released version 1.01
  - switched to Digest::SHA1
  - updated copyright dates
 
