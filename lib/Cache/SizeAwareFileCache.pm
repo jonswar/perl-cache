@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareFileCache.pm,v 1.1 2001/02/15 15:49:49 dclinton Exp $
+# $Id: SizeAwareFileCache.pm,v 1.2 2001/02/15 16:39:55 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -14,7 +14,7 @@ use strict;
 use vars qw( @ISA @EXPORT_OK $NO_MAX_SIZE );
 use Cache::Cache qw( $EXPIRES_NEVER $SUCCESS $FAILURE $TRUE $FALSE );
 use Cache::CacheUtils qw ( Make_Path
-                           Recursively_List_Files
+                           Recursively_List_Files_With_Paths
                            Read_File_Without_Time_Modification
                            Write_File );
 use Cache::FileCache;
@@ -53,6 +53,29 @@ sub new
 
 
 
+sub Clear
+{
+  my ( $optional_cache_root ) = @_;
+
+  return Cache::FileCache::Clear( $optional_cache_root );
+}
+
+
+sub Purge
+{
+  my ( $optional_cache_root ) = @_;
+
+  return Cache::FileCache::Purge( $optional_cache_root );
+}
+
+
+sub Size
+{
+  my ( $optional_cache_root ) = @_;
+
+  return Cache::FileCache::Size( $optional_cache_root );
+}
+
 
 sub _store
 {
@@ -81,7 +104,7 @@ sub _store
 
     $new_size = 0 if $new_size < 0;
 
-    $self->reduce_size( $new_size );
+    $self->limit_size( $new_size );
   }
 
   Write_File( $object_path, \$object_dump ) or
@@ -91,7 +114,7 @@ sub _store
 }
 
 
-sub reduce_size
+sub limit_size
 {
   my ( $self, $new_size ) = @_;
 
@@ -107,7 +130,7 @@ sub reduce_size
 
     if ( not defined $identifier_to_remove )
     {
-      warn("Couldn't reduce size to $new_size\n");
+      warn("Couldn't limit size to $new_size\n");
 
       return $FAILURE;
     }
@@ -159,7 +182,9 @@ sub _Find_Next_Expiring_Identifier
 
   my $next_expires_at = undef;
 
-  my @filenames = Recursively_List_Files( $namespace_path );
+  my @filenames;
+
+  Recursively_List_Files_With_Paths( $namespace_path, \@filenames );
 
   foreach my $filename ( @filenames )
   {
@@ -195,7 +220,9 @@ sub _Find_Least_Recently_Accessed_Identifier
 
   my $least_recent_access_time = undef;
 
-  my @filenames = Recursively_List_Files( $namespace_path );
+  my @filenames;
+
+  Recursively_List_Files_With_Paths( $namespace_path, \@filenames );
 
   foreach my $filename ( @filenames )
   {
@@ -209,7 +236,7 @@ sub _Find_Least_Recently_Accessed_Identifier
 
       $least_recent_access_time = $last_access_time;
 
-      $least_recently_accessed_identifier = $object->identifier( ) or
+      $least_recently_accessed_identifier = $object->get_identifier( ) or
         croak( "Couldn't get identifier" );
     }
   }
@@ -224,6 +251,12 @@ sub _Restore_Object_Without_Time_Modication
 
   defined( $filename ) or
     croak( "filename required" );
+
+  if ( not -e $filename )
+  {
+    warn( "filename $filename does not exist" );
+    return undef;
+  }
 
   my $object_dump_ref = Read_File_Without_Time_Modification( $filename ) or
     return undef;
