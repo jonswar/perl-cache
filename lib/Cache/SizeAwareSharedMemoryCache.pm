@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareSharedMemoryCache.pm,v 1.5 2001/03/20 15:47:32 dclinton Exp $
+# $Id: SizeAwareSharedMemoryCache.pm,v 1.6 2001/03/20 16:09:02 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -20,7 +20,7 @@ use Cache::CacheUtils qw( Restore_Shared_Hash_Ref
                           Static_Params
                           Store_Shared_Hash_Ref
                           Store_Shared_Hash_Ref_And_Unlock
-                          Clone_Object );
+                        );
 use Cache::SizeAwareMemoryCache;
 use Cache::SharedMemoryCache;
 use Carp;
@@ -150,6 +150,27 @@ sub remove
 ##
 
 
+sub _build_object_size
+{
+  my ( $self, $identifier ) = @_;
+
+  $identifier or
+    croak( "identifier required" );
+
+  my $namespace = $self->get_namespace( ) or
+    croak( "Couldn't get namespace" );
+
+  my $cache_hash_ref = _Restore_Cache_Hash_Ref( ) or
+    croak( "Couldn't restore cache hash ref" );
+
+  my $object_dump = $cache_hash_ref->{$namespace}->{$identifier} or
+    return 0;
+
+  my $size = length $object_dump;
+
+  return $size;
+}
+
 
 sub _store
 {
@@ -161,15 +182,10 @@ sub _store
   my $namespace = $self->get_namespace( ) or
     croak( "Couldn't get namespace" );
 
-  my $object_dump;
-
-  Clone_Object( \$object, \$object_dump ) or
-    croak( "Couldn't freeze object" );
-
   my $cache_hash_ref = _Restore_Cache_Hash_Ref( ) or
     croak( "Couldn't restore cache hash ref" );
 
-  $cache_hash_ref->{$namespace}->{$identifier} = $object_dump;
+  $cache_hash_ref->{$namespace}->{$identifier} = $object;
 
   _Store_Cache_Hash_Ref( $cache_hash_ref ) or
     croak( "Couldn't store cache hash ref" );
@@ -210,28 +226,6 @@ sub _identifiers
   return ( ) unless defined $cache_hash_ref->{$namespace};
 
   return keys %{$cache_hash_ref->{$namespace}};
-}
-
-
-sub _build_object_size
-{
-  my ( $self, $identifier ) = @_;
-
-  $identifier or
-    croak( "identifier required" );
-
-  my $namespace = $self->get_namespace( ) or
-    croak( "Couldn't get namespace" );
-
-  my $cache_hash_ref = _Restore_Cache_Hash_Ref( ) or
-    croak( "Couldn't restore cache hash ref" );
-
-  my $object_dump = $cache_hash_ref->{$namespace}->{$identifier} or
-    return 0;
-
-  my $size = length $object_dump;
-
-  return $size;
 }
 
 

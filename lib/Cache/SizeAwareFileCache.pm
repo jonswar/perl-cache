@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareFileCache.pm,v 1.10 2001/03/13 01:27:15 dclinton Exp $
+# $Id: SizeAwareFileCache.pm,v 1.11 2001/03/13 03:37:09 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -15,8 +15,10 @@ package Cache::SizeAwareFileCache;
 use strict;
 use vars qw( @ISA );
 use Cache::Cache qw( $EXPIRES_NEVER $SUCCESS $FAILURE $TRUE $FALSE );
+use Cache::CacheMetaData;
 use Cache::CacheUtils qw ( Build_Object
                            Build_Unique_Key
+                           Limit_Size
                            Make_Path
                            Recursively_List_Files_With_Paths
                            Read_File_Without_Time_Modification
@@ -66,71 +68,6 @@ sub Size
 ##
 # Private class methods
 ##
-
-
-# _Build_Removal_List creates a list of all of the files in the cache
-# Each file appears twice in the list.  First, ordered by the the time
-# in which they will expire (skipping those that will not expire), and
-# second, in the order by which they were most recently accessed
-#
-# NOTE:  I aplogize if this method is confusing.  This was an area
-# of significant performance issues, so it is written to be optimized
-# in terms of run time speed, not clarity
-
-
-sub _Build_Removal_List
-{
-  my ( $namespace_path, $removal_list_ref ) = Static_Params( @_ );
-
-  defined( $namespace_path ) or
-    croak( "namespace_path required" );
-
-  defined( $removal_list_ref ) or
-    croak( "removal_list_ref required" );
-
-
-  my @filenames;
-
-  my %next_expiration_hash;
-
-  my %least_recently_accessed_hash;
-
-  Recursively_List_Files_With_Paths( $namespace_path, \@filenames );
-
-  foreach my $filename ( @filenames )
-  {
-    my $object = _Restore_Object_Without_Time_Modication( $filename ) or
-      next;
-
-    my $expires_at = $object->get_expires_at( );
-
-    my $last_access_time = ( stat( $filename ) )[8];
-
-    $next_expiration_hash{ $filename } = $expires_at if
-      $expires_at ne $EXPIRES_NEVER;
-
-    $least_recently_accessed_hash{ $filename } = $last_access_time;
-  }
-
-
-  my @next_expiring_list =
-    sort
-    {
-      $next_expiration_hash{$b} <=> $next_expiration_hash{$a}
-    } keys %next_expiration_hash;
-
-
-  my @least_recently_accessed_list =
-    sort
-    {
-      $least_recently_accessed_hash{$b} <=> $least_recently_accessed_hash{$a}
-    } keys %least_recently_accessed_hash;
-
-
-  @$removal_list_ref = ( @next_expiring_list, @least_recently_accessed_list );
-
-  return $SUCCESS;
-}
 
 
 sub _Restore_Object_Without_Time_Modication
@@ -212,46 +149,59 @@ sub set
 
 
 
-sub limit_size
+sub _build_cache_meta_data
 {
-  my ( $self, $new_size ) = @_;
-
-  $new_size >= 0 or
-    croak( "size >= 0 required" );
-
-  return $SUCCESS if ( $new_size == $NO_MAX_SIZE );
+  my ( $self ) = @_;
 
   my $namespace_path = $self->_build_namespace_path( ) or
     croak( "Couldn't build namespace path" );
 
-  my $current_size = $self->size( );
+  defined( $namespace_path ) or
+    croak( "namespace_path required" );
 
-  my $size_difference = $self->size( ) - $new_size;
+  my $cache_meta_data = new Cache::CacheMetaData( ) or
+    croak( "Couldn't instantiate new CacheMetaData" );
 
-  return $SUCCESS if ( $size_difference <= 0 );
+  my @filenames;
 
-  my @removal_list;
+  Recursively_List_Files_With_Paths( $namespace_path, \@filenames );
 
-  _Build_Removal_List( $namespace_path, \@removal_list );
-
-  foreach my $filename ( @removal_list )
+  foreach my $filename ( @filenames )
   {
-    my $size = -s $filename;
+    my $object = _Restore_Object_Without_Time_Modication( $filename ) or
+      next;
 
-    Remove_File( $filename ) or
-      croak( "Couldn't remove file $filename" );
+    my $expires_at = $object->get_expires_at( );
 
-    $size_difference -= $size;
+    my $accessed_at = ( stat( $filename ) )[8] or
+      croak( "Couldn't get accessed_at" );
 
-    last if ( $size_difference <= 0 );
+    my $identifier = $object->get_identifier( ) or
+      croak( "Couldn't get identifier" );
+
+    my $size = -s $filename or
+      croak( "Couldn't get size for $filename" );
+
+    $cache_meta_data->insert( $identifier, $expires_at, $accessed_at, $size ) or
+      croak( "Couldn't insert meta data" );
   }
 
-  if ( $size_difference > 0 )
-  {
-    warn("Couldn't limit size to $new_size\n");
+  return $cache_meta_data;
+}
 
-    return $FAILURE;
-  }
+
+sub limit_size
+{
+  my ( $self, $new_size ) = @_;
+
+  defined $new_size or
+    croak( "new_size required" );
+
+  my $cache_meta_data = $self->_build_cache_meta_data( ) or
+    croak( "Couldn't build cache meta data" );
+
+  Limit_Size( $self, $cache_meta_data, $new_size ) or
+    croak( "Couldn't limit size to $new_size" );
 
   return $SUCCESS;
 }

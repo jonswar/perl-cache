@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareCacheTester.pm,v 1.3 2001/03/06 08:42:01 dclinton Exp $
+# $Id: SizeAwareCacheTester.pm,v 1.4 2001/03/12 19:20:59 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -85,6 +85,11 @@ sub _test_one
 
   $cache->limit_size( $size_limit );
 
+  my $first_value = $cache->get( $first_key );
+
+  ( not defined $first_value ) ?
+    $self->ok( ) : $self->not_ok( 'not defined $first_value' );
+
   my $third_size = $cache->size( );
 
   ( $third_size <= $size_limit ) ?
@@ -113,7 +118,7 @@ sub _test_two
   ( $empty_size == 0 ) ?
     $self->ok( ) : $self->not_ok( '$empty_size == 0' );
 
-  my $value = $self;
+  my $value = "A very short string";
 
   my $first_key = 'Key 0';
 
@@ -132,11 +137,13 @@ sub _test_two
 
   my $second_expires_in = $first_expires_in / 2;
 
-  my $num_keys = 10;
+  my $num_keys = 5;
 
   for ( my $i = 1; $i <= $num_keys; $i++ )
   {
     my $key = 'Key ' . $i;
+
+    sleep ( 1 );
 
     my $set_status = $cache->set( $key, $value, $second_expires_in );
 
@@ -152,6 +159,11 @@ sub _test_two
   my $size_limit = $first_size;
 
   $cache->limit_size( $size_limit );
+
+  my $first_value = $cache->get( $first_key );
+
+  ( $first_value eq $value ) ?
+    $self->ok( ) : $self->not_ok( '$first_value eq $value' );
 
   my $third_size = $cache->size( );
 

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SharedMemoryCache.pm,v 1.6 2001/03/20 15:47:32 dclinton Exp $
+# $Id: SharedMemoryCache.pm,v 1.7 2001/03/20 16:09:02 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -21,7 +21,7 @@ use Cache::CacheUtils qw( Restore_Shared_Hash_Ref
                           Static_Params
                           Store_Shared_Hash_Ref
                           Store_Shared_Hash_Ref_And_Unlock
-                          Clone_Object );
+                        );
 use Carp;
 
 
@@ -196,15 +196,10 @@ sub _store
   my $namespace = $self->get_namespace( ) or
     croak( "Couldn't get namespace" );
 
-  my $object_dump;
-
-  Clone_Object( \$object, \$object_dump ) or
-    croak( "Couldn't freeze object" );
-
   my $cache_hash_ref = _Restore_Cache_Hash_Ref_With_Lock( ) or
     croak( "Couldn't restore cache hash ref" );
 
-  $cache_hash_ref->{$namespace}->{$identifier} = $object_dump;
+  $cache_hash_ref->{$namespace}->{$identifier} = $object;
 
   _Store_Cache_Hash_Ref_And_Unlock( $cache_hash_ref ) or
     croak( "Couldn't store cache hash ref" );

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheBenchmark.pm,v 1.3 2001/03/21 14:09:59 dclinton Exp $
+# $Id: CacheBenchmark.pm,v 1.4 2001/03/22 02:58:40 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -35,10 +35,12 @@ use Exporter;
 @EXPORT_OK = qw ( Benchmark_Cache );
 
 
-my @SET_NUM_KEYS = ( 10, 100, 1000 );
+my @SET_NUM_KEYS = ( 10, 100, 1000, 5000 );
 my @SET_OBJECT_SIZE = ( 1, 10, 100, 1000  );
-my @GET_NUM_KEYS = ( 10, 100, 1000 );
+my @GET_NUM_KEYS = ( 10, 100, 1000, 5000 );
 my @GET_OBJECT_SIZE = ( 1, 10, 100, 1000 );
+
+
 my $MAX_SIZE = 10000;
 
 
@@ -250,13 +252,12 @@ sub Benchmark_Set
 
     my ( $real, $user, $system, $cuser, $csystem, $iterations ) = @$t;
 
-    my $total = $user + $real + $system;
-    my $per_key = $total / $num_keys;
+    my $per_key = $system / $num_keys;
 
-    printf ( "%5d sets of size %8d:  %6.2f total, %.3f per set\n",
+    printf ( "set %5d keys of size %8d:  %6.2f total cpu time, %.3f per set\n",
              $num_keys,
              $object_size,
-             $total,
+             $system,
              $per_key );
   };
 
@@ -273,7 +274,7 @@ sub Do_Set
 {
   my ( $cache, $num_keys, $object_size ) = @_;
 
-  my $object = 'x' x ($object_size - 1);
+  my $object = 'x' x ( $object_size );
 
   for ( my $i = 1; $i <= $num_keys; $i++ )
   {
@@ -329,13 +330,12 @@ sub Benchmark_Get
 
     my ( $real, $user, $system, $cuser, $csystem, $iterations ) = @$t;
 
-    my $total = $user + $real + $system;
-    my $per_key = $total / $num_keys;
+    my $per_key = $system / $num_keys;
 
-    printf ( "%5d gets of size %8d:  %6.2f total, %.3f per get\n",
+    printf ( "get %5d keys of size %8d:  %6.2f total cpu time, %.3f per get\n",
              $num_keys,
              $object_size,
-             $total,
+             $system,
              $per_key );
   };
 

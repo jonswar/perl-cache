@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareMemoryCache.pm,v 1.2 2001/03/13 01:27:42 dclinton Exp $
+# $Id: SizeAwareMemoryCache.pm,v 1.3 2001/03/13 03:37:09 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -15,10 +15,11 @@ package Cache::SizeAwareMemoryCache;
 use strict;
 use vars qw( @ISA );
 use Cache::Cache qw( $EXPIRES_NEVER $SUCCESS $FAILURE $TRUE $FALSE );
+use Cache::CacheMetaData;
 use Cache::CacheUtils qw ( Build_Object
-                           Freeze_Object
+                           Limit_Size
                            Object_Has_Expired
-                           Thaw_Object );
+                         );
 use Cache::MemoryCache;
 use Cache::SizeAwareCache qw( $NO_MAX_SIZE );
 use Carp;
@@ -58,27 +59,12 @@ sub Size
 ##
 
 
-# _build_removal_list creates a list of all of the identifiers in the
-# cache Each identifier appears twice in the list.  First, ordered by the
-# the time in which they will expire (skipping those that will not
-# expire), and second, in the order by which they were most recently
-# accessed
-#
-# NOTE:  I aplogize if this method is confusing.  This was an area
-# of significant performance issues, so it is written to be optimized
-# in terms of run time speed, not clarity
-
-
-sub _build_removal_list
+sub _build_cache_meta_data
 {
-  my ( $self, $removal_list_ref ) = @_;
+  my ( $self ) = @_;
 
-  defined( $removal_list_ref ) or
-    croak( "removal_list_ref required" );
-
-  my %next_expiration_hash;
-
-  my %least_recently_accessed_hash;
+  my $cache_meta_data = new Cache::CacheMetaData( ) or
+    croak( "Couldn't instantiate new CacheMetaData" );
 
   my @identifiers = $self->_identifiers( );
 
@@ -87,35 +73,19 @@ sub _build_removal_list
     my $object = $self->get_object( $identifier ) or
       next;
 
+    my $size = length $object;
+
     my $expires_at = $object->get_expires_at( );
 
-    my $last_access_time = $object->get_accessed_at( );
+    my $accessed_at = $object->get_accessed_at( );
 
-    $next_expiration_hash{ $identifier } = $expires_at if
-      $expires_at ne $EXPIRES_NEVER;
-
-    $least_recently_accessed_hash{ $identifier } = $last_access_time;
+    $cache_meta_data->insert( $identifier, $expires_at, $accessed_at, $size ) or
+      croak( "Couldn't insert meta data" );
   }
 
-
-  my @next_expiring_list =
-    sort
-    {
-      $next_expiration_hash{$b} <=> $next_expiration_hash{$a}
-    } keys %next_expiration_hash;
-
-
-  my @least_recently_accessed_list =
-    sort
-    {
-      $least_recently_accessed_hash{$b} <=> $least_recently_accessed_hash{$a}
-    } keys %least_recently_accessed_hash;
-
-
-  @$removal_list_ref = ( @next_expiring_list, @least_recently_accessed_list );
-
-  return $SUCCESS;
+  return $cache_meta_data;
 }
+
 
 
 ##
@@ -202,37 +172,14 @@ sub limit_size
 {
   my ( $self, $new_size ) = @_;
 
-  $new_size >= 0 or
-    croak( "size >= 0 required" );
+  defined $new_size or
+    croak( "new_size required" );
 
-  my $current_size = $self->size( );
+  my $cache_meta_data = $self->_build_cache_meta_data( ) or
+    croak( "Couldn't build cache meta data" );
 
-  my $size_difference = $self->size( ) - $new_size;
-
-  return $SUCCESS if ( $size_difference <= 0 );
-
-  my @removal_list;
-
-  $self->_build_removal_list( \@removal_list );
-
-  foreach my $identifier ( @removal_list )
-  {
-    my $size = $self->_build_object_size( $identifier );
-
-    $self->remove( $identifier ) or
-      croak( "Couldn't remove identifier" );
-
-    $size_difference -= $size;
-
-    last if ( $size_difference <= 0 );
-  }
-
-  if ( $size_difference > 0 )
-  {
-    warn("Couldn't limit size to $new_size\n");
-
-    return $FAILURE;
-  }
+  Limit_Size( $self, $cache_meta_data, $new_size ) or
+    croak( "Couldn't limit size to $new_size" );
 
   return $SUCCESS;
 }
@@ -241,7 +188,6 @@ sub limit_size
 ##
 # Private instance methods
 ##
-
 
 
 sub _initialize_size_aware_memory_cache

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheUtils.pm,v 1.12 2001/03/19 16:02:54 dclinton Exp $
+# $Id: CacheUtils.pm,v 1.13 2001/03/20 16:09:01 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -12,6 +12,7 @@ package Cache::CacheUtils;
 
 use strict;
 use vars qw( @ISA @EXPORT_OK );
+use Cache::CacheMetaData;
 use Cache::Cache qw( $EXPIRES_NOW
                      $EXPIRES_NEVER
                      $TRUE
@@ -37,6 +38,7 @@ use Storable qw( nfreeze thaw dclone );
                  Freeze_Object
                  Get_Temp_Directory
                  Instantiate_Share
+                 Limit_Size
                  List_Subdirectories
                  Make_Path
                  Read_File
@@ -954,6 +956,60 @@ sub Store_Shared_Hash_Ref_And_Unlock
     croak( "Couldn't unlock share" );
 
   return $SUCCESS;
+}
+
+
+# take a Cache reference and a CacheMetaData reference and
+# limit the cache's size to new_size
+
+sub Limit_Size
+{
+  my ( $cache, $cache_meta_data, $new_size ) = @_;
+
+  defined $cache or
+    croak( "cache required" );
+
+  defined $cache_meta_data or
+    croak( "cache_meta_data required" );
+
+  defined $new_size or
+    croak( "new_size required" );
+
+  $new_size >= 0 or
+    croak( "size >= 0 required" );
+
+  my $current_size = $cache_meta_data->get_cache_size( );
+
+  my $size_difference = $current_size - $new_size;
+
+  return $SUCCESS if ( $size_difference <= 0 );
+
+  my @removal_list;
+
+  $cache_meta_data->build_removal_list( \@removal_list ) or
+    croak( "Couldn't build removal list" );
+
+  foreach my $identifier ( @removal_list )
+  {
+    my $object_size;
+
+    $cache_meta_data->build_object_size( $identifier, \$object_size ) or
+      croak( "Couldn't build object size" );
+
+    $cache->remove( $identifier ) or
+      croak( "Couldn't remove identifier" );
+
+    $cache_meta_data->remove( $identifier ) or
+      croak( "Couldn't remove identifier from cache_meta_data" );
+
+    $size_difference -= $object_size;
+
+    return $SUCCESS if ( $size_difference <= 0 );
+  }
+
+  warn("Couldn't limit size to $new_size\n");
+
+  return $FAILURE;
 }
 
 
