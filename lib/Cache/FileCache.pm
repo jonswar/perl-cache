@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: FileCache.pm,v 1.3 2001/02/15 15:44:22 dclinton Exp $
+# $Id: FileCache.pm,v 1.4 2001/02/16 02:11:04 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -457,7 +457,7 @@ sub _build_object_path
 
 sub _Build_Cache_Root
 {
-  my ( $self, $optional_cache_root ) = @_;
+  my ( $optional_cache_root ) = @_;
 
   my $cache_root;
 
