@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareFileCache.pm,v 1.8 2001/03/06 18:37:21 dclinton Exp $
+# $Id: SizeAwareFileCache.pm,v 1.9 2001/03/12 19:20:13 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -13,7 +13,7 @@ package Cache::SizeAwareFileCache;
 
 
 use strict;
-use vars qw( @ISA @EXPORT_OK $NO_MAX_SIZE );
+use vars qw( @ISA );
 use Cache::Cache qw( $EXPIRES_NEVER $SUCCESS $FAILURE $TRUE $FALSE );
 use Cache::CacheUtils qw ( Build_Object
                            Build_Unique_Key
@@ -24,17 +24,12 @@ use Cache::CacheUtils qw ( Build_Object
                            Static_Params
                            Write_File );
 use Cache::FileCache;
+use Cache::SizeAwareCache qw( $NO_MAX_SIZE );
 use Carp;
 use Data::Dumper;
-use Exporter;
 
 
-@ISA = qw ( Cache::FileCache Exporter );
-@EXPORT_OK = qw( $NO_MAX_SIZE );
-
-
-$NO_MAX_SIZE = -1;
-
+@ISA = qw ( Cache::FileCache Cache::SizeAwareCache );
 
 my $DEFAULT_MAX_SIZE = $NO_MAX_SIZE;
 
@@ -400,20 +395,9 @@ See Cache::Cache
 
 =item B<limit_size( $new_size )>
 
-Attempt to resize the cache such that the total disk usage is under
-the 'new_size' parameter.  NOTE: This is not 100% accurate, as the
+See Cache::SizeAwareCache.  NOTE: This is not 100% accurate, as the
 current size is calculated from the size of the objects in the cache,
 and does not include the size of the directory inodes.
-
-=item C<$new_size>
-
-The size (in bytes) that the cache should be limited to.  This is
-only a one time adjustment.  To maintain the cache size, consider using
-the 'max_size' option, although it is considered very expensive.
-
-=item Returns
-
-Either $SUCCESS or $FAILURE
 
 =item B<purge( )>
 
@@ -443,8 +427,7 @@ keys:
 
 =item max_size
 
-Sets the max_size property, which is described in detail below.
-Defaults to $NO_MAX_SIZE.
+See Cache::SizeAwareCache
 
 =back
 
@@ -456,18 +439,13 @@ See Cache::Cache for default properties.
 
 =item B<(get|set)_max_size>
 
-If this property is set, then the cache will try not to exceed the max
-size value specified.  NOTE: This causes the size of the cache to be
-checked on every set, and can be considered *very* expensive.  A good
-alternative approach is leave max_size as $NO_MAX_SIZE and to
-periodically limit the size of the cache by calling the
-limit_size( $size ) method.
+See Cache::SizeAwareCache
 
 =back
 
 =head1 SEE ALSO
 
-Cache::Cache, Cache::FileCache
+Cache::Cache, Cache::SizeAwareCache, Cache::FileCache
 
 =head1 AUTHOR
 
