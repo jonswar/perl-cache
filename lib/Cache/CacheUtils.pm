@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheUtils.pm,v 1.20 2001/04/25 22:22:04 dclinton Exp $
+# $Id: CacheUtils.pm,v 1.21 2001/09/05 14:39:27 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -312,6 +312,8 @@ sub Create_Directory
   my $old_umask = umask( ) if defined $optional_new_umask;
 
   umask( $optional_new_umask ) if defined $optional_new_umask;
+
+  $directory =~ s|/$||;
 
   mkpath( $directory, 0, $DIRECTORY_MODE );
 
