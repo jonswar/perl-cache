@@ -9,11 +9,12 @@ outline the style for this project.
 
 
 
-                         -------------------
-                           Tabs and spaces
-                         -------------------
+                    -----------------------------
+                      Tabs, spaces, and columns
+                    -----------------------------
 
-Avoid tabs.  Instead, use exactly 2 spaces to indent code.
+Avoid tabs.  Instead, use exactly 2 spaces to indent code.  Lines
+should break at 80 columns.
 
 
 
@@ -274,7 +275,7 @@ A the top of each module there should be a copyright disclaimer as
 follows:
 
   ######################################################################
-  # $Id: $
+  # $ Id: $
   # Copyright (C) 2001 John Smith  All Rights Reserved
   #
   # Software distributed under the License is distributed on an "AS
@@ -283,8 +284,9 @@ follows:
   # rights and limitations under the License.
   ######################################################################
 
-The $Id: $ is optional, though highly recommended if the code is
-being managed with CVS.  
+The "Id:" keyword is optional, though highly recommended if the code
+is being managed with CVS.  Note that there should not be a space
+between the '$' and the 'Id:' keyword if you want it to be expanded.
 
 
 After the copyright disclaimer, there should be a blank line, and then
@@ -306,7 +308,7 @@ next line after the package declaration)
 
 Next, list the @ISA and @EXPORT or @EXPORT_OK lists:
 
-  @ISA = qw( Cache::Cache );
+  @ISA = qw( Cache::Cache Exporter );
   @EXPORT_OK = qw( $PUBLIC_STATIC_CONSTANT );
 
 
@@ -325,8 +327,8 @@ Write the methods in the following order:
 
   * public class methods
   * private class methods
+  * class properties ( first Get, then Set ) 
   * new ( if the class is to be instantiated )
-  * class properties ( first Get, then Set )
   * public instance methods
   * private instance methods
   * instance properties ( first get, then set )
@@ -386,7 +388,7 @@ Finally, the class should be documented according to this template:
 
   Original author:  John Smith <jsmith@company.com>
 
-  Last author: $Author: $
+  Last author: $ Author: $
 
   Copyright (C) 2001 John Smith
 
