@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheUtils.pm,v 1.6 2001/03/06 07:07:43 dclinton Exp $
+# $Id: CacheUtils.pm,v 1.7 2001/03/06 07:13:58 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -753,7 +753,9 @@ sub Get_Temp_Directory
 
 sub Static_Params
 {
-  if ( ( ref $_[0] ) !~ /^(SCALAR|ARRAY|HASH|CODE|REF|GLOB|LVALUE)$/ )
+  my $type = ref $_[0];
+
+  if ( $type and ( $type !~ /^(SCALAR|ARRAY|HASH|CODE|REF|GLOB|LVALUE)$/ ) )
   {
     shift( @_ );
   }
