@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: FileBackend.pm,v 1.17 2002/03/12 00:09:10 dclinton Exp $
+# $Id: FileBackend.pm,v 1.18 2002/03/13 15:09:57 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -511,9 +511,9 @@ sub _Make_Path
 
   my ( $volume, $directory, $filename ) = File::Spec->splitpath( $p_path );
 
-  if ( defined $directory and defined $volume and $volume )
+  if ( defined $directory and defined $volume )
   {
-    $directory = File::Spec->catpath( $volume, $directory );
+    $directory = File::Spec->catpath( $volume, $directory, "" );
   }
 
   if ( defined $directory and not -d $directory )

@@ -8,6 +8,7 @@ Revision history for Cache
    tests to fail
  - exposed the get_namespaces method on Cache
  - fixed the failing Win32 tests caused by fileglobs in Makefile.PL
+ - applied Yves Orton's patch in _Make_Path to fix warnings on Win32
 
 0.99 2001-12-09-18-45
  - released version 0.99
