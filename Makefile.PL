@@ -13,7 +13,8 @@ my $DEFAULT_PREREQ_PM = {
                          Digest::MD5 => '2.09',
                          File::Spec => '0.82',
                          Storable => '1.011',
-                         IPC::ShareLite => '0.08'
+                         IPC::ShareLite => '0.08',
+                         Error => ''
                         };
 
 

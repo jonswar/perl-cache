@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: BaseCacheTester.pm,v 1.2 2001/03/06 15:12:54 dclinton Exp $
+# $Id: BaseCacheTester.pm,v 1.3 2001/04/08 22:48:37 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -13,8 +13,6 @@ package Cache::BaseCacheTester;
 
 
 use strict;
-use Carp;
-
 
 ##
 # Constructor

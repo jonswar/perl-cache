@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheMetaData.pm,v 1.3 2001/03/23 00:15:06 dclinton Exp $
+# $Id: CacheMetaData.pm,v 1.4 2001/04/08 22:48:37 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -11,7 +11,7 @@
 package Cache::CacheMetaData;
 
 use strict;
-use Cache::Cache qw( $EXPIRES_NOW $EXPIRES_NEVER $SUCCESS $FAILURE );
+use Cache::Cache qw( $EXPIRES_NOW $EXPIRES_NEVER );
 use Carp;
 
 # the cache meta data structure looks something like the following
@@ -41,71 +41,31 @@ sub new
   my $class = ref( $proto ) || $proto;
   my $self  = {};
   bless( $self, $class );
-
   $self->_set_meta_data_hash_ref( { } );
-
   $self->_set_cache_size( 0 );
-
   return $self;
 }
 
 
 sub insert
 {
-  my ( $self, $object ) = @_;
+  my ( $self, $p_object ) = @_;
 
-  my $expires_at = $object->get_expires_at( );
-
-  my $identifier = $object->get_identifier( ) or
-    croak( "identifier required" );
-
-  my $accessed_at = $object->get_accessed_at( ) or
-    croak( "accessed_at required" );
-
-  my $object_size = $object->get_size( ) or
-    croak( "size required" );
-
-  my $meta_data_hash_ref = $self->_get_meta_data_hash_ref( ) or
-    croak( "Couldn't get meta_data_hash_ref" );
-
-  $meta_data_hash_ref->{ $identifier }->[ $_EXPIRES_AT_OFFSET ] = $expires_at;
-  $meta_data_hash_ref->{ $identifier }->[ $_ACCESS_AT_OFFSET ] = $accessed_at;
-  $meta_data_hash_ref->{ $identifier }->[ $_SIZE_OFFSET ] = $object_size;
-
-  my $cache_size = $self->get_cache_size( );
-
-  $cache_size += $object_size;
-
-  $self->_set_cache_size( $cache_size );
-
-  return $SUCCESS;
+  $self->_insert_object_expires_at( $p_object );
+  $self->_insert_object_accessed_at( $p_object );
+  $self->_insert_object_size( $p_object );
+  $self->_set_cache_size( $self->get_cache_size( ) + $p_object->get_size( ) );
 }
 
 
 sub remove
 {
-  my ( $self, $identifier ) = @_;
+  my ( $self, $p_identifier ) = @_;
 
-  defined $identifier or
-    croak( "identifier not defined" );
+  $self->_set_cache_size( $self->get_cache_size( ) -
+                          $self->build_object_size( $p_identifier ) );
 
-  my $object_size;
-
-  $self->build_object_size( $identifier, \$object_size ) or
-    croak( "Couldn't build object size" );
-
-  my $cache_size = $self->get_cache_size( );
-
-  $cache_size -= $object_size;
-
-  $self->_set_cache_size( $cache_size );
-
-  my $meta_data_hash_ref = $self->_get_meta_data_hash_ref( ) or
-    croak( "Couldn't get meta_data_hash_ref" );
-
-  delete $meta_data_hash_ref->{ $identifier };
-
-  return $SUCCESS;
+  delete $self->_get_meta_data_hash_ref( )->{ $p_identifier };
 }
 
 
@@ -114,10 +74,9 @@ sub build_removal_list
   my ( $self, $removal_list_ref ) = @_;
 
   defined $removal_list_ref or
-    croak( "removal_list_ref required" );
+    throw Error( "removal_list_ref required" );
 
-  my $meta_data_hash_ref = $self->_get_meta_data_hash_ref( ) or
-    croak( "Couldn't get meta_data_hash_ref" );
+  my $meta_data_hash_ref = $self->_get_meta_data_hash_ref( );
 
   @$removal_list_ref =
     sort
@@ -140,29 +99,60 @@ sub build_removal_list
       return ( $a_expires_at <=> $b_expires_at );
 
     } keys %$meta_data_hash_ref;
-
-  return $SUCCESS;
 }
 
 
 
 sub build_object_size
 {
-  my ( $self, $identifier, $object_size_ref ) = @_;
+  my ( $self, $p_identifier  ) = @_;
 
-  defined $object_size_ref or
-    croak( "object_size_ref required" );
-
-  my $meta_data_hash_ref = $self->_get_meta_data_hash_ref( ) or
-    croak( "Couldn't get meta data hash ref" );
-
-  defined $meta_data_hash_ref->{ $identifier } or
-    croak( "identifier $identifier doesn't exist in cache meta data" );
-
-  $$object_size_ref = $meta_data_hash_ref->{ $identifier }->[$_SIZE_OFFSET];
-
-  return $SUCCESS;
+  return $self->_get_meta_data_hash_ref( )
+    ->{ $p_identifier }
+      ->[ $_SIZE_OFFSET ];
 }
+
+
+sub _insert_object_meta_data
+{
+  my ( $self, $p_object, $p_offset, $p_value ) = @_;
+
+  $self->_get_meta_data_hash_ref( )
+    ->{ $p_object->get_identifier( ) }
+      ->[ $p_offset ] = $p_value;
+}
+
+
+sub _insert_object_expires_at
+{
+  my ( $self, $p_object ) = @_;
+
+  $self->_insert_object_meta_data( $p_object,
+                                   $_EXPIRES_AT_OFFSET,
+                                   $p_object->get_expires_at( ) );
+}
+
+
+sub _insert_object_accessed_at
+{
+  my ( $self, $p_object ) = @_;
+
+  $self->_insert_object_meta_data( $p_object,
+                                   $_ACCESS_AT_OFFSET,
+                                   $p_object->get_accessed_at( ) );
+}
+
+
+sub _insert_object_size
+{
+  my ( $self, $p_object ) = @_;
+
+  $self->_insert_object_meta_data( $p_object,
+                                   $_SIZE_OFFSET,
+                                   $p_object->get_size( ) );
+}
+
+
 
 
 

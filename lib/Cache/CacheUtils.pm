@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheUtils.pm,v 1.22 2001/09/09 18:27:51 dclinton Exp $
+# $Id: CacheUtils.pm,v 1.23 2001/09/10 14:47:24 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -91,6 +91,11 @@ my $DIRECTORY_MODE = 0777;
 sub Object_Has_Expired
 {
   my ( $object, $time ) = @_;
+
+  if ( not defined $object )
+  {
+    return $TRUE;
+  }
 
   $time = $time || time( );
 
@@ -871,9 +876,7 @@ sub Limit_Size
 
   foreach my $identifier ( @removal_list )
   {
-    my $object_size;
-
-    $cache_meta_data->build_object_size( $identifier, \$object_size ) or
+    my $object_size = $cache_meta_data->build_object_size( $identifier ) or
       croak( "Couldn't build object size" );
 
     $cache->remove( $identifier ) or

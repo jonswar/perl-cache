@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareMemoryCache.pm,v 1.9 2001/04/25 22:22:04 dclinton Exp $
+# $Id: SizeAwareMemoryCache.pm,v 1.10 2001/09/05 14:39:27 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -93,8 +93,7 @@ sub new
 {
   my ( $self ) = _new( @_ );
 
-  $self->_complete_initialization( ) or
-    croak( "Couldn't complete initialization" );
+  $self->_complete_initialization( );
 
   return $self;
 }
@@ -112,8 +111,8 @@ sub get
   $identifier or
     croak( "identifier required" );
 
-  $self->_conditionally_auto_purge_on_get( ) or
-    croak( "Couldn't conditionally auto purge on get" );
+  $self->_conditionally_auto_purge_on_get( );
+
 
   my $object = $self->get_object( $identifier ) or
     return undef;
@@ -142,8 +141,7 @@ sub set
 {
   my ( $self, $identifier, $data, $expires_in ) = @_;
 
-  $self->_conditionally_auto_purge_on_set( ) or
-    croak( "Couldn't conditionally auto purge on set" );
+  $self->_conditionally_auto_purge_on_set( );
 
   my $default_expires_in = $self->get_default_expires_in( );
 

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareSharedMemoryCache.pm,v 1.12 2001/04/08 22:48:37 dclinton Exp $
+# $Id: SizeAwareSharedMemoryCache.pm,v 1.13 2001/09/05 14:39:27 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -114,8 +114,7 @@ sub new
 {
   my ( $self ) = _new( @_ );
 
-  $self->_complete_initialization( ) or
-    croak( "Couldn't complete initialization" );
+  $self->_complete_initialization( );
 
   return $self;
 }
