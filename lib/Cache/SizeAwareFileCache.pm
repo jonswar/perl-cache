@@ -1,6 +1,6 @@
 ######################################################################
-# $Id: SizeAwareFileCache.pm,v 1.26 2001/12/03 17:21:33 dclinton Exp $
-# Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
+# $Id: SizeAwareFileCache.pm,v 1.27 2001/12/09 22:59:36 dclinton Exp $
+# Copyright (C) 2001, 2002 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
 # IS" basis, WITHOUT WARRANTY OF ANY KIND, either expressed or
@@ -191,6 +191,6 @@ extentions to the original File::Cache
 
 Last author:     $Author: dclinton $
 
-Copyright (C) 2001 DeWitt Clinton
+Copyright (C) 2001, 2002 DeWitt Clinton
 
 =cut

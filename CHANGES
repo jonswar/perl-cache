@@ -1,5 +1,9 @@
 Revision history for Cache
 
+1.01 in progress
+ - switched to Digest::SHA1
+ - updated copyright dates
+
 1.0 2002-04-06-18-51
  - released version 1.0
  - localized scope of global file and directory handles (FILE and DIR)

@@ -1,6 +1,6 @@
 #####################################################################
-# $Id: Cache.pm,v 1.34 2002/04/04 14:15:45 dclinton Exp $
-# Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
+# $Id: Cache.pm,v 1.35 2002/04/07 00:05:50 dclinton Exp $
+# Copyright (C) 2001, 2002 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
 # IS" basis, WITHOUT WARRANTY OF ANY KIND, either expressed or
@@ -310,6 +310,6 @@ Original author: DeWitt Clinton <dewitt@unto.net>
 
 Last author:     $Author: dclinton $
 
-Copyright (C) 2001 DeWitt Clinton
+Copyright (C) 2001, 2002 DeWitt Clinton
 
 =cut

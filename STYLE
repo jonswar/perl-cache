@@ -322,7 +322,7 @@ follows:
 
   ######################################################################
   # $ Id: $
-  # Copyright (C) 2001 John Smith  All Rights Reserved
+  # Copyright (C) 2002 John Smith  All Rights Reserved
   #
   # Software distributed under the License is distributed on an "AS
   # IS" basis, WITHOUT WARRANTY OF ANY KIND, either expressed or
@@ -439,7 +439,7 @@ Finally, the class should be documented according to this template:
 
   Last author: $ Author: $
 
-  Copyright (C) 2001 John Smith
+  Copyright (C) 2002 John Smith
 
   =cut
 

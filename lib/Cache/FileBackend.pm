@@ -1,6 +1,6 @@
 ######################################################################
-# $Id: FileBackend.pm,v 1.18 2002/03/13 15:09:57 dclinton Exp $
-# Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
+# $Id: FileBackend.pm,v 1.19 2002/04/04 13:28:34 dclinton Exp $
+# Copyright (C) 2001, 2002 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
 # IS" basis, WITHOUT WARRANTY OF ANY KIND, either expressed or
@@ -12,7 +12,7 @@ package Cache::FileBackend;
 
 use strict;
 use Cache::CacheUtils qw( Assert_Defined Build_Path Freeze_Data Thaw_Data );
-use Digest::MD5 qw( md5_hex );
+use Digest::SHA1 qw( sha1_hex );
 use Error;
 use File::Path qw( mkpath );
 
@@ -197,7 +197,7 @@ sub _Build_Unique_Key
 
   Assert_Defined( $p_key );
 
-  return md5_hex( $p_key );
+  return sha1_hex( $p_key );
 }
 
 
@@ -739,6 +739,6 @@ Original author: DeWitt Clinton <dewitt@unto.net>
 
 Last author:     $Author: dclinton $
 
-Copyright (C) 2001 DeWitt Clinton
+Copyright (C) 2001, 2002 DeWitt Clinton
 
 =cut

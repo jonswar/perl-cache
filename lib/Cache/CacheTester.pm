@@ -1,6 +1,6 @@
 ######################################################################
-# $Id: CacheTester.pm,v 1.18 2002/03/12 00:26:15 dclinton Exp $
-# Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
+# $Id: CacheTester.pm,v 1.19 2002/03/29 15:00:10 dclinton Exp $
+# Copyright (C) 2001, 2002 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
 # IS" basis, WITHOUT WARRANTY OF ANY KIND, either expressed or
@@ -656,7 +656,7 @@ Original author: DeWitt Clinton <dewitt@unto.net>
 
 Last author:     $Author: dclinton $
 
-Copyright (C) 2001 DeWitt Clinton
+Copyright (C) 2001, 2002 DeWitt Clinton
 
 =cut
 

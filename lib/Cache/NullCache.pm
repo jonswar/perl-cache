@@ -1,6 +1,6 @@
 ######################################################################
-# $Id: NullCache.pm,v 1.4 2001/11/29 18:33:21 dclinton Exp $
-# Copyright (C) 2001 Jay Sachs  All Rights Reserved
+# $Id: NullCache.pm,v 1.5 2001/12/09 22:43:03 dclinton Exp $
+# Copyright (C) 2001 Jay Sachs, 2002 DeWitt Clinton All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
 # IS" basis, WITHOUT WARRANTY OF ANY KIND, either expressed or
@@ -179,11 +179,11 @@ Cache::Cache
 
 =head1 AUTHOR
 
-Original author: DeWitt Clinton <dewitt@unto.net>
+Original author: Jay Sachs
 
 Last author:     $Author: dclinton $
 
-Copyright (C) 2001 DeWitt Clinton
+Copyright (C) 2001 Jay Sachs, 2002 DeWitt Clinton
 
 =cut
 

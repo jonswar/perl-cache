@@ -1,6 +1,6 @@
 ######################################################################
-# $Id: MemoryBackend.pm,v 1.7 2001/12/09 22:43:03 dclinton Exp $
-# Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
+# $Id: MemoryBackend.pm,v 1.8 2001/12/09 23:40:52 dclinton Exp $
+# Copyright (C) 2001, 2002 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
 # IS" basis, WITHOUT WARRANTY OF ANY KIND, either expressed or
@@ -151,7 +151,7 @@ Original author: DeWitt Clinton <dewitt@unto.net>
 
 Last author:     $Author: dclinton $
 
-Copyright (C) 2001 DeWitt Clinton
+Copyright (C) 2001, 2002 DeWitt Clinton
 
 =cut
 
