@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheUtils.pm,v 1.1.1.1 2001/02/13 01:30:39 dclinton Exp $
+# $Id: CacheUtils.pm,v 1.2 2001/02/13 02:32:03 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -34,6 +34,7 @@ use File::Spec::Functions qw( catdir catfile splitdir splitpath tmpdir );
                  List_Subdirectories
                  Make_Path
                  Read_File
+                 Read_File_Without_Time_Modification
                  Recursive_Directory_Size
                  Recursively_List_Files
                  Recursively_Remove_Directory
@@ -328,6 +329,26 @@ sub Read_File
   $$data_ref = <FILE>;
 
   close( FILE );
+
+  return $data_ref;
+}
+
+
+# read in a file. returns a reference to the data read, without 
+# modifying the last accessed time
+
+sub Read_File_Without_Time_Modification
+{
+  my ( $filename ) = @_;
+
+  defined( $filename ) or
+    croak( "filename required" );
+
+  my ( $file_access_time, $file_modified_time ) = ( stat( $filename ) )[8,9];
+
+  my $data_ref = Read_File( $filename );
+
+  utime( $file_access_time, $file_modified_time, $filename );
 
   return $data_ref;
 }
