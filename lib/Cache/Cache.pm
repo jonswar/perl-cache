@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: Cache.pm,v 1.3 2001/02/16 02:10:25 dclinton Exp $
+# $Id: Cache.pm,v 1.4 2001/03/06 07:07:43 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -8,11 +8,11 @@
 # rights and limitations under the License.
 ######################################################################
 
+
 package Cache::Cache;
 
-use strict;
-use Exporter;
 
+use strict;
 use vars qw( @ISA
              @EXPORT_OK
              $VERSION
@@ -22,8 +22,11 @@ use vars qw( @ISA
              $FALSE
              $SUCCESS
              $FAILURE );
+use Exporter;
+
 
 @ISA = qw( Exporter );
+
 
 @EXPORT_OK = qw( $VERSION
                  $EXPIRES_NOW
@@ -33,7 +36,9 @@ use vars qw( @ISA
                  $SUCCESS
                  $FAILURE );
 
+
 use vars @EXPORT_OK;
+
 
 $VERSION = 0.03;
 $EXPIRES_NOW = 'now';
@@ -43,35 +48,72 @@ $FALSE = 0;
 $SUCCESS = 1;
 $FAILURE = 0;
 
+
+
+##
+# Public class methods
+##
+
+
 sub Clear;
+
 
 sub Purge;
 
+
 sub Size;
 
-sub set;
 
-sub get;
+##
+# Constructor
+##
 
-sub get_object;
 
-sub get_namespace;
+sub new;
 
-sub get_default_expires_in;
 
-sub remove;
+##
+# Public instance methods
+##
+
 
 sub clear;
 
+
+sub get;
+
+
+sub get_object;
+
+
 sub purge;
 
+
+sub remove;
+
+
+sub set;
+
+
 sub size;
+
+
+##
+# Properties
+##
+
+
+sub get_default_expires_in;
+
+
+sub get_namespace;
 
 
 1;
 
 
 __END__
+
 
 =pod
 
@@ -92,103 +134,6 @@ corresponding static methods for persisting data across method calls.
 
   @ISA = qw( Cache::Cache );
 
-  sub get
-  {
-    my ( $self, $identifier ) = @_;
-
-    # ...
-
-    return $data;
-  }
-
-
-  sub get_object
-  {
-    my ( $self, $identifier ) = @_;
-
-    # ...
-
-    return $object;
-  }
-
-
-  sub set
-  {
-    my ( $self, $identifier, $data, $expires_in ) = @_;
-
-    # ...
-
-    return $SUCCESS;
-  }
-
-  sub remove
-  {
-    my ( $self, $identifier ) = @_;
-
-    # ...
-
-    return $SUCCESS;
-  }
-
-  sub size
-  {
-    my ( $self ) = @_;
-
-    # ...
-
-    return $size;
-  }
-
-
-  sub clear
-  {
-    my ( $self ) = @_;
-
-    # ...
-
-    return $SUCCESS;
-  }
-
-
-  sub purge
-  {
-    my ( $self ) = @_;
-
-    # ...
-
-    return $SUCCESS;
-  }
-
-
-  sub Size
-  {
-    my ( ) = @_;
-
-    # ...
-
-    return $size;
-  }
-
-
-  sub Clear
-  {
-    my ( ) = @_;
-
-    # ...
-
-    return $SUCCESS;
-  }
-
-
-  sub Purge
-  {
-    my ( ) = @_;
-
-    # ...
-
-    return $SUCCESS;
-  }
-
 
 =head1 CONSTANTS
 
@@ -208,7 +153,7 @@ The item being set in the cache will never expire.
 
 =over 4
 
-=item B<Clear(  )>
+=item B<Clear( )>
 
 Remove all objects from all caches of this type.
 
@@ -216,7 +161,7 @@ Remove all objects from all caches of this type.
 
 Either $SUCCESS or $FAILURE
 
-=item B<Purge(  )>
+=item B<Purge( )>
 
 Remove all objects that have expired from all caches of this type.
 
@@ -224,13 +169,22 @@ Remove all objects that have expired from all caches of this type.
 
 Either $SUCCESS or $FAILURE
 
-=item B<Size(  )>
+=item B<Size( $optional_namespace )>
 
 Calculate the total size of all objects in all caches of this type.
 
 =item Returns
 
 The total size of all the objects in all caches of this type.
+
+=item B<new( $options_hash_ref )>
+
+Construct a new instance of a Cache::Cache
+
+=item C<$options_hash_ref>
+
+A reference to a hash containing configuration options for the cache.
+See the section OPTIONS below.
 
 =item B<clear(  )>
 
@@ -256,7 +210,7 @@ The data specified.
 
 Fetch the underlying Cache::Object object that is used to store the
 cached data.  This will not trigger a removal of the cached object
-even if it has expired.
+even if the object has expired.
 
 =item C<$identifier>
 
@@ -266,21 +220,14 @@ A string uniquely identifying the data.
 
 The underlying Cache::Object object, which may or may not have expired.
 
-=item B<get_namespace( )>
+=item B<purge(  )>
 
-Get the namespace of this cache instance
-
-=item Returns
-
-The namespace of this cache instance
-
-=item B<get_default_expires_in( )>
-
-Get the default expiration time for objects placed in this cache instance
+Remove all objects that have expired from the namespace associated
+with this cache instance.
 
 =item Returns
 
-The default expiration time for objects placed in this cache instance
+Either $SUCCESS or $FAILURE
 
 =item B<remove( $identifier )>
 
@@ -319,15 +266,6 @@ be represented as "now" and $EXPIRES_NEVER can be represented as
 
 Either $SUCCESS or $FAILURE
 
-=item B<purge(  )>
-
-Remove all objects that have expired from the namespace associated
-with this cache instance.
-
-=item Returns
-
-Either $SUCCESS or $FAILURE
-
 =item B<size(  )>
 
 Calculate the total size of all objects in the namespace associated with
@@ -337,6 +275,20 @@ this cache instance.
 
 The total size of all objects in the namespace associated with this
 cache instance.
+
+=back
+
+=head1 PROPERTIES
+
+=over 4
+
+=item B<get_namespace( )>
+
+The namespace of this cache instance
+
+=item B<get_default_expires_in( )>
+
+The default expiration time for objects placed in this cache instance
 
 =back
 
