@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: NullCache.pm,v 1.3 2001/11/07 13:10:56 dclinton Exp $
+# $Id: NullCache.pm,v 1.4 2001/11/29 18:33:21 dclinton Exp $
 # Copyright (C) 2001 Jay Sachs  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -97,6 +97,14 @@ sub get_keys
 }
 
 
+sub get_keys
+{
+  warn( "get_identifiers has been marked deprepricated.  use get_keys" );
+
+  return ( );
+}
+
+
 sub get_auto_purge_interval
 {
   return 0;
@@ -110,6 +118,7 @@ sub set_auto_purge_interval
 
 sub get_auto_purge_on_set
 {
+  return 0;
 }
 
 
@@ -120,6 +129,7 @@ sub set_auto_purge_on_set
 
 sub get_auto_purge_on_get
 {
+  return 0;
 }
 
 
@@ -127,4 +137,53 @@ sub set_auto_purge_on_get
 {
 }
 
+
+__END__
+
+=pod
+
+=head1 NAME
+
+Cache::NullCache -- implements the Cache interface.
+
+=head1 DESCRIPTION
+
+The NullCache class implements the Cache::Cache interface, but does
+not actually persist data.  This is useful when developing and
+debugging a system and you wish to easily turn off caching.  As a
+result, all calls to get and get_object will return undef.
+
+=head1 SYNOPSIS
+
+  use Cache::NullCache;
+
+  my $cache = new Cache::NullCache( );
+
+  See Cache::Cache for the usage synopsis.
+
+=head1 METHODS
+
+See Cache::Cache for the API documentation.
+
+=head1 OPTIONS
+
+See Cache::Cache for standard options.
+
+=head1 PROPERTIES
+
+See Cache::Cache for default properties.
+
+=head1 SEE ALSO
+
+Cache::Cache
+
+=head1 AUTHOR
+
+Original author: DeWitt Clinton <dewitt@unto.net>
+
+Last author:     $Author: dclinton $
+
+Copyright (C) 2001 DeWitt Clinton
+
+=cut
 

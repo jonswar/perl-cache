@@ -41,9 +41,7 @@ sub Main
   $options{dist} = { COMPRESS => $COMPRESS, SUFFIX => $SUFFIX };
   $options{PREREQ_PM} = $DEFAULT_PREREQ_PM;
 
-  my $has_sharelite = Has_Module( 'IPC::ShareLite' );
-
-  if ( not $has_sharelite )
+  if ( not Has_Module( 'IPC::ShareLite' ) )
   {
     Print_ShareLite_Missing_Message( );
     $options{test} = { TESTS => 't/[12356]*.t' };

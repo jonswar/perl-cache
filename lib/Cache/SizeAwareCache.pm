@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareCache.pm,v 1.5 2001/11/29 18:33:21 dclinton Exp $
+# $Id: SizeAwareCache.pm,v 1.6 2001/12/03 17:21:33 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -28,9 +28,7 @@ $NO_MAX_SIZE = -1;
 
 sub limit_size;
 
-
 sub get_max_size;
-
 
 sub set_max_size;
 
@@ -66,51 +64,37 @@ max_size features of a size aware cache.
 
 Please see Cache::Cache for standard constants
 
-=over 4
-
-=item $NO_MAX_SIZE
+=item I<$NO_MAX_SIZE>
 
 The cache has no size restrictions
 
-=back
-
 =head1 METHODS
 
-Please see Cache::Cache for standard methods
+Please see Cache::Cache for the standard methods
 
-=over 4
+=over
 
 =item B<limit_size( $new_size )>
 
 Attempt to resize the cache such that the total disk usage is under
-the 'new_size' parameter.
-
-=over 4
-
-=item $new_size
-
-The size (in bytes) that the cache should be limited to.  This is
-only a one time adjustment.  To maintain the cache size, consider using
-the 'max_size' option, although it is considered very expensive.
-
-=item Returns
-
-Either $SUCCESS or $FAILURE
-
-=back
+the I<$new_size> parameter.  I<$new_size> represents t size (in bytes)
+that the cache should be limited to.  Note that this is only a one
+time adjustment.  To maintain the cache size, consider using the
+I<max_size> option, although it is considered very expensive, and can
+often be better achieved by peridocally calling I<limit_size>.
 
 =back
 
 =head1 OPTIONS
 
-Please see Cache::Cache for standard options
+Please see Cache::Cache for the standard options
 
-=over 4
+=over
 
-=item max_size
+=item I<max_size>
 
 Sets the max_size property (size in bytes), which is described in
-detail below.  Defaults to $NO_MAX_SIZE.
+detail below.  Defaults to I<$NO_MAX_SIZE>.
 
 =back
 
@@ -118,7 +102,7 @@ detail below.  Defaults to $NO_MAX_SIZE.
 
 Please see Cache::Cache for standard properties
 
-=over 4
+=over
 
 =item B<(get|set)_max_size>
 

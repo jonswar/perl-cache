@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheTester.pm,v 1.14 2001/12/03 17:21:32 dclinton Exp $
+# $Id: CacheTester.pm,v 1.15 2001/12/09 17:00:35 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -613,13 +613,9 @@ its contract.
   use Cache::MemoryCache;
   use Cache::CacheTester;
 
-  my $cache = new Cache::MemoryCache( ) or
-  n  ot_ok( "Couldn't create new MemoryCache" );
+  my $cache = new Cache::MemoryCache( );
 
-  ok( );
-
-  my $cache_tester = new Cache::CacheTester( 1 ) or
-    not_ok( "Couldn't create new CacheTester" );
+  my $cache_tester = new Cache::CacheTester( 1 );
 
   $cache_tester->test( $cache );
 
@@ -635,6 +631,8 @@ I<$initial_count>.
 =item B<test( )>
 
 Run the tests.
+
+=back
 
 =head1 SEE ALSO
 

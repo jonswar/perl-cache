@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: FileCache.pm,v 1.27 2001/11/29 22:40:39 dclinton Exp $
+# $Id: FileCache.pm,v 1.28 2001/12/03 17:21:32 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -57,17 +57,6 @@ sub Clear
 }
 
 
-# return the OS default temp directory
-
-sub Get_Temp_Directory
-{
-  my $tmpdir = File::Spec->tmpdir( ) or
-    throw Error::Simple( "No tmpdir on this system.  Upgrade File::Spec?" );
-
-  return $tmpdir;
-}
-
-
 sub Purge
 {
   my ( $p_optional_cache_root ) = Static_Params( @_ );
@@ -94,12 +83,33 @@ sub Size
 }
 
 
+sub new
+{
+  my ( $self ) = _new( @_ );
+
+  $self->_complete_initialization( );
+
+  return $self;
+}
+
+
 sub _Get_Backend
 {
   my ( $p_optional_cache_root ) = Static_Params( @_ );
 
   return new Cache::FileBackend( _Build_Cache_Root( $p_optional_cache_root ) );
 
+}
+
+
+# return the OS default temp directory
+
+sub _Get_Temp_Directory
+{
+  my $tmpdir = File::Spec->tmpdir( ) or
+    throw Error::Simple( "No tmpdir on this system.  Upgrade File::Spec?" );
+
+  return $tmpdir;
 }
 
 
@@ -113,7 +123,7 @@ sub _Build_Cache_Root
   }
   else
   {
-    return Build_Path( Get_Temp_Directory( ), $DEFAULT_CACHE_ROOT );
+    return Build_Path( _Get_Temp_Directory( ), $DEFAULT_CACHE_ROOT );
   }
 }
 
@@ -141,16 +151,6 @@ sub _Get_Cache
   {
     return new Cache::FileCache( { 'namespace' => $p_namespace } );
   }
-}
-
-
-sub new
-{
-  my ( $self ) = _new( @_ );
-
-  $self->_complete_initialization( );
-
-  return $self;
 }
 
 
@@ -185,7 +185,7 @@ sub _get_initial_root
   }
   else
   {
-    return Build_Path( Get_Temp_Directory( ), $DEFAULT_CACHE_ROOT );
+    return Build_Path( _Get_Temp_Directory( ), $DEFAULT_CACHE_ROOT );
   }
 }
 
@@ -274,95 +274,28 @@ data in the filesystem so that it can be shared between processes.
 
   use Cache::FileCache;
 
-  my %cache_options = ( 'namespace' => 'MyNamespace',
-			'default_expires_in' => 600 );
+  my $cache = new Cache::FileCache( { 'namespace' => 'MyNamespace',
+                                      'default_expires_in' => 600 } );
 
-  my $file_cache = new Cache::FileCache( \%cache_options ) or
-    croak( "Couldn't instantiate FileCache" );
+  See Cache::Cache for the usage synopsis.
 
 =head1 METHODS
 
-=over 4
+See Cache::Cache for the API documentation.
 
-=item B<Clear( $optional_cache_root )>
+=over
 
-See Cache::Cache
+=item B<Clear( [$cache_root] )>
 
-=over 4
+See Cache::Cache, with the optional I<$cache_root> parameter.
 
-=item $optional_cache_root
+=item B<Purge( [$cache_root] )>
 
-If specified, this indicates the root on the filesystem of the cache
-to be cleared.
+See Cache::Cache, with the optional I<$cache_root> parameter.
 
-=back
+=item B<Size( [$cache_root] )>
 
-=item B<Purge( $optional_cache_root )>
-
-See Cache::Cache
-
-=over 4
-
-=item $optional_cache_root
-
-If specified, this indicates the root on the filesystem of the cache
-to be purged.
-
-=back
-
-=item B<Size( $optional_cache_root )>
-
-See Cache::Cache
-
-=over 4
-
-=item $optional_cache_root
-
-If specified, this indicates the root on the filesystem of the cache
-to be sized.
-
-=back
-
-=item B<new( $options_hash_ref )>
-
-Constructs a new FileCache.
-
-=over 4
-
-=item $options_hash_ref
-
-A reference to a hash containing configuration options for the cache.
-See the section OPTIONS below.
-
-=back
-
-=item B<clear(  )>
-
-See Cache::Cache
-
-=item B<get( $key )>
-
-See Cache::Cache
-
-=item B<get_object( $key )>
-
-See Cache::Cache
-
-=item B<purge( )>
-
-See Cache::Cache
-
-=item B<remove( $key )>
-
-See Cache::Cache
-
-=item B<set( $key, $data, $expires_in )>
-
-See Cache::Cache
-
-=item B<size(  )>
-
-See Cache::Cache
+See Cache::Cache, with the optional I<$cache_root> parameter.
 
 =back
 
@@ -372,21 +305,21 @@ See Cache::Cache for standard options.  Additionally, options are set
 by passing in a reference to a hash containing any of the following
 keys:
 
-=over 4
+=over
 
-=item cache_root
+=item I<cache_root>
 
 The location in the filesystem that will hold the root of the cache.
 Defaults to the 'FileCache' under the OS default temp directory (
 often '/tmp' on UNIXes ) unless explicitly set.
 
-=item cache_depth
+=item I<cache_depth>
 
 The number of subdirectories deep to cache object item.  This should
 be large enough that no cache directory has more than a few hundred
 objects.  Defaults to 3 unless explicitly set.
 
-=item directory_umask
+=item I<directory_umask>
 
 The directories in the cache on the filesystem should be globally
 writable to allow for multiple users.  While this is a potential
@@ -395,38 +328,25 @@ umask, thus reducing the risk of cache poisoning.  If you desire it to
 only be user writable, set the 'directory_umask' option to '077' or
 similar.  Defaults to '000' unless explicitly set.
 
-
 =back
 
 =head1 PROPERTIES
 
 See Cache::Cache for default properties.
 
-=over 4
+=over
 
 =item B<(get|set)_cache_root>
 
-The root on the filesystem of this cache.
+See the definition above for the option I<cache_root>
 
 =item B<(get|set)_cache_depth>
 
-The number of subdirectories deep to cache each object.
+See the definition above for the option I<cache_depth>
 
 =item B<(get|set)_directory_umask>
 
-The directories in the cache on the filesystem should be globally
-writable to allow for multiple users.  While this is a potential
-security concern, the actual cache entries are written with the user's
-umask, thus reducing the risk of cache poisoning.  If you desire it to
-only be user writable, set the 'directory_umask' option to '077' or
-similar.
-
-=item B<get_keys>
-
-The list of keys specifying objects in the namespace associated
-with this cache instance.  For FileCache implementations, the
-get_keys routine must actual examine each stored item in the
-cache, and it is therefore an expensive operation.
+See the definition above for the option I<directory_umask>
 
 =back
 

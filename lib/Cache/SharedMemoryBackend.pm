@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SharedMemoryBackend.pm,v 1.2 2001/11/29 18:33:21 dclinton Exp $
+# $Id: SharedMemoryBackend.pm,v 1.3 2001/11/29 22:40:39 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -11,11 +11,9 @@
 package Cache::SharedMemoryBackend;
 
 use strict;
+use Cache::CacheUtils qw( Assert_Defined Freeze_Data Static_Params Thaw_Data );
 use Cache::MemoryBackend;
-use Cache::SharedCacheUtils qw( Restore_Shared_Hash_Ref
-                                Restore_Shared_Hash_Ref_With_Lock
-                                Store_Shared_Hash_Ref
-                                Store_Shared_Hash_Ref_And_Unlock );
+use IPC::ShareLite qw( LOCK_EX LOCK_UN );
 
 use vars qw( @ISA );
 
@@ -69,9 +67,98 @@ sub store
 }
 
 
+# create a IPC::ShareLite share under the ipc_identifier
+
+sub _Instantiate_Share
+{
+  my ( $p_ipc_identifier ) = Static_Params( @_ );
+
+  Assert_Defined( $p_ipc_identifier );
+
+  my %ipc_options = (
+                     -key       =>  $p_ipc_identifier,
+                     -create    => 'yes',
+                     -destroy   => 'no',
+                     -exclusive => 'no'
+                    );
+
+  return new IPC::ShareLite( %ipc_options );
+}
+
+
+# this method uses the shared created by Instantiate_Share to
+# transparently retrieve a reference to a shared hash structure
+
+sub _Restore_Shared_Hash_Ref
+{
+  my ( $p_ipc_identifier ) = Static_Params( @_ );
+
+  Assert_Defined( $p_ipc_identifier );
+
+  my $frozen_hash_ref = _Instantiate_Share( $p_ipc_identifier )->fetch( ) or
+    return { };
+
+  return Thaw_Data( $frozen_hash_ref );
+}
+
+
+# this method uses the shared created by Instantiate_Share to
+# transparently retrieve a reference to a shared hash structure, and
+# additionally exlusively locks the share
+
+sub _Restore_Shared_Hash_Ref_With_Lock
+{
+  my ( $p_ipc_identifier ) = Static_Params( @_ );
+
+  Assert_Defined( $p_ipc_identifier );
+
+  my $share = _Instantiate_Share( $p_ipc_identifier );
+
+  $share->lock( LOCK_EX );
+
+  my $frozen_hash_ref = $share->fetch( ) or
+    return { };
+
+  return Thaw_Data( $frozen_hash_ref );
+}
+
+
+# this method uses the shared created by Instantiate_Share to
+# transparently persist a reference to a shared hash structure
+
+sub _Store_Shared_Hash_Ref
+{
+  my ( $p_ipc_identifier, $p_hash_ref ) = @_;
+
+  Assert_Defined( $p_ipc_identifier );
+  Assert_Defined( $p_hash_ref );
+
+  _Instantiate_Share( $p_ipc_identifier )->store( Freeze_Data( $p_hash_ref ) );
+}
+
+
+# this method uses the shared created by Instantiate_Share to
+# transparently persist a reference to a shared hash structure and
+# additionally unlocks the share
+
+sub _Store_Shared_Hash_Ref_And_Unlock
+{
+  my ( $p_ipc_identifier, $p_hash_ref ) = @_;
+
+  Assert_Defined( $p_ipc_identifier );
+  Assert_Defined( $p_hash_ref );
+
+  my $share = _Instantiate_Share( $p_ipc_identifier );
+
+  $share->store( Freeze_Data( $p_hash_ref ) );
+
+  $share->unlock( LOCK_UN );
+}
+
+
 sub _get_locked_store_ref
 {
-  return Restore_Shared_Hash_Ref_With_Lock( $IPC_IDENTIFIER );
+  return _Restore_Shared_Hash_Ref_With_Lock( $IPC_IDENTIFIER );
 }
 
 
@@ -79,13 +166,13 @@ sub _set_locked_store_ref
 {
   my ( $self, $p_store_ref ) = @_;
 
-  Store_Shared_Hash_Ref_And_Unlock( $IPC_IDENTIFIER, $p_store_ref );
+  _Store_Shared_Hash_Ref_And_Unlock( $IPC_IDENTIFIER, $p_store_ref );
 }
 
 
 sub _get_store_ref
 {
-  return Restore_Shared_Hash_Ref( $IPC_IDENTIFIER );
+  return _Restore_Shared_Hash_Ref( $IPC_IDENTIFIER );
 }
 
 
@@ -93,7 +180,46 @@ sub _set_store_ref
 {
   my ( $self, $p_store_ref ) = @_;
 
-  Store_Shared_Hash_Ref( $IPC_IDENTIFIER, $p_store_ref );
+  _Store_Shared_Hash_Ref( $IPC_IDENTIFIER, $p_store_ref );
 }
 
+
+
 1;
+
+
+__END__
+
+=pod
+
+=head1 NAME
+
+Cache::SharedMemoryBackend -- a shared memory based persistance mechanism
+
+=head1 DESCRIPTION
+
+The SharedMemoryBackend class is used to persist data to shared memory
+
+=head1 SYNOPSIS
+
+  my $backend = new Cache::SharedMemoryBackend( );
+
+  See Cache::Backend for the usage synopsis.
+
+=head1 METHODS
+
+See Cache::Backend for the API documentation.
+
+=head1 SEE ALSO
+
+Cache::Backend, Cache::FileBackend, Cache::ShareMemoryBackend
+
+=head1 AUTHOR
+
+Original author: DeWitt Clinton <dewitt@unto.net>
+
+Last author:     $Author: dclinton $
+
+Copyright (C) 2001 DeWitt Clinton
+
+=cut

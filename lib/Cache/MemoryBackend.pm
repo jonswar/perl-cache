@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: MemoryBackend.pm,v 1.5 2001/11/29 22:14:11 dclinton Exp $
+# $Id: MemoryBackend.pm,v 1.6 2001/11/29 22:40:39 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -119,4 +119,39 @@ sub _set_store_ref
 
 1;
 
+__END__
+
+=pod
+
+=head1 NAME
+
+Cache::MemoryBackend -- a memory based persistance mechanism
+
+=head1 DESCRIPTION
+
+The MemoryBackend class is used to persist data to memory
+
+=head1 SYNOPSIS
+
+  my $backend = new Cache::MemoryBackend( );
+
+  See Cache::Backend for the usage synopsis.
+
+=head1 METHODS
+
+See Cache::Backend for the API documentation.
+
+=head1 SEE ALSO
+
+Cache::Backend, Cache::FileBackend, Cache::ShareMemoryBackend
+
+=head1 AUTHOR
+
+Original author: DeWitt Clinton <dewitt@unto.net>
+
+Last author:     $Author: dclinton $
+
+Copyright (C) 2001 DeWitt Clinton
+
+=cut
 

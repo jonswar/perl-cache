@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheMetaData.pm,v 1.9 2001/12/03 17:21:32 dclinton Exp $
+# $Id: CacheMetaData.pm,v 1.10 2001/12/09 17:00:35 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -251,7 +251,7 @@ Return the size of an object specified by I<$key>.
 
 =head1 PROPERTIES
 
-=over 4
+=over
 
 =item B<get_cache_size>
 

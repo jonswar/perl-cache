@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: Object.pm,v 1.5 2001/11/07 13:10:56 dclinton Exp $
+# $Id: Object.pm,v 1.6 2001/11/29 18:33:21 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -32,9 +32,9 @@ sub get_created_at
 
 sub set_created_at
 {
-  my ( $self, $created_at ) = @_;
+  my ( $self, $p_created_at ) = @_;
 
-  $self->{_Created_At} = $created_at;
+  $self->{_Created_At} = $p_created_at;
 }
 
 
@@ -47,9 +47,9 @@ sub get_accessed_at
 
 sub set_accessed_at
 {
-  my ( $self, $accessed_at ) = @_;
+  my ( $self, $p_accessed_at ) = @_;
 
-  $self->{_Accessed_At} = $accessed_at;
+  $self->{_Accessed_At} = $p_accessed_at;
 }
 
 
@@ -62,9 +62,9 @@ sub get_data
 
 sub set_data
 {
-  my ( $self, $data ) = @_;
+  my ( $self, $p_data ) = @_;
 
-  $self->{_Data} = $data;
+  $self->{_Data} = $p_data;
 }
 
 
@@ -78,9 +78,9 @@ sub get_expires_at
 
 sub set_expires_at
 {
-  my ( $self, $expires_at ) = @_;
+  my ( $self, $p_expires_at ) = @_;
 
-  $self->{_Expires_At} = $expires_at;
+  $self->{_Expires_At} = $p_expires_at;
 }
 
 
@@ -94,9 +94,9 @@ sub get_key
 
 sub set_key
 {
-  my ( $self, $key ) = @_;
+  my ( $self, $p_key ) = @_;
 
-  $self->{_Key} = $key;
+  $self->{_Key} = $p_key;
 }
 
 
@@ -111,9 +111,9 @@ sub get_size
 
 sub set_size
 {
-  my ( $self, $size ) = @_;
+  my ( $self, $p_size ) = @_;
 
-  $self->{_Size} = $size;
+  $self->{_Size} = $p_size;
 }
 
 
@@ -129,11 +129,11 @@ sub get_identifier
 
 sub set_identifier
 {
-  my ( $self, $identifier ) = @_;
+  my ( $self, $p_identifier ) = @_;
 
   warn( "set_identifier has been marked deprepricated.  use set_key" );
 
-  return $self->set_key( $identifier );
+  return $self->set_key( $p_identifier );
 }
 
 
@@ -171,7 +171,7 @@ on the Cache::Cache interface.
 
 =head1 METHODS
 
-=over 4
+=over
 
 =item B<new(  )>
 
@@ -181,7 +181,7 @@ Construct a new Cache::Object.
 
 =head1 PROPERTIES
 
-=over 4
+=over
 
 =item B<(get|set)_accessed_at>
 

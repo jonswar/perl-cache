@@ -1,5 +1,5 @@
 #####################################################################
-# $Id: Cache.pm,v 1.25 2001/12/09 16:02:33 dclinton Exp $
+# $Id: Cache.pm,v 1.26 2001/12/09 17:00:35 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -90,57 +90,66 @@ Cache::Cache -- the Cache interface.
 
 =head1 DESCRIPTION
 
-The Cache interface is implemented by classes that support the get,
-set, remove, size, purge, and clear instance methods and their
+The Cache modules are designed to assist a developer in persisting
+data for a specified period of time.  Often these modules are used in
+web applications to store data locally to save repeated and redundant
+expensive calls to remote machines or databases.  People have also
+been known to use Cache::Cache for its straightforward interface in
+sharing data between runs of an application or invocations of a
+CGI-style script or simply as an easy to use abstraction of the
+filesystem or shared memory.
+
+The Cache::Cache interface is implemented by classes that support the
+get, set, remove, size, purge, and clear instance methods and their
 corresponding static methods for persisting data across method calls.
 
 =head1 USAGE
 
-  First, choose the best type of cache implementation for your needs.
-  The simplest cache is the MemoryCache, which is suitable for
-  applications that are serving multiple sequential requests, and
-  which to avoid making redundant expensive queries, such as an
-  Apache/mod_perl application talking to a database.  If you wish to
-  share that data between processes, then perhaps the
-  SharedMemoryCache is appropriate, although its behavior is tightly
-  bound to the underlying IPC mechanism, which varies from system to
-  system, and is unsuitable for large objects or large numbers of
-  objects.  When the SharedMemoryCache is not acceptable, then
-  FileCache offers all of the same functionality with similar
-  performance metrics, and it is not limited in terms of the number of
-  objects or their size.  If you wish to maintain a strict limit on
-  the size of a file system based cache, then the SizeAwareFileCache
-  is the way to go.  Similarly, the SizeAwareMemoryCache and the
-  SizeAwareSharedMemoryCache add size management functionality
-  to the MemoryCache and SharedMemoryCache classes respectively.
+First, choose the best type of cache implementation for your needs.
+The simplest cache is the MemoryCache, which is suitable for
+applications that are serving multiple sequential requests, and which
+to avoid making redundant expensive queries, such as an
+Apache/mod_perl application talking to a database.  If you wish to
+share that data between processes, then perhaps the SharedMemoryCache
+is appropriate, although its behavior is tightly bound to the
+underlying IPC mechanism, which varies from system to system, and is
+unsuitable for large objects or large numbers of objects.  When the
+SharedMemoryCache is not acceptable, then FileCache offers all of the
+same functionality with similar performance metrics, and it is not
+limited in terms of the number of objects or their size.  If you wish
+to maintain a strict limit on the size of a file system based cache,
+then the SizeAwareFileCache is the way to go.  Similarly, the
+SizeAwareMemoryCache and the SizeAwareSharedMemoryCache add size
+management functionality to the MemoryCache and SharedMemoryCache
+classes respectively.
 
-  Using a cache is simple.  Here is some sample code for instantiating
-  and using a file system based cache.
+Using a cache is simple.  Here is some sample code for instantiating
+and using a file system based cache.
 
-    use Cache::FileCache;
+  use Cache::FileCache;
 
-    my $cache = new Cache::FileCache( );
+  my $cache = new Cache::FileCache( );
 
-    my $customer = $cache->get( $name );
+  my $customer = $cache->get( $name );
 
-    if ( not defined $customer )
-    {
-      $customer = get_customer_from_db( $name );
-      $cache->set( $name, $customer, "10 minutes" );
-    }
+  if ( not defined $customer )
+  {
+    $customer = get_customer_from_db( $name );
+    $cache->set( $name, $customer, "10 minutes" );
+  }
 
-    return $customer;
+  return $customer;
 
 
 =head1 CONSTANTS
 
 =over
 
-=item $EXPIRES_NEVER
+=item I<$EXPIRES_NEVER>
 
 The item being set in the cache will never expire.
 
-=item $EXPIRES_NOW
+=item I<$EXPIRES_NOW>
 
 The item being set in the cache will expire immediately.
 
@@ -182,11 +191,6 @@ Returns the underlying Cache::Object object used to store the cached
 data associated with I<$key>.  This will not trigger a removal
 of the cached object even if the object has expired.
 
-=item B<set_object( $key, $object )>
-
-Associates I<$key> with Cache::Object I<$object>.  Using
-_object (as opposed to set) does not trigger an automatic purge.
-
 =item B<purge(  )>
 
 Remove all objects that have expired from the namespace associated
@@ -208,6 +212,12 @@ M, month, months, y, year, and years.  Additionally, $EXPIRES_NOW can
 be represented as "now" and $EXPIRES_NEVER can be represented as
 "never".
 
+=item B<set_object( $key, $object )>
+
+Associates I<$key> with Cache::Object I<$object>.  Using set_object
+(as opposed to set) does not trigger an automatic removal of expired
+objects.
+
 =item B<size(  )>
 
 Returns the total size of all objects in the namespace associated with
@@ -222,29 +232,29 @@ of the following keys:
 
 =over
 
-=item namespace
+=item I<namespace>
 
 The namespace associated with this cache.  Defaults to "Default" if
 not explicitly set.
 
-=item default_expires_in
+=item I<default_expires_in>
 
 The default expiration time for objects place in the cache.  Defaults
 to $EXPIRES_NEVER if not explicitly set.
 
-=item auto_purge_interval
+=item I<auto_purge_interval>
 
 Sets the auto purge interval.  If this option is set to a particular
 time ( in the same format as the expires_in ), then the purge( )
 routine will be called during the first set after the interval
 expires.  The interval will then be reset.
 
-=item auto_purge_on_set
+=item I<auto_purge_on_set>
 
 If this option is true, then the auto purge interval routine will be
 checked on every set.
 
-=item auto_purge_on_get
+=item I<auto_purge_on_get>
 
 If this option is true, then the auto purge interval routine will be
 checked on every get.

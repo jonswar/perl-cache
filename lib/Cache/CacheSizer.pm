@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheSizer.pm,v 1.1 2001/12/03 17:23:27 dclinton Exp $
+# $Id: CacheSizer.pm,v 1.2 2001/12/09 17:00:35 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -187,14 +187,17 @@ Inform the cache that the object specified by I<$key> has been accessed.
 Use the sizing algorithms to get the cache down under I<$new_size> if
 possible.
 
+=back
 
 =head1 PROPERTIES
 
-=over 4
+=over
 
 =item B<get_max_size>
 
 The desired size limit for the cache under control.
+
+=back
 
 =head1 SEE ALSO
 

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheUtils.pm,v 1.33 2001/11/29 22:40:39 dclinton Exp $
+# $Id: CacheUtils.pm,v 1.34 2001/12/03 17:21:32 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -122,3 +122,28 @@ sub Thaw_Data
 
 
 1;
+
+
+__END__
+
+=pod
+
+=head1 NAME
+
+Cache::CacheUtils -- miscellaneous utility routines
+
+=head1 DESCRIPTION
+
+The CacheUtils package is a collection of static methods that provide
+functionality useful to many different classes.
+
+=head1 AUTHOR
+
+Original author: DeWitt Clinton <dewitt@unto.net>
+
+Last author:     $Author: dclinton $
+
+Copyright (C) 2001 DeWitt Clinton
+
+=cut
+
