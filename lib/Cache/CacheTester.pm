@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheTester.pm,v 1.17 2001/12/13 15:48:29 dclinton Exp $
+# $Id: CacheTester.pm,v 1.18 2002/03/12 00:26:15 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -45,6 +45,7 @@ sub test
     $self->_test_fourteen( $cache );
     $self->_test_fifteen( $cache );
     $self->_test_sixteen( $cache );
+    $self->_test_seventeen( $cache );
   }
   catch Error with
   {
@@ -562,6 +563,27 @@ sub _test_sixteen
     $self->ok( ) : $self->not_ok( "couldn't create autopurge cache" );
 }
 
+
+# test the get_namespaces method
+
+sub _test_seventeen
+{
+  my ( $self, $cache ) = @_;
+
+  $cache->set( 'foo', 'bar' );
+
+  if ( Arrays_Are_Equal( [ sort( $cache->get_namespaces( ) ) ],
+                         [ sort( 'Default', '__AUTO_PURGE__' ) ] ) )
+  {
+    $self->ok( );
+  }
+  else
+  {
+    $self->not_ok( "get_namespaces returned the wrong namespaces" );
+  }
+
+  $cache->Clear( );
+}
 
 
 

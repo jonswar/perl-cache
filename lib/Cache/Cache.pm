@@ -1,5 +1,5 @@
 #####################################################################
-# $Id: Cache.pm,v 1.29 2002/03/12 00:26:15 dclinton Exp $
+# $Id: Cache.pm,v 1.30 2002/03/13 15:09:57 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -20,7 +20,7 @@ use Exporter;
 
 @EXPORT_OK = qw( $VERSION $EXPIRES_NOW $EXPIRES_NEVER );
 
-$VERSION = 0.992;
+$VERSION = 0.993;
 $EXPIRES_NOW = 'now';
 $EXPIRES_NEVER = 'never';
 
@@ -72,6 +72,8 @@ sub set_auto_purge_on_set;
 sub get_auto_purge_on_get;
 
 sub set_auto_purge_on_get;
+
+sub get_namespaces;
 
 sub get_identifiers;  # deprecated
 
@@ -222,6 +224,10 @@ objects.
 
 Returns the total size of all objects in the namespace associated with
 this cache instance.
+
+=item B<get_namespaces( )>
+
+Returns all the namespaces associated with this type of cache.
 
 =back
 

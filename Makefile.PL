@@ -87,7 +87,9 @@ END
 sub Print_Make_Test_Message
 {
   print <<END
+------------------------------------------------------------------
 Please be patient while running "make test" as the full test suite
 takes roughly two minutes to complete.
+------------------------------------------------------------------
 END
 }
