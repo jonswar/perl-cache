@@ -10,11 +10,10 @@ my $VERSION_FROM = 'lib/Cache/Cache.pm';
 my $COMPRESS = 'gzip';
 my $SUFFIX = '.gz';
 my $DEFAULT_PREREQ_PM = {
-                         Digest::SHA1 => '2.01',
+                         Digest::SHA1 => '2.02',
                          File::Spec => '0.82',
                          Storable => '1.014',
-                         Storable => '1.014',
-                         IPC::ShareLite => '0.08',
+                         IPC::ShareLite => '0.09',
                          Error => '0.15'
                         };
 

@@ -1,3 +1,6 @@
+- Shailen Bellare <Shailen.Bellare@lehman.com> assisted in the work 
+  required to migrated to Storable's "nfreeze" instead of "freeze" 
+
 - Simran <simran@cse.unsw.edu.au> submitted a patch to correctly initialize
   the MemoryBackend hash
 
