@@ -81,6 +81,13 @@ USAGE
   implementations for complete documentation.
 
 
+CHANGES
+
+  Cache::Cache 0.99 now throws Error::Simple on exceptions, and the
+  get_identifiers method has been deprecated in favor of the
+  get_keys method
+
+
 SEE ALSO
 
   File::Cache and IPC::Cache, and the project homepage at:

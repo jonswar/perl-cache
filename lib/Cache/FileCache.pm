@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: FileCache.pm,v 1.24 2001/11/29 16:12:11 dclinton Exp $
+# $Id: FileCache.pm,v 1.25 2001/11/29 18:12:55 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -50,11 +50,6 @@ my $DEFAULT_CACHE_ROOT = "FileCache";
 my $DEFAULT_DIRECTORY_UMASK = 000;
 
 
-##
-# Public class methods
-##
-
-
 sub Clear
 {
   my ( $p_optional_cache_root ) = Static_Params( @_ );
@@ -90,12 +85,6 @@ sub Size
 
   return $size;
 }
-
-
-
-##
-# Private class methods
-##
 
 
 sub _Get_Backend
@@ -147,10 +136,6 @@ sub _Get_Cache
   }
 }
 
-##
-# Constructor
-##
-
 
 sub new
 {
@@ -160,16 +145,6 @@ sub new
 
   return $self;
 }
-
-
-##
-# Public instance methods
-##
-
-
-##
-# Private instance methods
-##
 
 
 sub _new
@@ -232,11 +207,6 @@ sub _get_initial_umask
 
   return $self->_read_option( 'directory_umask', $DEFAULT_DIRECTORY_UMASK );
 }
-
-
-##
-# Instance properties
-##
 
 
 sub get_cache_depth

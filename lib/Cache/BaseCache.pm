@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: BaseCache.pm,v 1.16 2001/11/29 18:12:55 dclinton Exp $
+# $Id: BaseCache.pm,v 1.17 2001/11/29 18:33:21 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -97,6 +97,8 @@ sub get_object
   $object->set_size( $self->_get_backend( )->
                      get_object_size( $self->get_namespace( ), $p_key ) );
 
+  $object->set_key( $p_key );
+
   return $object;
 }
 
@@ -143,6 +145,7 @@ sub set_object
   my ( $self, $p_key, $p_object ) = @_;
 
   $p_object->set_size( undef );
+  $p_object->set_key( undef );
 
   $self->_get_backend( )->store( $self->get_namespace( ),
                                  $p_key,
@@ -533,51 +536,39 @@ be used as superclass for cache implementations.
 =head1 SYNOPSIS
 
 Cache::BaseCache is to be used as a superclass for cache
-implementations.
+implementations.  The most effective way to use BaseCache is to use
+the protected _set_backend method, which will be used to retrieve the
+persistance mechanism.  The subclass can then inherit the BaseCache's
+implentation of get, set, etc.  However, due to the difficulty
+inheriting static methods in Perl, the subclass will likely need to
+explicitly implement Clear, Purge, and Size.
 
   package Cache::MyCache;
 
   use vars qw( @ISA );
   use Cache::BaseCache;
+  use Cache::MyBackend;
 
   @ISA = qw( Cache::BaseCache );
 
   sub new
   {
-    my ( $proto, $options_hash_ref ) = @_;
-    my $class = ref( $proto ) || $proto;
+    my ( $self ) = _new( @_ );
 
-    my $self  =  $class->SUPER::new( $options_hash_ref ) or
-      throw Error::Simple( "Couldn't run super constructor" );
+    $self->_complete_initialization( );
 
     return $self;
   }
 
-  sub get
+  sub _new
   {
-    my ( $self, $key ) = @_;
-
-    #...
+    my ( $proto, $p_options_hash_ref ) = @_;
+    my $class = ref( $proto ) || $proto;
+    my $self = $class->SUPER::_new( $p_options_hash_ref );
+    $self->_set_backend( new Cache::MyBackend( ) );
+    return $self;
   }
 
-
-=head1 PROPERTIES
-
-=over 4
-
-=item B<get_namespace>
-
-See Cache::Cache
-
-=item B<get_default_expires_in>
-
-See Cache::Cache
-
-=item B<get_auto_purge>
-
-See Cache::Cache
-
-=back
 
 =head1 SEE ALSO
 

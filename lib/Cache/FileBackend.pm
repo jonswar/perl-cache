@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: FileBackend.pm,v 1.4 2001/11/29 18:12:55 dclinton Exp $
+# $Id: FileBackend.pm,v 1.5 2001/11/29 18:33:21 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -64,16 +64,6 @@ sub delete_namespace
 }
 
 
-# TODO: This code presumes that the data stored is an Object, which
-# makes FileBackend less generally applicable to any type of data
-# to be stored.  This can be fixed by simply modifying the cache 
-# implementations to insert the name of the key on retrieval, and
-# then freeze not just objects, but a list that contains both
-# the key and the object.  The has the additional benefit in
-# that even less data needs to be stored.  Again, this is similar
-# to how the size field is handled.
-
-
 sub get_keys
 {
   my ( $self, $p_namespace ) = @_;
@@ -84,12 +74,10 @@ sub get_keys
 
   foreach my $unique_key ( $self->get_unique_keys( $p_namespace ) )
   {
-    my $object = 
-      $self->_read_data( $self->_path_to_unique_key( $p_namespace,
-                                                     $unique_key ) ) or
-                                                       next;
+    my $key =  $self->_read_data( $self->_path_to_unique_key( $p_namespace, $unique_key ) )->[0] or
+      next;
 
-    push( @keys, $object->get_key( ) );
+    push( @keys, $key );
   }
 
   return @keys;
@@ -150,7 +138,7 @@ sub restore
   Assert_Defined( $p_namespace );
   Assert_Defined( $p_key );
 
-  return $self->_read_data( $self->_path_to_key( $p_namespace, $p_key ) );
+  return $self->_read_data( $self->_path_to_key($p_namespace, $p_key) )->[1];
 }
 
 
@@ -161,7 +149,9 @@ sub store
   Assert_Defined( $p_namespace );
   Assert_Defined( $p_key );
 
-  $self->_write_data( $self->_path_to_key( $p_namespace, $p_key ), $p_value );
+  $self->_write_data( $self->_path_to_key( $p_namespace, $p_key ),
+                      [ $p_key, $p_value ] );
+
 }
 
 
@@ -239,6 +229,8 @@ sub _path_to_unique_key
 }
 
 
+# the data is returned as reference to an array ( key, object )
+
 sub _read_data
 {
   my ( $self, $p_path ) = @_;
@@ -246,28 +238,30 @@ sub _read_data
   Assert_Defined( $p_path );
 
   my $frozen_file_ref = Read_File_Without_Time_Modification( $p_path ) or
-    return undef;
+    return [ undef, undef ];
 
-  my $file;
+  my $data;
 
-  Thaw_Object( $frozen_file_ref, \$file );
+  Thaw_Object( $frozen_file_ref, \$data );
 
-  return $file;
+  return $data;
 }
 
 
+# the data is passed as reference to an array ( key, object )
+
 sub _write_data
 {
-  my ( $self, $p_path, $p_file ) = @_;
+  my ( $self, $p_path, $p_data ) = @_;
 
   Assert_Defined( $p_path );
-  Assert_Defined( $p_file );
+  Assert_Defined( $p_data );
 
   Make_Path( $p_path, $self->get_directory_umask( ) );
 
   my $frozen_file;
 
-  Freeze_Object( \$p_file, \$frozen_file );
+  Freeze_Object( \$p_data, \$frozen_file );
 
   Write_File( $p_path, \$frozen_file );
 }

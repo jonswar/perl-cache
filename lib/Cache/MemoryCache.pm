@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: MemoryCache.pm,v 1.22 2001/11/24 21:12:43 dclinton Exp $
+# $Id: MemoryCache.pm,v 1.23 2001/11/29 18:12:55 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -93,16 +93,8 @@ sub _new
   my ( $proto, $p_options_hash_ref ) = @_;
   my $class = ref( $proto ) || $proto;
   my $self = $class->SUPER::_new( $p_options_hash_ref );
-  $self->_initialize_memory_cache( );
-  return $self;
-}
-
-
-sub _initialize_memory_cache
-{
-  my ( $self ) = @_;
-
   $self->_set_backend( new Cache::MemoryBackend( ) );
+  return $self;
 }
 
 

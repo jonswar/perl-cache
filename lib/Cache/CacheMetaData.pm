@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheMetaData.pm,v 1.6 2001/11/06 23:44:08 dclinton Exp $
+# $Id: CacheMetaData.pm,v 1.7 2001/11/07 13:10:56 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -14,25 +14,20 @@ use strict;
 use Cache::Cache qw( $EXPIRES_NOW $EXPIRES_NEVER );
 use Carp;
 
-# the cache meta data structure looks something like the following
-
-
+#
+# the cache meta data structure looks something like the following:
+#
 # %meta_data_hash =
 #  (
 #   $key_1 => [ $expires_at, $accessed_at, $object_size ],
 #   $key_2 => [ $expires_at, $accessed_at, $object_size ],
 #   ...
 #  )
-
+#
 
 my $_EXPIRES_AT_OFFSET = 0;
 my $_ACCESS_AT_OFFSET = 1;
 my $_SIZE_OFFSET = 2;
-
-
-##
-# Constructor
-##
 
 
 sub new
@@ -145,16 +140,6 @@ sub _insert_object_size
                                    $_SIZE_OFFSET,
                                    $p_object->get_size( ) );
 }
-
-
-
-
-
-
-
-##
-# Instance properties
-##
 
 
 sub get_cache_size
