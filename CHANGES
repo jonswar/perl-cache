@@ -9,6 +9,7 @@ Revision history for Cache
    and implementations.  This option will call the purge method on
    the cache after the specified interval expires
  - renamed _set_namepsace to set_namespace (i.e., made it public)
+ - added the set_object method to the cache interface
  - updated the test scripts and CREDITS file
  - updated the perldoc formatting to look better in HTML
  - removed the $VERSION from SizeAwareCache
