@@ -1,3 +1,6 @@
+- Rob Mueller <robm@fastmail.fm> and Jeremy Howard <jhoward@fastmail.fm> 
+  provided a patch to ensure consistent state if the filesystem fills up
+
 - Glady.Junsay <Glady.Junsay@target.com> noticed that get_keys was 
   defined twice in NullCache
 

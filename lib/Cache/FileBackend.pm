@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: FileBackend.pm,v 1.20 2002/04/07 17:04:46 dclinton Exp $
+# $Id: FileBackend.pm,v 1.21 2002/06/22 14:31:01 dclinton Exp $
 # Copyright (C) 2001, 2002 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -639,7 +639,17 @@ sub _read_data
   my $frozen_data_ref = _Read_File_Without_Time_Modification( $p_path ) or
     return [ undef, undef ];
 
-  return Thaw_Data( $$frozen_data_ref );
+  my $data_ref = eval{ Thaw_Data( $$frozen_data_ref ) };
+  
+  if ( $@ ) 
+  {
+    unlink _Untaint_Path( $p_path );
+    return [ undef, undef ];
+  }
+  else
+  {
+    return $data_ref;
+  }
 }
 
 
