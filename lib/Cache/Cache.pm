@@ -1,5 +1,5 @@
-######################################################################
-# $Id: Cache.pm,v 1.17 2001/04/26 12:37:11 dclinton Exp $
+#####################################################################
+# $Id: Cache.pm,v 1.18 2001/09/05 14:40:47 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -192,7 +192,7 @@ To use a Cache implementation, such as Cache::MemoryCache:
 
 =head1 CONSTANTS
 
-=over 4
+=over
 
 =item $SUCCESS
 
@@ -212,205 +212,76 @@ The item being set in the cache will never expire.
 
 The item being set in the cache will expire immediately.
 
-=item $EXPIRES_NEVER
-
-The item being set in the cache will never expire.
-
 =back
 
 =head1 METHODS
 
-=over 4
+=over
 
 =item B<Clear( )>
 
-Remove all objects from all caches of this type.
-
-=over 4
-
-=item Returns
-
-Either $SUCCESS or $FAILURE.
-
-=back
+Remove all objects from all caches of this type. Returns either $SUCCESS or $FAILURE.
 
 =item B<Purge( )>
 
-Remove all objects that have expired from all caches of this type.
-
-=over 4
-
-=item Returns
-
-Either $SUCCESS or $FAILURE.
-
-=back
+Remove all objects that have expired from all caches of this type. Returns either $SUCCESS or $FAILURE.
 
 =item B<Size( $optional_namespace )>
 
-Calculate the total size of all objects in all caches of this type.
-
-=over 4
-
-=item Returns
-
-The total size of all the objects in all caches of this type.
-
-=back
+Returns the total size of all objects in all caches of this type.
 
 =item B<new( $options_hash_ref )>
 
-Construct a new instance of a Cache::Cache
-
-=over 4
-
-=item $options_hash_ref
-
-A reference to a hash containing configuration options for the cache.
-See the section OPTIONS below.
-
-=back
+Construct a new instance of a Cache::Cache. I<$options_hash_ref> is a
+reference to a hash containing configuration options; see the section
+OPTIONS below.
 
 =item B<clear(  )>
 
-Remove all objects from the namespace associated with this cache instance.
-
-=over 4
-
-=item Returns
-
-Either $SUCCESS or $FAILURE.
-
-=back
+Remove all objects from the namespace associated with this cache instance. Returns either $SUCCESS or $FAILURE.
 
 =item B<get( $identifier )>
 
-Fetch the data specified.
-
-=over 4
-
-=item $identifier
-
-A string uniquely identifying the data.
-
-=item Returns
-
-The data specified.
-
-=back
+Returns the data associated with I<$identifier>.
 
 =item B<get_object( $identifier )>
 
-Fetch the underlying Cache::Object object that is used to store the
-cached data.  This will not trigger a removal of the cached object
-even if the object has expired.
-
-=over 4
-
-=item $identifier
-
-A string uniquely identifying the data.
-
-=item Returns
-
-The underlying Cache::Object object, which may or may not have expired.
-
-=back
+Returns the underlying Cache::Object object used to store the cached
+data associated with I<$identifier>.  This will not trigger a removal
+of the cached object even if the object has expired.
 
 =item B<set_object( $identifier, $object )>
 
-Stores the underlying Cache::Object object that is to be cached.  Using
-set_object (as opposed to set) does not trigger an automatic purge.
-
-=over 4
-
-=item $identifier
-
-A string uniquely identifying the data.
-
-=item $object
-
-The underlying Cache::Object object to be stored.
-
-=item Returns
-
-Either $SUCCESS or $FAILURE.
-
-=back
+Associates I<$identifier> with Cache::Object I<$object>.  Using
+_object (as opposed to set) does not trigger an automatic purge.
+Returns either $SUCCESS or $FAILURE.
 
 =item B<purge(  )>
 
 Remove all objects that have expired from the namespace associated
-with this cache instance.
-
-=over 4
-
-=item Returns
-
-Either $SUCCESS or $FAILURE.
-
-=back
+with this cache instance. Returns either $SUCCESS or $FAILURE.
 
 =item B<remove( $identifier )>
 
-Delete the data associated with the $identifier from the cache.
+Delete the data associated with the I<$identifier> from the cache.
+Returns either $SUCCESS or $FAILURE.
 
-=over 4
+=item B<set( $identifier, $data, [$expires_in] )>
 
-=item $identifier
-
-A string uniquely identifying the data.
-
-=item Returns
-
-Either $SUCCESS or $FAILURE.
-
-=back
-
-=item B<set( $identifier, $data, $expires_in )>
-
-Store an item in the cache
-
-=over 4
-
-=item $identifier
-
-A string uniquely identifying the data.
-
-=item $data
-
-A scalar or reference to the object to be stored.
-
-=item $expires_in
-
-Either the time in seconds until this data should be erased, or the
+Associates I<$data> with I<$identifier> in the cache. I<$expires_in>
+indicates the time in seconds until this data should be erased, or the
 constant $EXPIRES_NOW, or the constant $EXPIRES_NEVER.  Defaults to
 $EXPIRES_NEVER.  This variable can also be in the extended format of
 "[number] [unit]", e.g., "10 minutes".  The valid units are s, second,
 seconds, sec, m, minute, minutes, min, h, hour, hours, w, week, weeks,
 M, month, months, y, year, and years.  Additionally, $EXPIRES_NOW can
 be represented as "now" and $EXPIRES_NEVER can be represented as
-"never".
-
-=item Returns
-
-Either $SUCCESS or $FAILURE.
-
-=back
+"never". Returns either $SUCCESS or $FAILURE.
 
 =item B<size(  )>
 
-Calculate the total size of all objects in the namespace associated with
+Returns the total size of all objects in the namespace associated with
 this cache instance.
-
-=over 4
-
-=item Returns
-
-The total size of all objects in the namespace associated with this
-cache instance.
-
-=back
 
 =back
 
@@ -419,7 +290,7 @@ cache instance.
 The options are set by passing in a reference to a hash containing any
 of the following keys:
 
-=over 4
+=over
 
 =item namespace
 
@@ -452,7 +323,7 @@ checked on every get.
 
 =head1 PROPERTIES
 
-=over 4
+=over
 
 =item B<(get|set)_namespace( )>
 
