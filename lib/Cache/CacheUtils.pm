@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheUtils.pm,v 1.7 2001/03/06 07:13:58 dclinton Exp $
+# $Id: CacheUtils.pm,v 1.8 2001/03/06 20:01:52 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -30,6 +30,7 @@ use File::Spec::Functions qw( catdir catfile splitdir splitpath tmpdir );
                  Build_Object
                  Build_Path
                  Build_Unique_Key
+                 Create_Directory
                  Get_Temp_Directory
                  List_Subdirectories
                  Make_Path
@@ -62,6 +63,12 @@ my %_Expiration_Units = ( map(($_,             1), qw(s second seconds sec)),
                           map(($_,      60*60*24), qw(w week weeks)),
                           map(($_,   60*60*24*30), qw(M month months)),
                           map(($_,  60*60*24*365), qw(y year years)) );
+
+
+# the file mode for new directories, which will be modified by the
+# current umask
+
+my $DIRECTORY_MODE = 0777;
 
 
 # Compare the expires_at to the current time to determine whether or
@@ -165,6 +172,9 @@ sub Sum_Expiration_Time
   return $expires_at;
 }
 
+
+# turn a string in the form "[number] [unit]" into an explicit number
+# of seconds from the present.  E.g, "10 minutes" returns "600"
 
 sub Canonicalize_Expiration_Time
 {
@@ -286,11 +296,11 @@ sub Create_Directory
   defined( $directory ) or
     croak( "directory required" );
 
-  my $old_umask = umask if defined $optional_new_umask;
+  my $old_umask = umask( ) if defined $optional_new_umask;
 
   umask( $optional_new_umask ) if defined $optional_new_umask;
 
-  mkpath( $directory, 0, 0777 );
+  mkpath( $directory, 0, $DIRECTORY_MODE );
 
   -d $directory or
     croak( "Couldn't create directory: $directory: $!" );
@@ -324,10 +334,12 @@ sub Split_Word
 }
 
 
+# create a directory with the optional umask if it doesn't already
+# exist
 
 sub Make_Path
 {
-  my ( $path ) = @_;
+  my ( $path, $optional_new_umask ) = @_;
 
   my ( $volume, $directory, $filename ) = splitpath( $path );
 
@@ -335,11 +347,12 @@ sub Make_Path
 
   return $SUCCESS if -d $directory;
 
-  Create_Directory( $directory ) or
+  Create_Directory( $directory, $optional_new_umask ) or
     croak( "Couldn't create directory $directory" );
 
   return $SUCCESS;
 }
+
 
 # write a file atomically
 

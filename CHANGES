@@ -1,6 +1,9 @@
 Revision history for Cache
 
 0.03 in progress
+ - made the FileCache more multi-user friendly by allowing a more
+   permissive default directory umask, which can also be optionally 
+   overridden
  - updated documentation and code style
  - completely rewrote and improved the limit_size method for a major
    performance gain

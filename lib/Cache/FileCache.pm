@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: FileCache.pm,v 1.9 2001/03/06 17:05:24 dclinton Exp $
+# $Id: FileCache.pm,v 1.10 2001/03/06 18:26:30 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -19,6 +19,7 @@ use Cache::Cache qw( $EXPIRES_NEVER $SUCCESS $FAILURE $TRUE $FALSE );
 use Cache::CacheUtils qw ( Build_Object
                            Build_Path
                            Build_Unique_Key
+                           Create_Directory
                            Get_Temp_Directory
                            List_Subdirectories
                            Make_Path
@@ -39,9 +40,24 @@ use Data::Dumper;
 @ISA = qw ( Cache::BaseCache );
 
 
+# by default, the cache nests all entries on the filesystem three
+# directories deep
+
 my $DEFAULT_CACHE_DEPTH = 3;
+
+
+# by default, the root of the cache is located in 'FileCache'.  On a
+# UNIX system, this will appear in "/tmp/FileCache/"
+
 my $DEFAULT_CACHE_ROOT = "FileCache";
 
+
+# by, default, the directories in the cache on the filesystem should
+# be globally writable to allow for multiple users.  While this is a
+# potential security concern, the actual cache entries are written
+# with the user's umask, thus reducing the risk of cache poisoning
+
+my $DEFAULT_DIRECTORY_UMASK = 000;
 
 
 ##
@@ -320,6 +336,9 @@ sub _initialize_file_cache
   $self->_initialize_cache_root( ) or
     croak( "Couldn't initialize cache root" );
 
+  $self->_initialize_directory_umask( ) or
+    croak( "Couldn't initialize directory umask" );
+
   return $SUCCESS;
 }
 
@@ -351,6 +370,19 @@ sub _initialize_cache_root
 }
 
 
+sub _initialize_directory_umask
+{
+  my ( $self ) = @_;
+
+  my $directory_umask = 
+    $self->_read_option( 'directory_umask', $DEFAULT_DIRECTORY_UMASK );
+
+  $self->set_directory_umask( $directory_umask );
+
+  return $SUCCESS;
+}
+
+
 sub _store
 {
   my ( $self, $unique_key, $object ) = @_;
@@ -367,7 +399,12 @@ sub _store
 
   my $object_dump = $data_dumper->Dump( );
 
-  Make_Path( $object_path ) or
+  my $directory_umask = $self->get_directory_umask( );
+
+  defined $directory_umask or
+    croak( "Couldn't get directory umask" );
+
+  Make_Path( $object_path, $directory_umask ) or
     croak( "Couldn't make path: $object_path" );
 
   Write_File( $object_path, \$object_dump ) or
@@ -505,6 +542,22 @@ sub set_cache_root
 }
 
 
+sub get_directory_umask
+{
+  my ( $self ) = @_;
+
+  return $self->{_Directory_Umask};
+}
+
+
+sub set_directory_umask
+{
+  my ( $self, $directory_umask ) = @_;
+
+  $self->{_Directory_Umask} = $directory_umask;
+}
+
+
 1;
 
 
@@ -621,6 +674,16 @@ The number of subdirectories deep to cache object item.  This should
 be large enough that no cache directory has more than a few hundred
 objects.  Defaults to 3 unless explicitly set.
 
+=item directory_umask
+
+The directories in the cache on the filesystem should be globally
+writable to allow for multiple users.  While this is a potential
+security concern, the actual cache entries are written with the user's
+umask, thus reducing the risk of cache poisoning.  If you desire it to
+only be user writable, set the 'directory_umask' option to '077' or
+similar.  Defaults to '000' unless explicitly set.
+
+
 =back
 
 =head1 PROPERTIES
@@ -629,13 +692,22 @@ See Cache::Cache for default properties.
 
 =over 4
 
-=item B<get_cache_root>
+=item B<(get|set)_cache_root>
 
 The root on the filesystem of this cache.
 
-=item B<get_cache_depth>
+=item B<(get|set)_cache_depth>
 
 The number of subdirectories deep to cache each object.
+
+=item B<(get|set)_directory_umask>
+
+The directories in the cache on the filesystem should be globally
+writable to allow for multiple users.  While this is a potential
+security concern, the actual cache entries are written with the user's
+umask, thus reducing the risk of cache poisoning.  If you desire it to
+only be user writable, set the 'directory_umask' option to '077' or
+similar.
 
 =back
 
