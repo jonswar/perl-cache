@@ -1,6 +1,6 @@
 Revision history for Cache
 
-0.99 in progress
+0.99 2001-12-09-18-45
  - major refactoring of code
  - replaced non-standard usage of SUCCESS and FAILURE with Error.pm
  - replaced non-standard usage of TRUE and FALSE with 1 and 0 
@@ -13,6 +13,8 @@ Revision history for Cache
  - changed the meaning of object and cache size for file system based
    caches to consistently reflect the total size of the objects on disk,
    but not including the directory overhead
+ - changed format of persisted data in the FileBackend
+ - major rewrite of documentatoin
 
 0.09 2001-09-10-12-10
  - released version 0.09
