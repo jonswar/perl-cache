@@ -44,12 +44,30 @@ INSTALLATION
 
 USAGE
 
-  see perldoc Cache::Cache, Cache::FileCache, etc.
+  see perldoc Cache::Cache, Cache::FileCache, etc, but in general it
+  is a simple as:
+
+
+
+  use Cache::FileCache;  # or Cache::MemoryCache, etc.
+
+  my $cache = new Cache::FileCache( ), # or Cache::MemoryCache, etc.
+
+  my $key = 'foo';
+
+  my $original_object = 'bar';
+
+  $cache->set( $key, $original_object );
+
+  my $fetched_object = $cache->get( $key );
+
+  $fetched_object eq $original_object;
+
 
 
 SEE ALSO
 
-  File::Cache, IPC::Cache
+  File::Cache and IPC::Cache
 
 
 NOTES
