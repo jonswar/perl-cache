@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: FileCache.pm,v 1.14 2001/03/23 00:15:06 dclinton Exp $
+# $Id: FileCache.pm,v 1.15 2001/04/08 22:48:37 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -16,7 +16,8 @@ use strict;
 use vars qw( @ISA );
 use Cache::BaseCache;
 use Cache::Cache qw( $EXPIRES_NEVER $SUCCESS $FAILURE $TRUE $FALSE );
-use Cache::CacheUtils qw ( Build_Object
+use Cache::CacheUtils qw ( Auto_Purge
+                           Build_Object
                            Build_Path
                            Build_Unique_Key
                            Create_Directory
@@ -296,11 +297,28 @@ sub set
 {
   my ( $self, $identifier, $data, $expires_in ) = @_;
 
+  Auto_Purge( $self ) or
+    croak( "Couldn't auto purge" );
+
   my $default_expires_in = $self->get_default_expires_in( );
 
   my $object =
     Build_Object( $identifier, $data, $default_expires_in, $expires_in ) or
       croak( "Couldn't build cache object" );
+
+  my $unique_key = Build_Unique_Key( $identifier ) or
+    croak( "Couldn't build unique key" );
+
+  $self->_store( $unique_key, $object ) or
+    croak( "Couldn't store $identifier" );
+
+  return $SUCCESS;
+}
+
+
+sub set_object
+{
+  my ( $self, $identifier, $object ) = @_;
 
   my $unique_key = Build_Unique_Key( $identifier ) or
     croak( "Couldn't build unique key" );

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareFileCache.pm,v 1.14 2001/03/23 00:15:06 dclinton Exp $
+# $Id: SizeAwareFileCache.pm,v 1.15 2001/04/08 22:48:37 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -20,6 +20,7 @@ use Cache::CacheUtils qw ( Build_Object
                            Build_Unique_Key
                            Limit_Size
                            Make_Path
+                           Object_Has_Expired
                            Recursively_List_Files
                            Remove_File
                            Static_Params
@@ -32,7 +33,6 @@ use Carp;
 @ISA = qw ( Cache::FileCache Cache::SizeAwareCache );
 
 my $DEFAULT_MAX_SIZE = $NO_MAX_SIZE;
-
 
 ##
 # Public class methods
@@ -123,38 +123,6 @@ sub set
 
 
 
-sub _build_cache_meta_data
-{
-  my ( $self ) = @_;
-
-  my $namespace_path = $self->_build_namespace_path( ) or
-    croak( "Couldn't build namespace path" );
-
-  defined( $namespace_path ) or
-    croak( "namespace_path required" );
-
-  my $cache_meta_data = new Cache::CacheMetaData( ) or
-    croak( "Couldn't instantiate new CacheMetaData" );
-
-  my @filenames;
-
-  Recursively_List_Files( $namespace_path, \@filenames );
-
-  foreach my $filename ( @filenames )
-  {
-    my $object = $self->_restore( $filename ) or
-      next;
-
-    my $size = $object->get_size( );
-
-    $cache_meta_data->insert( $object ) or
-      croak( "Couldn't insert meta data" );
-  }
-
-  return $cache_meta_data;
-}
-
-
 sub limit_size
 {
   my ( $self, $new_size ) = @_;
@@ -200,6 +168,38 @@ sub _initialize_max_size
 }
 
 
+sub _build_cache_meta_data
+{
+  my ( $self ) = @_;
+
+  my $namespace_path = $self->_build_namespace_path( ) or
+    croak( "Couldn't build namespace path" );
+
+  defined( $namespace_path ) or
+    croak( "namespace_path required" );
+
+  my $cache_meta_data = new Cache::CacheMetaData( ) or
+    croak( "Couldn't instantiate new CacheMetaData" );
+
+  my @filenames;
+
+  Recursively_List_Files( $namespace_path, \@filenames );
+
+  foreach my $filename ( @filenames )
+  {
+    my $object = $self->_restore( $filename ) or
+      next;
+
+    my $size = $object->get_size( );
+
+    $cache_meta_data->insert( $object ) or
+      croak( "Couldn't insert meta data" );
+  }
+
+  return $cache_meta_data;
+}
+
+
 ##
 # Instance properties
 ##
@@ -219,6 +219,7 @@ sub set_max_size
 
   $self->{_Max_Size} = $max_size;
 }
+
 
 
 1;

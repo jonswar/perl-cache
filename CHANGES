@@ -1,6 +1,11 @@
 Revision history for Cache
 
 0.08 in progress
+ - added the auto_purge option and property to the base cache interface
+   and implementations.  This option will call the purge method on
+   the cache after the specified interval expires
+ - renamed _set_namepsace to set_namespace (i.e., made it public)
+ - updated the test scripts and CREDITS file
  - updated the perldoc formatting to look better in HTML
  - removed the $VERSION from SizeAwareCache
  - started version 0.08

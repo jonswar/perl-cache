@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: Cache.pm,v 1.13 2001/03/27 15:43:02 dclinton Exp $
+# $Id: Cache.pm,v 1.14 2001/04/08 22:48:37 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -93,6 +93,9 @@ sub remove;
 
 
 sub set;
+
+
+sub set_object;
 
 
 sub size;
@@ -305,6 +308,27 @@ The underlying Cache::Object object, which may or may not have expired.
 
 =back
 
+=item B<set_object( $identifier, $object )>
+
+Stores the underlying Cache::Object object that is to be cached.  Using
+set_object (as opposed to set) does not trigger an automatic purge.
+
+=over 4
+
+=item $identifier
+
+A string uniquely identifying the data.
+
+=item $object
+
+The underlying Cache::Object object to be stored.
+
+=item Returns
+
+Either $SUCCESS or $FAILURE.
+
+=back
+
 =item B<purge(  )>
 
 Remove all objects that have expired from the namespace associated
@@ -398,13 +422,21 @@ not explicitly set.
 The default expiration time for objects place in the cache.  Defaults
 to $EXPIRES_NEVER if not explicitly set.
 
+=item auto_purge
+
+Sets the auto purge interval.  If this option is set to a particular
+time ( in the same format as the expires_in ), then the purge( )
+routine will be called during the first set after the interval
+expires.  The interval will then be reset.
+
+
 =back
 
 =head1 PROPERTIES
 
 =over 4
 
-=item B<get_namespace( )>
+=item B<(get|set)_namespace( )>
 
 The namespace of this cache instance
 
@@ -416,6 +448,13 @@ The default expiration time for objects placed in this cache instance
 
 The list of identifiers specifying objects in the namespace associated
 with this cache instance
+
+=item B<(get|set)_auto_purge( )>
+
+Accesses the auto purge interval.  If this option is set to a particular
+time ( in the same format as the expires_in ), then the purge( )
+routine will be called during the first get after the interval
+expires.  The interval will then be reset.
 
 =back
 

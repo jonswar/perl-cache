@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareMemoryCache.pm,v 1.6 2001/03/23 00:15:06 dclinton Exp $
+# $Id: SizeAwareMemoryCache.pm,v 1.7 2001/04/08 22:48:37 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -16,7 +16,8 @@ use strict;
 use vars qw( @ISA );
 use Cache::Cache qw( $EXPIRES_NEVER $SUCCESS $FAILURE $TRUE $FALSE );
 use Cache::CacheMetaData;
-use Cache::CacheUtils qw ( Build_Object
+use Cache::CacheUtils qw ( Auto_Purge
+                           Build_Object
                            Freeze_Object
                            Limit_Size
                            Object_Has_Expired
@@ -142,14 +143,17 @@ sub set
 {
   my ( $self, $identifier, $data, $expires_in ) = @_;
 
+  Auto_Purge( $self ) or
+    croak( "Couldn't auto purge" );
+
   my $default_expires_in = $self->get_default_expires_in( );
 
   my $object =
     Build_Object( $identifier, $data, $default_expires_in, $expires_in ) or
       croak( "Couldn't build cache object" );
 
-  $self->_store( $identifier, $object ) or
-    croak( "Couldn't store $identifier" );
+  $self->set_object( $identifier, $object ) or
+    croak( "Couldn't set object" );
 
   my $max_size = $self->get_max_size();
 
@@ -157,6 +161,17 @@ sub set
   {
     $self->limit_size( $max_size );
   }
+
+  return $SUCCESS;
+}
+
+
+sub set_object
+{
+  my ( $self, $identifier, $object ) = @_;
+
+  $self->_store( $identifier, $object ) or
+    croak( "Couldn't store $identifier" );
 
   return $SUCCESS;
 }

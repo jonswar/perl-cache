@@ -1,3 +1,7 @@
+- Randal Schwartz <merlyn@stonehenge.com> wrote about an automatic purging
+  mechanism for the cache in Web Techniques, and helped me implement
+  that feature as part of the framework
+
 - Matt Sly <matt@eziba.com> for catching a bug with erroneously
   importing an unused module
   

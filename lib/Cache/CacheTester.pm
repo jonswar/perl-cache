@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheTester.pm,v 1.4 2001/03/06 07:07:43 dclinton Exp $
+# $Id: CacheTester.pm,v 1.5 2001/03/23 00:15:06 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -39,6 +39,7 @@ sub test
   $self->_test_twelve( $cache );
   $self->_test_thirteen( $cache );
   $self->_test_fourteen( $cache );
+  $self->_test_fifteen( $cache );
 }
 
 
@@ -444,10 +445,10 @@ sub _test_eleven
   ( $purge_status eq $SUCCESS ) ?
     $self->ok( ) : $self->not_ok( '$purge_status eq $SUCCESS' );
 
-  my $post_purge_size = $cache->Size( );
+  my $purged_object = $cache->get_object( $key );
 
-  ( $post_purge_size == $empty_size ) ?
-    $self->ok( ) : $self->not_ok( '$post_purge_size == $empty_size' );
+  ( not defined $purged_object ) ?
+    $self->ok( ) : $self->not_ok( 'not defined $purged_object' );
 }
 
 
@@ -506,10 +507,10 @@ sub _test_twelve
   ( $purge_status eq $SUCCESS ) ?
     $self->ok( ) : $self->not_ok( '$purge_status eq $SUCCESS' );
 
-  my $post_purge_size = &$size_method( );
+  my $purged_object = $cache->get_object( $key );
 
-  ( $post_purge_size == $empty_size ) ?
-    $self->ok( ) : $self->not_ok( '$post_purge_size == $empty_size' );
+  ( not defined $purged_object ) ?
+    $self->ok( ) : $self->not_ok( 'not defined $purged_object' );
 
   use strict;
 }
@@ -582,6 +583,56 @@ sub _test_fourteen
   ( $arrays_equal == 1 ) ?
     $self->ok( ) : $self->not_ok( '$arrays_equal == 1' );
 }
+
+
+# test the auto_purge functionality
+
+sub _test_fifteen
+{
+  my ( $self, $cache ) = @_;
+
+  my $clear_status = $cache->Clear( );
+
+  ( $clear_status eq $SUCCESS ) ?
+    $self->ok( ) : $self->not_ok( '$clear_status eq $SUCCESS' );
+
+  my $expires_in = "1 second";
+
+  $cache->set_auto_purge( $expires_in );
+
+  my $key = 'Test Key';
+
+  my $value = 'Test Value';
+
+  my $set_status = $cache->set( $key, $value, $expires_in );
+
+  ( $set_status eq $SUCCESS ) ?
+    $self->ok( ) : $self->not_ok( '$set_status eq $SUCCESS' );
+
+  my $fetched_value = $cache->get( $key );
+
+  ( $fetched_value eq $value ) ?
+    $self->ok( ) : $self->not_ok( '$fetched_value eq $value' );
+
+  sleep( $EXPIRES_DELAY );
+
+  $set_status = $cache->set( "Trigger auto_purge", "Empty" );
+
+  ( $set_status eq $SUCCESS ) ?
+    $self->ok( ) : $self->not_ok( '$set_status eq $SUCCESS' );
+
+  my $fetched_expired_value = $cache->get( $key );
+
+  ( not defined $fetched_expired_value ) ?
+    $self->ok( ) : $self->not_ok( 'not defined $fetched_expired_value' );
+
+  $clear_status = $cache->Clear( );
+
+  ( $clear_status eq $SUCCESS ) ?
+    $self->ok( ) : $self->not_ok( '$clear_status eq $SUCCESS' );
+}
+
+
 
 
 sub Arrays_Are_Equal

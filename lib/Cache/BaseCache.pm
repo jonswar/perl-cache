@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: BaseCache.pm,v 1.4 2001/03/22 21:41:35 dclinton Exp $
+# $Id: BaseCache.pm,v 1.5 2001/04/08 22:48:37 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -16,6 +16,7 @@ use strict;
 use vars qw( @ISA );
 use Cache::Cache qw( $SUCCESS $FAILURE $EXPIRES_NEVER );
 use Cache::CacheUtils qw( Freeze_Object
+                          Reset_Auto_Purge
                           Thaw_Object
                         );
 use Carp;
@@ -65,6 +66,9 @@ sub _initialize_base_cache
   $self->_initialize_default_expires_in( ) or
     croak( "Couldn't initialize default expires in" );
 
+  $self->_initialize_auto_purge( ) or
+    croak( "Couldn't initialize auto purge" );
+
   return $SUCCESS;
 }
 
@@ -85,7 +89,7 @@ sub _initialize_namespace
 
   my $namespace = $self->_read_option( 'namespace', $DEFAULT_NAMESPACE );
 
-  $self->_set_namespace( $namespace );
+  $self->set_namespace( $namespace );
 
   return $SUCCESS;
 }
@@ -102,6 +106,22 @@ sub _initialize_default_expires_in
 
   return $SUCCESS;
 }
+
+
+sub _initialize_auto_purge
+{
+  my ( $self ) = @_;
+
+  my $auto_purge = $self->_read_option( 'auto_purge' );
+
+  if ( defined $auto_purge )
+  {
+    $self->set_auto_purge( $auto_purge );
+  }
+
+  return $SUCCESS;
+}
+
 
 
 # _read_option looks for an option named 'option_name' in the
@@ -193,7 +213,7 @@ sub get_namespace
 }
 
 
-sub _set_namespace
+sub set_namespace
 {
   my ( $self, $namespace ) = @_;
 
@@ -216,6 +236,24 @@ sub _set_default_expires_in
   $self->{_Default_Expires_In} = $default_expires_in;
 }
 
+
+sub get_auto_purge
+{
+  my ( $self ) = @_;
+
+  return $self->{_Auto_Purge};
+}
+
+
+sub set_auto_purge
+{
+  my ( $self, $auto_purge ) = @_;
+
+  $self->{_Auto_Purge} = $auto_purge;
+
+  Reset_Auto_Purge( $self ) or
+    croak( "Couldn't reset auto purge" );
+}
 
 1;
 
@@ -275,6 +313,10 @@ implementations.
 See Cache::Cache
 
 =item B<get_default_expires_in>
+
+See Cache::Cache
+
+=item B<get_auto_purge>
 
 See Cache::Cache
 
