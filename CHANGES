@@ -8,8 +8,8 @@ Revision history for Cache
  - updated documentation on expiration units
  - modified the quoting of the untainted path regex
  - fixed the duplicated get_keys in NullCache
- - applied patch to ensure conistent state if the filesystem fills up
- - applied patch to ensure inialization of the memory cache hash
+ - applied patch to ensure consistent state if the filesystem fills up
+ - applied patch to ensure initialization of the memory cache hash
 
 1.01 2002-04-14-01-30
  - released version 1.01
@@ -52,7 +52,7 @@ Revision history for Cache
  - added Jay Sachs' implementation of NullCache
  - modified the remove methods to avoid croaking if two cache
    instances are both purging or limiting at the same time
- - migrated to a factory-like model with private contructors
+ - migrated to a factory-like model with private constructors
    to fix the auto_purge_interval functionality
  - updated the documentation to better reflect that size means
    size in bytes
@@ -67,7 +67,7 @@ Revision history for Cache
  - added the auto_purge option and property to the base cache interface
    and implementations.  This option will call the purge method on
    the cache after the specified interval expires
- - renamed _set_namepsace to set_namespace (i.e., made it public)
+ - renamed _set_namespace to set_namespace (i.e., made it public)
  - added the set_object method to the cache interface
  - updated the test scripts and CREDITS file
  - updated the perldoc formatting to look better in HTML
