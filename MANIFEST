@@ -6,7 +6,6 @@ MANIFEST
 Makefile.PL
 README
 STYLE
-TODO
 lib/Cache/BaseCache.pm
 lib/Cache/BaseCacheTester.pm
 lib/Cache/Cache.pm
