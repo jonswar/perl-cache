@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: MemoryCache.pm,v 1.10 2001/03/13 03:37:09 dclinton Exp $
+# $Id: MemoryCache.pm,v 1.11 2001/03/20 15:47:32 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -17,9 +17,9 @@ use vars qw( @ISA );
 use Cache::BaseCache;
 use Cache::Cache qw( $EXPIRES_NEVER $TRUE $FALSE $SUCCESS $FAILURE );
 use Cache::CacheUtils qw( Build_Object
-                          Clone_Object
                           Object_Has_Expired
-                          Static_Params );
+                          Static_Params
+                          );
 use Cache::Object;
 use Carp;
 
@@ -107,10 +107,10 @@ sub _Namespaces
 }
 
 
+
 ##
 # Class properties
 ##
-
 
 sub _Get_Cache_Hash_Ref
 {
@@ -215,7 +215,7 @@ sub remove
   $identifier or
     croak( "identifier required" );
 
-  my $cache_hash_ref = _Get_Cache_Hash_Ref( ) or
+  my $cache_hash_ref = $self->_get_cache_hash_ref( ) or
     croak( "Couldn't get cache hash ref" );
 
   my $namespace = $self->get_namespace( ) or
@@ -236,6 +236,8 @@ sub set
   my $object =
     Build_Object( $identifier, $data, $default_expires_in, $expires_in ) or
       croak( "Couldn't build cache object" );
+
+  my $object_dump = $self->_freeze( $object );
 
   $self->_store( $identifier, $object ) or
     croak( "Couldn't store $identifier" );
@@ -279,16 +281,14 @@ sub _store
   $identifier or
     croak( "identifier required" );
 
+  my $object_dump = $self->_freeze( $object ) or
+    croak( "Couldn't freeze object" );
+
   my $namespace = $self->get_namespace( ) or
     croak( "Couldn't get namespace" );
 
-  my $cache_hash_ref = _Get_Cache_Hash_Ref( ) or
+  my $cache_hash_ref = $self->_get_cache_hash_ref( ) or
     croak( "Couldn't get cache hash ref" );
-
-  my $object_dump;
-
-  Clone_Object( \$object, \$object_dump ) or
-    croak( "Couldn't freeze object" );
 
   $cache_hash_ref->{$namespace}->{$identifier} = $object_dump;
 
@@ -303,13 +303,17 @@ sub _restore
   $identifier or
     croak( "identifier required" );
 
-  my $cache_hash_ref = _Get_Cache_Hash_Ref( ) or
+  my $cache_hash_ref = $self->_get_cache_hash_ref( ) or
     croak( "Couldn't get cache hash ref" );
 
   my $namespace = $self->get_namespace( ) or
     croak( "Couldn't get namespace" );
 
-  my $object = $cache_hash_ref->{$namespace}->{$identifier};
+  my $object_dump = $cache_hash_ref->{$namespace}->{$identifier} or
+    return undef;
+
+  my $object = $self->_thaw( $object_dump ) or
+    croak( "Couldn't thaw object" );
 
   return $object;
 }
@@ -333,7 +337,7 @@ sub _identifiers
 {
   my ( $self ) = @_;
 
-  my $cache_hash_ref = _Get_Cache_Hash_Ref( ) or
+  my $cache_hash_ref = $self->_get_cache_hash_ref( ) or
     croak( "Couldn't get cache hash ref" );
 
   my $namespace = $self->get_namespace( ) or
@@ -352,7 +356,7 @@ sub _build_object_size
   $identifier or
     croak( "identifier required" );
 
-  my $cache_hash_ref = _Get_Cache_Hash_Ref( ) or
+  my $cache_hash_ref = $self->_get_cache_hash_ref( ) or
     croak( "Couldn't get cache hash ref" );
 
   my $namespace = $self->get_namespace( ) or
@@ -364,6 +368,18 @@ sub _build_object_size
   my $size = length $object_dump;
 
   return $size;
+}
+
+
+##
+# Instance properties
+##
+
+sub _get_cache_hash_ref
+{
+  my ( $self ) = @_;
+
+  return _Get_Cache_Hash_Ref( );
 }
 
 

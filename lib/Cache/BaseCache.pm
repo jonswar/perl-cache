@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: BaseCache.pm,v 1.2 2001/03/06 14:55:41 dclinton Exp $
+# $Id: BaseCache.pm,v 1.3 2001/03/06 15:12:54 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -15,6 +15,9 @@ package Cache::BaseCache;
 use strict;
 use vars qw( @ISA );
 use Cache::Cache qw( $SUCCESS $FAILURE $EXPIRES_NEVER );
+use Cache::CacheUtils qw( Freeze_Object
+                          Thaw_Object 
+                        );
 use Carp;
 
 
@@ -120,6 +123,44 @@ sub _read_option
   {
     return $default_value;
   }
+}
+
+
+sub _freeze
+{
+  my ( $self, $object ) = @_;
+
+  defined $object or
+    croak( "object required" );
+
+  $object->set_size( undef );
+
+  my $object_dump;
+
+  Freeze_Object( \$object, \$object_dump ) or
+    croak( "Couldn't freeze object" );
+
+  return $object_dump;
+}
+
+
+sub _thaw
+{
+  my ( $self, $object_dump ) = @_;
+
+  defined $object_dump or
+    croak( "object_dump required" );
+
+  my $size = length $object_dump;
+
+  my $object;
+
+  Thaw_Object( \$object_dump, \$object ) or
+    croak( "Couldn't thaw object" );
+
+  $object->set_size( $size );
+
+  return $object;
 }
 
 

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareCacheTester.pm,v 1.4 2001/03/12 19:20:59 dclinton Exp $
+# $Id: SizeAwareCacheTester.pm,v 1.5 2001/03/22 18:40:08 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -160,15 +160,16 @@ sub _test_two
 
   $cache->limit_size( $size_limit );
 
+  my $third_size = $cache->size( );
+
+  ( $third_size <= $size_limit ) ?
+    $self->ok( ) : $self->not_ok( '$third_size <= $size_limit' );
+
   my $first_value = $cache->get( $first_key );
 
   ( $first_value eq $value ) ?
     $self->ok( ) : $self->not_ok( '$first_value eq $value' );
 
-  my $third_size = $cache->size( );
-
-  ( $third_size <= $size_limit ) ?
-    $self->ok( ) : $self->not_ok( '$third_size <= $size_limit' );
 }
 
 

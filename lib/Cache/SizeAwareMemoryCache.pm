@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareMemoryCache.pm,v 1.3 2001/03/13 03:37:09 dclinton Exp $
+# $Id: SizeAwareMemoryCache.pm,v 1.4 2001/03/22 18:40:08 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -17,6 +17,7 @@ use vars qw( @ISA );
 use Cache::Cache qw( $EXPIRES_NEVER $SUCCESS $FAILURE $TRUE $FALSE );
 use Cache::CacheMetaData;
 use Cache::CacheUtils qw ( Build_Object
+                           Freeze_Object
                            Limit_Size
                            Object_Has_Expired
                          );
@@ -73,13 +74,7 @@ sub _build_cache_meta_data
     my $object = $self->get_object( $identifier ) or
       next;
 
-    my $size = length $object;
-
-    my $expires_at = $object->get_expires_at( );
-
-    my $accessed_at = $object->get_accessed_at( );
-
-    $cache_meta_data->insert( $identifier, $expires_at, $accessed_at, $size ) or
+    $cache_meta_data->insert( $object ) or
       croak( "Couldn't insert meta data" );
   }
 
@@ -132,7 +127,6 @@ sub get
 
     return undef;
   }
-
   my $time = time( );
 
   $object->set_accessed_at( $time );
@@ -176,7 +170,7 @@ sub limit_size
     croak( "new_size required" );
 
   my $cache_meta_data = $self->_build_cache_meta_data( ) or
-    croak( "Couldn't build cache meta data" );
+    croak( "Couldn't get cache meta data" );
 
   Limit_Size( $self, $cache_meta_data, $new_size ) or
     croak( "Couldn't limit size to $new_size" );

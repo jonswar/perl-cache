@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareMemoryCache.pm,v 1.3 2001/03/13 03:37:09 dclinton Exp $
+# $Id: CacheMetaData.pm,v 1.1 2001/03/22 18:40:08 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -50,7 +50,18 @@ sub new
 
 sub insert
 {
-  my ( $self, $identifier, $expires_at, $accessed_at, $object_size ) = @_;
+  my ( $self, $object ) = @_;
+
+  my $expires_at = $object->get_expires_at( );
+
+  my $identifier = $object->get_identifier( ) or
+    croak( "identifier required" );
+
+  my $accessed_at = $object->get_accessed_at( ) or
+    croak( "accessed_at required" );
+
+  my $object_size = $object->get_size( ) or
+    croak( "size required" );
 
   my $meta_data_hash_ref = $self->_get_meta_data_hash_ref( ) or
     croak( "Couldn't get meta_data_hash_ref" );
@@ -72,6 +83,9 @@ sub insert
 sub remove
 {
   my ( $self, $identifier ) = @_;
+
+  defined $identifier or
+    croak( "identifier not defined" );
 
   my $object_size;
 
@@ -139,6 +153,9 @@ sub build_object_size
 
   my $meta_data_hash_ref = $self->_get_meta_data_hash_ref( ) or
     croak( "Couldn't get meta data hash ref" );
+
+  defined $meta_data_hash_ref->{ $identifier } or
+    croak( "identifier $identifier doesn't exist in cache meta data" );
 
   $$object_size_ref = $meta_data_hash_ref->{ $identifier }->[$_SIZE_OFFSET];
 
@@ -212,10 +229,7 @@ CacheMetaData directly.
 
  my $cache_meta_data = new Cache::CacheMetaData( );
 
- $cache_meta_data->insert( $identifier,
-                           $expires_at,
-                           $accessed_at,
-                           $size );
+ $cache_meta_data->insert( $object );
 
  my $current_size = $cache_meta_data->get_cache_size( );
 
@@ -231,25 +245,13 @@ CacheMetaData directly.
 
 Construct a new Cache::CacheMetaData object
 
-=item B<insert($identifier, $expires_at, $accessed_at, $object_size)>
+=item B<insert( $object )>
 
 Inform the CacheMetaData about an object in the cache.
 
-=item C<identifier>
+=item C<$object>
 
-The key under which the object was stored.
-
-=item C<expires_at>
-
-The time at which the object should expire from the cache.
-
-=item C<accessed_at>
-
-The time at which the object was last accessed.
-
-=item C<object_size>
-
-The size of the stored object.
+The object to be examined for its meta data
 
 =item B<remove( $identifier )>
 

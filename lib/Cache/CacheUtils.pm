@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheUtils.pm,v 1.13 2001/03/20 16:09:01 dclinton Exp $
+# $Id: CacheUtils.pm,v 1.14 2001/03/22 18:40:08 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -31,9 +31,9 @@ use Storable qw( nfreeze thaw dclone );
 
 @EXPORT_OK = qw( Build_Expires_At
                  Build_Object
+                 Build_Object_Dump
                  Build_Path
                  Build_Unique_Key
-                 Clone_Object
                  Create_Directory
                  Freeze_Object
                  Get_Temp_Directory
@@ -343,18 +343,6 @@ sub Thaw_Object
   my ( $frozen_object_ref, $object_ref ) = @_;
 
   $$object_ref = thaw( $$frozen_object_ref );
-
-  return $SUCCESS;
-}
-
-
-# use Storable to clone an object
-
-sub Clone_Object
-{
-  my ( $object_ref, $cloned_object_ref ) = @_;
-
-  $$cloned_object_ref = dclone( $$object_ref );
 
   return $SUCCESS;
 }
@@ -980,9 +968,7 @@ sub Limit_Size
 
   my $current_size = $cache_meta_data->get_cache_size( );
 
-  my $size_difference = $current_size - $new_size;
-
-  return $SUCCESS if ( $size_difference <= 0 );
+  return $SUCCESS if ( $current_size <= $new_size );
 
   my @removal_list;
 
@@ -1002,9 +988,9 @@ sub Limit_Size
     $cache_meta_data->remove( $identifier ) or
       croak( "Couldn't remove identifier from cache_meta_data" );
 
-    $size_difference -= $object_size;
+    $current_size -= $object_size;
 
-    return $SUCCESS if ( $size_difference <= 0 );
+    return $SUCCESS if ( $current_size <= $new_size );
   }
 
   warn("Couldn't limit size to $new_size\n");

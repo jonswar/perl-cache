@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareFileCache.pm,v 1.11 2001/03/13 03:37:09 dclinton Exp $
+# $Id: SizeAwareFileCache.pm,v 1.12 2001/03/22 18:40:08 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -24,7 +24,6 @@ use Cache::CacheUtils qw ( Build_Object
                            Read_File_Without_Time_Modification
                            Remove_File
                            Static_Params
-                           Thaw_Object
                            Write_File );
 use Cache::FileCache;
 use Cache::SizeAwareCache qw( $NO_MAX_SIZE );
@@ -69,30 +68,6 @@ sub Size
 # Private class methods
 ##
 
-
-sub _Restore_Object_Without_Time_Modication
-{
-  my ( $filename ) = Static_Params( @_ );
-
-  defined( $filename ) or
-    croak( "filename required" );
-
-  if ( not -e $filename )
-  {
-    warn( "filename $filename does not exist" );
-    return undef;
-  }
-
-  my $object_dump_ref = Read_File_Without_Time_Modification( $filename ) or
-    return undef;
-
-  my $object;
-
-  Thaw_Object( $object_dump_ref, \$object ) or
-    croak( "Couldn't thaw object" );
-
-  return $object;
-}
 
 
 ##
@@ -168,21 +143,22 @@ sub _build_cache_meta_data
 
   foreach my $filename ( @filenames )
   {
-    my $object = _Restore_Object_Without_Time_Modication( $filename ) or
+    my $object = $self->_restore_object_without_time_modication( $filename ) or
       next;
-
-    my $expires_at = $object->get_expires_at( );
-
-    my $accessed_at = ( stat( $filename ) )[8] or
-      croak( "Couldn't get accessed_at" );
-
-    my $identifier = $object->get_identifier( ) or
-      croak( "Couldn't get identifier" );
 
     my $size = -s $filename or
       croak( "Couldn't get size for $filename" );
 
-    $cache_meta_data->insert( $identifier, $expires_at, $accessed_at, $size ) or
+    my $expires_at = $object->get_expires_at( );
+
+    $object->set_size( $size );
+
+    my $accessed_at = ( stat( $filename ) )[8] or
+      croak( "Couldn't get accessed_at" );
+
+    $object->set_accessed_at( $accessed_at );
+
+    $cache_meta_data->insert( $object ) or
       croak( "Couldn't insert meta data" );
   }
 
@@ -234,6 +210,29 @@ sub _initialize_max_size
   return $SUCCESS;
 }
 
+
+
+sub _restore_object_without_time_modication
+{
+  my ( $self, $filename ) = @_;
+
+  defined( $filename ) or
+    croak( "filename required" );
+
+  if ( not -e $filename )
+  {
+    warn( "filename $filename does not exist" );
+    return undef;
+  }
+
+  my $object_dump_ref = Read_File_Without_Time_Modification( $filename ) or
+    return undef;
+
+  my $object = $self->_thaw( $$object_dump_ref ) or
+    croak( "Couldn't thaw object" );
+
+  return $object;
+}
 
 ##
 # Instance properties

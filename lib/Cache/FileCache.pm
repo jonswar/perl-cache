@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: FileCache.pm,v 1.11 2001/03/09 15:21:28 dclinton Exp $
+# $Id: FileCache.pm,v 1.12 2001/03/13 03:37:09 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -20,7 +20,6 @@ use Cache::CacheUtils qw ( Build_Object
                            Build_Path
                            Build_Unique_Key
                            Create_Directory
-                           Freeze_Object
                            Get_Temp_Directory
                            List_Subdirectories
                            Make_Path
@@ -32,7 +31,6 @@ use Cache::CacheUtils qw ( Build_Object
                            Remove_File
                            Split_Word
                            Static_Params
-                           Thaw_Object
                            Write_File );
 use Cache::Object;
 use Carp;
@@ -394,9 +392,7 @@ sub _store
   my $object_path = $self->_build_object_path( $unique_key ) or
     croak( "Couldn't build object path" );
 
-  my $object_dump;
-
-  Freeze_Object( \$object, \$object_dump ) or
+  my $object_dump = $self->_freeze( $object ) or
     croak( "Couldn't freeze object" );
 
   my $directory_umask = $self->get_directory_umask( );
@@ -427,10 +423,8 @@ sub _restore
   my $object_dump_ref = Read_File( $object_path ) or
     return undef;
 
-  my $object;
-
-  Thaw_Object( $object_dump_ref, \$object ) or
-    croak( "Couldn't thaw object" );
+  my $object = $self->_thaw( $$object_dump_ref ) or
+    croak( "Couldn't thaw object dump" );
 
   return $object;
 }

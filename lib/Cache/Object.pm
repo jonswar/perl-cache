@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: Object.pm,v 1.2 2001/03/06 18:16:26 dclinton Exp $
+# $Id: Object.pm,v 1.3 2001/03/12 19:18:33 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -108,6 +108,22 @@ sub set_identifier
 }
 
 
+sub get_size
+{
+  my ( $self ) = @_;
+
+  return $self->{_Size};
+}
+
+
+sub set_size
+{
+  my ( $self, $size ) = @_;
+
+  $self->{_Size} = $size;
+}
+
+
 1;
 
 
@@ -174,6 +190,10 @@ The time at which the object should expire from the cache.
 =item B<(get|set)_identifier>
 
 The key under which the object was stored.
+
+=item B<(get|set)_size>
+
+The size of the frozen version of this object
 
 =back
 

@@ -1,6 +1,11 @@
 Revision history for Cache
 
 0.06 in progress
+ - added the size property to Object
+ - added the _freeze and _thaw methods to the BaseCache class and
+   modified all children classes to use them
+ - revert to separate freeze and thaws on the memory based caches to
+   ensure that cached data isn't modified at any time
  - major rewrite of the size aware cache logic
  - added the CacheMetaData class, which is used to efficiently keep track
    of a size aware cache state

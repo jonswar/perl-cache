@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SharedMemoryCache.pm,v 1.7 2001/03/20 16:09:02 dclinton Exp $
+# $Id: SharedMemoryCache.pm,v 1.8 2001/03/22 18:40:08 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -196,10 +196,13 @@ sub _store
   my $namespace = $self->get_namespace( ) or
     croak( "Couldn't get namespace" );
 
+  my $object_dump = $self->_freeze( $object ) or
+    croak( "Couldn't freeze object" );
+
   my $cache_hash_ref = _Restore_Cache_Hash_Ref_With_Lock( ) or
     croak( "Couldn't restore cache hash ref" );
 
-  $cache_hash_ref->{$namespace}->{$identifier} = $object;
+  $cache_hash_ref->{$namespace}->{$identifier} = $object_dump;
 
   _Store_Cache_Hash_Ref_And_Unlock( $cache_hash_ref ) or
     croak( "Couldn't store cache hash ref" );
@@ -221,7 +224,11 @@ sub _restore
   my $cache_hash_ref = _Restore_Cache_Hash_Ref( ) or
     croak( "Couldn't restore cache hash ref" );
 
-  my $object = $cache_hash_ref->{$namespace}->{$identifier};
+  my $object_dump = $cache_hash_ref->{$namespace}->{$identifier} or
+    return undef;
+
+  my $object = $self->_thaw( $object_dump ) or
+    croak( "Couldn't thaw object" );
 
   return $object;
 }
