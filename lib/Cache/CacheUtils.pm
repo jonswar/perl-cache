@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheUtils.pm,v 1.5 2001/03/05 19:01:47 dclinton Exp $
+# $Id: CacheUtils.pm,v 1.6 2001/03/06 07:07:43 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -170,8 +170,6 @@ sub Canonicalize_Expiration_Time
 {
   my ( $expires_in ) = @_;
 
-  print "expires_in: $expires_in\n";
-
   defined $expires_in or
     croak( "expires_in required" );
 
@@ -198,8 +196,6 @@ sub Canonicalize_Expiration_Time
   {
     croak( "invalid expiration time '$expires_in'" );
   }
-
-  print "secs: $secs\n";
 
   return $secs;
 }
