@@ -1,5 +1,5 @@
 ######################################################################
-# $Id:  $
+# $Id: CacheTester.pm,v 1.1.1.1 2001/02/13 01:30:42 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -12,31 +12,14 @@ package Cache::CacheTester;
 
 use strict;
 use Carp;
+use Cache::AbstractCacheTester;
 use Cache::Cache qw( $SUCCESS );
 
-use vars qw( $EXPIRES_DELAY );
+use vars qw( @ISA $EXPIRES_DELAY );
+
+@ISA = qw ( Cache::AbstractCacheTester );
 
 $EXPIRES_DELAY = 1;
-
-sub new
-{
-  my ( $proto, $base_test_count ) = @_;
-  my $class = ref( $proto ) || $proto;
-  my $self  = {};
-  bless ( $self, $class );
-
-  if ( defined $base_test_count )
-  {
-    $self->_set_test_count( $base_test_count );
-  }
-  else
-  {
-    $self->_set_test_count( 0 );
-  }
-
-  return $self;
-}
-
 
 sub test
 {
@@ -529,66 +512,6 @@ sub _test_twelve
   use strict;
 }
 
-
-
-sub _set_test_count
-{
-  my ( $self, $test_count ) = @_;
-
-  $self->{_Test_Count} = $test_count;
-}
-
-
-sub _get_test_count
-{
-  my ( $self ) = @_;
-
-  return $self->{_Test_Count};
-}
-
-
-sub _increment_test_count
-{
-  my ( $self ) = @_;
-
-  $self->{_Test_Count}++;
-}
-
-
-sub ok
-{
-  my ( $self ) = @_;
-
-  my $test_count = $self->_get_test_count( );
-
-  print "ok $test_count\n";
-
-  $self->_increment_test_count( );
-}
-
-
-sub not_ok
-{
-  my ( $self, $message ) = @_;
-
-  my $test_count = $self->_get_test_count( );
-
-  print "not ok $test_count # failed '$message'\n";
-
-  $self->_increment_test_count( );
-}
-
-
-sub skip
-{
-  my ( $self, $message ) = @_;
-
-  my $test_count = $self->_get_test_count( );
-
-  print "ok $test_count # skipped $message \n";
-
-  $self->_increment_test_count( );
-}
 
 
 1;
