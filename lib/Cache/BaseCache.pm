@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: BaseCache.pm,v 1.18 2001/11/29 20:24:47 dclinton Exp $
+# $Id: BaseCache.pm,v 1.19 2001/11/29 22:14:11 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -17,6 +17,7 @@ use vars qw( @ISA );
 use Cache::Cache qw( $EXPIRES_NEVER );
 use Cache::CacheUtils qw( Assert_Defined
                           Build_Object
+                          Clone_Data
                           Object_Has_Expired
                         );
 use Error;
@@ -144,14 +145,12 @@ sub set_object
 {
   my ( $self, $p_key, $p_object ) = @_;
 
-  # TODO, this should first clone the object!
+  my $object = Clone_Data( $p_object );
 
-  $p_object->set_size( undef );
-  $p_object->set_key( undef );
+  $object->set_size( undef );
+  $object->set_key( undef );
 
-  $self->_get_backend( )->store( $self->get_namespace( ),
-                                 $p_key,
-                                 $p_object );
+  $self->_get_backend( )->store( $self->get_namespace( ), $p_key, $object );
 }
 
 

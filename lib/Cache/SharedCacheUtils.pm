@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SharedCacheUtils.pm,v 1.3 2001/11/07 17:02:56 dclinton Exp $
+# $Id: SharedCacheUtils.pm,v 1.4 2001/11/29 22:14:11 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -65,9 +65,7 @@ sub Restore_Shared_Hash_Ref
   my $frozen_hash_ref = Instantiate_Share( $p_ipc_identifier )->fetch( ) or
     return $hash_ref;
 
-  Thaw_Data( \$frozen_hash_ref, \$hash_ref );
-
-  return $hash_ref;
+  return Thaw_Data( $frozen_hash_ref );
 }
 
 
@@ -90,9 +88,7 @@ sub Restore_Shared_Hash_Ref_With_Lock
   my $frozen_hash_ref = $share->fetch( ) or
     return $hash_ref;
 
-  Thaw_Data( \$frozen_hash_ref, \$hash_ref );
-
-  return $hash_ref;
+  return Thaw_Data( $frozen_hash_ref );
 }
 
 
@@ -106,11 +102,7 @@ sub Store_Shared_Hash_Ref
   Assert_Defined( $p_ipc_identifier );
   Assert_Defined( $p_hash_ref );
 
-  my $frozen_hash_ref = { };
-
-  Freeze_Data( \$p_hash_ref, \$frozen_hash_ref );
-
-  Instantiate_Share( $p_ipc_identifier )->store( $frozen_hash_ref );
+  Instantiate_Share( $p_ipc_identifier )->store( Freeze_Data( $p_hash_ref ) );
 }
 
 
@@ -125,13 +117,9 @@ sub Store_Shared_Hash_Ref_And_Unlock
   Assert_Defined( $p_ipc_identifier );
   Assert_Defined( $p_hash_ref );
 
-  my $frozen_hash_ref = { };
-
-  Freeze_Data( \$p_hash_ref, \$frozen_hash_ref );
-
   my $share = Instantiate_Share( $p_ipc_identifier );
 
-  $share->store( $frozen_hash_ref );
+  $share->store( Freeze_Data( $p_hash_ref ) );
 
   $share->unlock( LOCK_UN );
 }

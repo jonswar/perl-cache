@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: FileCache.pm,v 1.25 2001/11/29 18:12:55 dclinton Exp $
+# $Id: FileCache.pm,v 1.26 2001/11/29 20:24:47 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -42,7 +42,7 @@ my $DEFAULT_CACHE_DEPTH = 3;
 my $DEFAULT_CACHE_ROOT = "FileCache";
 
 
-# by, default, the directories in the cache on the filesystem should
+# by default, the directories in the cache on the filesystem should
 # be globally writable to allow for multiple users.  While this is a
 # potential security concern, the actual cache entries are written
 # with the user's umask, thus reducing the risk of cache poisoning
@@ -153,18 +153,8 @@ sub _new
   my $class = ref( $proto ) || $proto;
 
   my $self  =  $class->SUPER::_new( $p_options_hash_ref );
-
-  $self->_initialize_file_cache( );
-
-  return $self;
-}
-
-
-sub _initialize_file_cache
-{
-  my ( $self ) = @_;
-
   $self->_initialize_file_backend( );
+  return $self;
 }
 
 

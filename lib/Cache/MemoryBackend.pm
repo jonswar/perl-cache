@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: MemoryBackend.pm,v 1.4 2001/11/29 18:33:21 dclinton Exp $
+# $Id: MemoryBackend.pm,v 1.5 2001/11/29 22:14:11 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -11,8 +11,8 @@
 package Cache::MemoryBackend;
 
 use strict;
-use Cache::CacheUtils qw( Freeze_Data
-                          Thaw_Data );
+use Cache::CacheUtils qw( Clone_Data );
+
 
 my $Store_Ref;
 
@@ -79,7 +79,7 @@ sub restore
 {
   my ( $self, $p_namespace, $p_key ) = @_;
 
-  return $self->_thaw( $self->_get_store_ref( )->{ $p_namespace }{ $p_key } );
+  return Clone_Data( $self->_get_store_ref( )->{ $p_namespace }{ $p_key } );
 }
 
 
@@ -87,22 +87,7 @@ sub store
 {
   my ( $self, $p_namespace, $p_key, $p_value ) = @_;
 
-  $self->_get_store_ref( )->{ $p_namespace }{ $p_key } =
-    $self->_freeze( $p_value );
-}
-
-
-sub _freeze
-{
-  my ( $self, $p_data ) = @_;
-
-  return undef if not defined $p_data;
-
-  my $frozen_data;
-
-  Freeze_Data( \$p_data, \$frozen_data );
-
-  return $frozen_data;
+  $self->_get_store_ref( )->{ $p_namespace }{ $p_key } = $p_value;
 }
 
 
@@ -114,21 +99,6 @@ sub _initialize_memory_backend
   {
     $self->_set_store_ref( { } );
   }
-}
-
-
-sub _thaw
-{
-  my ( $self, $p_frozen_data ) = @_;
-
-  return undef if not defined $p_frozen_data;
-
-  my $data;
-
-  Thaw_Data( \$p_frozen_data, \$data );
-
-  return $data;
-
 }
 
 

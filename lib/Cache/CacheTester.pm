@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheTester.pm,v 1.11 2001/11/07 16:35:35 dclinton Exp $
+# $Id: CacheTester.pm,v 1.12 2001/11/16 19:20:22 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -29,6 +29,7 @@ sub test
 
   try
   {
+    $cache->Clear( );
     $self->_test_one( $cache );
     $self->_test_two( $cache );
     $self->_test_three( $cache );

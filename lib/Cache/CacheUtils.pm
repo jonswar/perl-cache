@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheUtils.pm,v 1.31 2001/11/24 21:12:43 dclinton Exp $
+# $Id: CacheUtils.pm,v 1.32 2001/11/29 22:14:11 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -20,7 +20,7 @@ use Error;
 use Exporter;
 use File::Path qw( mkpath );
 use File::Spec::Functions;
-use Storable qw( freeze thaw );
+use Storable qw( freeze thaw dclone );
 
 @ISA = qw( Exporter );
 
@@ -30,6 +30,7 @@ use Storable qw( freeze thaw );
                  Build_Path
                  Build_Unique_Key
                  Create_Directory
+                 Clone_Data
                  Freeze_Data
                  Get_Temp_Directory
                  Instantiate_Share
@@ -248,13 +249,9 @@ sub Create_Directory
 
 sub Freeze_Data
 {
-  my ( $p_object_ref, $p_frozen_object_ref  ) = @_;
+  my ( $p_object  ) = @_;
 
-  Assert_Defined( $p_object_ref );
-  Assert_Defined( $p_frozen_object_ref );
-
-  $$p_frozen_object_ref = freeze( $$p_object_ref ) or
-    throw Error::Simple( "Couldn't freeze object" );
+  return defined $p_object ? freeze( $p_object ) : undef;
 }
 
 
@@ -262,13 +259,19 @@ sub Freeze_Data
 
 sub Thaw_Data
 {
-  my ( $p_frozen_object_ref, $p_object_ref ) = @_;
+  my ( $p_frozen_object ) = @_;
 
-  Assert_Defined( $p_frozen_object_ref );
-  Assert_Defined( $$p_frozen_object_ref );
-  Assert_Defined( $p_object_ref );
+  return defined $p_frozen_object ? thaw( $p_frozen_object ) : undef;
+}
 
-  $$p_object_ref = thaw( $$p_frozen_object_ref );
+
+# use Storable to clone an object
+
+sub Clone_Data
+{
+  my ( $p_object  ) = @_;
+
+  return defined $p_object ? dclone( $p_object ) : undef;
 }
 
 

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: FileBackend.pm,v 1.6 2001/11/29 20:24:47 dclinton Exp $
+# $Id: FileBackend.pm,v 1.7 2001/11/29 22:14:11 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -237,14 +237,10 @@ sub _read_data
 
   Assert_Defined( $p_path );
 
-  my $frozen_file_ref = Read_File_Without_Time_Modification( $p_path ) or
+  my $frozen_data_ref = Read_File_Without_Time_Modification( $p_path ) or
     return [ undef, undef ];
 
-  my $data;
-
-  Thaw_Data( $frozen_file_ref, \$data );
-
-  return $data;
+  return Thaw_Data( $$frozen_data_ref );
 }
 
 
@@ -259,9 +255,7 @@ sub _write_data
 
   Make_Path( $p_path, $self->get_directory_umask( ) );
 
-  my $frozen_file;
-
-  Freeze_Data( \$p_data, \$frozen_file );
+  my $frozen_file = Freeze_Data( $p_data );
 
   Write_File( $p_path, \$frozen_file );
 }
