@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: Cache.pm,v 1.17 2001/04/26 12:37:11 dclinton Exp $
+# $Id: NullCache.pm,v 1.1 2001/09/05 14:39:27 dclinton Exp $
 # Copyright (C) 2001 Jay Sachs  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -13,7 +13,7 @@ package Cache::NullCache;
 
 use strict;
 use vars qw( @ISA );
-use Cache::Cache qw( $EXPIRES_NOW $SUCCESS $FAILURE $FALSE );
+use Cache::Cache qw( $EXPIRES_NOW  );
 
 @ISA = qw ( Cache::BaseCache );
 
@@ -26,12 +26,10 @@ use base qw(Cache::Cache);
 
 sub Clear
 {
-  return $SUCCESS;
 }
 
 sub Purge
 {
-  return $SUCCESS;
 }
 
 sub Size
@@ -60,7 +58,6 @@ sub new
 
 sub clear
 {
-  return $SUCCESS;
 }
 
 sub get
@@ -75,23 +72,19 @@ sub get_object
 
 sub purge
 {
-  return $SUCCESS;
 }
 
 sub remove
 {
-  return $FAILURE;
 }
 
 sub set
 {
-  return $SUCCESS;
 }
 
 
 sub set_object
 {
-  return $SUCCESS;
 }
 
 sub size
@@ -137,7 +130,6 @@ sub set_auto_purge_interval
 
 sub get_auto_purge_on_set
 {
-  return $FALSE;
 }
 
 sub set_auto_purge_on_set
@@ -146,7 +138,6 @@ sub set_auto_purge_on_set
 
 sub get_auto_purge_on_get
 {
-  return $FALSE;
 }
 
 sub set_auto_purge_on_get

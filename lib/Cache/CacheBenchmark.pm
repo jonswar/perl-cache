@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheBenchmark.pm,v 1.6 2001/03/25 18:13:16 dclinton Exp $
+# $Id: CacheBenchmark.pm,v 1.7 2001/03/26 18:43:38 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -16,11 +16,7 @@ use strict;
 use vars qw( @ISA @EXPORT_OK );
 use Benchmark;
 use Cache::Cache qw( $EXPIRES_NOW
-                     $EXPIRES_NEVER
-                     $TRUE
-                     $FALSE
-                     $SUCCESS
-                     $FAILURE );
+                     $EXPIRES_NEVER );
 use Cache::FileCache;
 use Cache::MemoryCache;
 use Cache::SharedMemoryCache;

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareCache.pm,v 1.2 2001/04/08 22:48:37 dclinton Exp $
+# $Id: SizeAwareCache.pm,v 1.3 2001/09/05 14:39:27 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -18,10 +18,6 @@ use vars qw( @ISA
              @EXPORT_OK
              $EXPIRES_NOW
              $EXPIRES_NEVER
-             $TRUE
-             $FALSE
-             $SUCCESS
-             $FAILURE
              $NO_MAX_SIZE );
 use Exporter;
 
@@ -30,10 +26,6 @@ use Exporter;
 
 @EXPORT_OK = qw( $EXPIRES_NOW
                  $EXPIRES_NEVER
-                 $TRUE
-                 $FALSE
-                 $SUCCESS
-                 $FAILURE
                  $NO_MAX_SIZE );
 
 
@@ -42,10 +34,6 @@ use vars @EXPORT_OK;
 
 $EXPIRES_NOW = $Cache::Cache::EXPIRES_NOW;
 $EXPIRES_NEVER = $Cache::Cache::EXPIRES_NEVER;
-$TRUE = $Cache::Cache::TRUE;
-$FALSE = $Cache::Cache::FALSE;
-$SUCCESS = $Cache::Cache::SUCCESS;
-$FAILURE = $Cache::Cache::FAILURE;
 $NO_MAX_SIZE = -1;
 
 

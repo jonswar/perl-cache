@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheUtils.pm,v 1.23 2001/09/10 14:47:24 dclinton Exp $
+# $Id: CacheUtils.pm,v 1.24 2001/11/05 13:34:45 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -14,13 +14,9 @@ use strict;
 use vars qw( @ISA @EXPORT_OK );
 use Cache::CacheMetaData;
 use Cache::Cache qw( $EXPIRES_NOW
-                     $EXPIRES_NEVER
-                     $TRUE
-                     $FALSE
-                     $SUCCESS
-                     $FAILURE );
-use Carp;
+                     $EXPIRES_NEVER );
 use Digest::MD5 qw( md5_hex );
+use Error;
 use Exporter;
 use File::Path qw( mkpath );
 use File::Spec::Functions;
@@ -28,7 +24,8 @@ use Storable qw( nfreeze thaw dclone );
 
 @ISA = qw( Exporter );
 
-@EXPORT_OK = qw( Build_Expires_At
+@EXPORT_OK = qw( Assert_Defined
+                 Build_Expires_At
                  Build_Object
                  Build_Object_Dump
                  Build_Path
@@ -65,7 +62,7 @@ use vars ( @EXPORT_OK );
 # valid filepath characters for tainting. Be sure to accept
 # DOS/Windows style path specifiers (C:\path) also
 
-my $UNTAINTED_PATH_REGEX = qr{^([-\@\w\\\\~./:]+|[\w]:[-\@\w\\\\~./]+)$};
+my $UNTAINTED_PATH_REGEX = '^([-\@\w\\\\~./:]+|[\w]:[-\@\w\\\\~./]+)$';
 
 
 # map of expiration formats to their respective time in seconds
@@ -90,33 +87,30 @@ my $DIRECTORY_MODE = 0777;
 
 sub Object_Has_Expired
 {
-  my ( $object, $time ) = @_;
+  my ( $p_object, $p_time ) = @_;
 
-  if ( not defined $object )
+  if ( not defined $p_object )
   {
-    return $TRUE;
+    return 1;
   }
 
-  $time = $time || time( );
+  $p_time = $p_time || time( );
 
-  my $expires_at = $object->get_expires_at( ) or
-    croak( "Couldn't get expires_at" );
-
-  if ( $expires_at eq $EXPIRES_NOW )
+  if ( $p_object->get_expires_at( ) eq $EXPIRES_NOW )
   {
-    return $TRUE;
+    return 1;
   }
-  elsif ( $expires_at eq $EXPIRES_NEVER )
+  elsif ( $p_object->get_expires_at( ) eq $EXPIRES_NEVER )
   {
-    return $FALSE;
+    return 0;
   }
-  elsif ( $time >= $expires_at )
+  elsif ( $p_time >= $p_object->get_expires_at( ) )
   {
-    return $TRUE;
+    return 1;
   }
   else
   {
-    return $FALSE;
+    return 0;
   }
 }
 
@@ -125,15 +119,11 @@ sub Object_Has_Expired
 
 sub Build_Unique_Key
 {
-  my ( $identifier ) = @_;
+  my ( $p_identifier ) = @_;
 
-  defined( $identifier ) or
-    croak( "identifier required" );
+  Assert_Defined( $p_identifier );
 
-  my $unique_key = md5_hex( $identifier ) or
-    croak( "couldn't build unique key for identifier $identifier" );
-
-  return $unique_key;
+  return md5_hex( $p_identifier );
 }
 
 
@@ -144,20 +134,12 @@ sub Build_Unique_Key
 
 sub Build_Expires_At
 {
-  my ( $created_at, $default_expires_in, $explicit_expires_in ) = @_;
+  my ( $p_created_at, $p_default_expires_in, $p_explicit_expires_in ) = @_;
 
-  my $expires_at;
+  my $expires_in = defined $p_explicit_expires_in ?
+    $p_explicit_expires_in : $p_default_expires_in;
 
-  if ( defined $explicit_expires_in )
-  {
-    $expires_at = Sum_Expiration_Time( $created_at, $explicit_expires_in );
-  }
-  else
-  {
-    $expires_at = Sum_Expiration_Time( $created_at, $default_expires_in );
-  }
-
-  return $expires_at;
+  return Sum_Expiration_Time( $p_created_at, $expires_in );
 }
 
 
@@ -167,28 +149,19 @@ sub Build_Expires_At
 
 sub Sum_Expiration_Time
 {
-  my ( $created_at, $expires_in ) = @_;
+  my ( $p_created_at, $p_expires_in ) = @_;
 
-  defined $created_at or
-    croak( "created_at required" );
+  Assert_Defined( $p_created_at );
+  Assert_Defined( $p_expires_in );
 
-  defined $expires_in or
-    croak( "expires_in required" );
-
-  my $expires_at;
-
-  if ( $expires_in eq $EXPIRES_NEVER )
+  if ( $p_expires_in eq $EXPIRES_NEVER )
   {
-    $expires_at = $EXPIRES_NEVER;
+    return $EXPIRES_NEVER;
   }
   else
   {
-    my $canonical_expires_in = Canonicalize_Expiration_Time( $expires_in );
-
-    $expires_at = $created_at + $canonical_expires_in;
+    return $p_created_at + Canonicalize_Expiration_Time( $p_expires_in );
   }
-
-  return $expires_at;
 }
 
 
@@ -197,33 +170,32 @@ sub Sum_Expiration_Time
 
 sub Canonicalize_Expiration_Time
 {
-  my ( $expires_in ) = @_;
+  my ( $p_expires_in ) = @_;
 
-  defined $expires_in or
-    croak( "expires_in required" );
+  Assert_Defined( $p_expires_in );
 
   my $secs;
 
-  if ( uc( $expires_in ) eq uc( $EXPIRES_NOW ) )
+  if ( uc( $p_expires_in ) eq uc( $EXPIRES_NOW ) )
   {
     $secs = 0;
   }
-  elsif ( uc( $expires_in ) eq uc( $EXPIRES_NEVER ) )
+  elsif ( uc( $p_expires_in ) eq uc( $EXPIRES_NEVER ) )
   {
-    croak( "Internal error.  expires_in eq $EXPIRES_NEVER" );
+    throw Error( "Internal error.  expires_in eq $EXPIRES_NEVER" );
   }
-  elsif ( $expires_in =~ /^\s*([+-]?(?:\d+|\d*\.\d*))\s*$/ )
+  elsif ( $p_expires_in =~ /^\s*([+-]?(?:\d+|\d*\.\d*))\s*$/ )
   {
-    $secs = $expires_in;
+    $secs = $p_expires_in;
   }
-  elsif ( $expires_in =~ /^\s*([+-]?(?:\d+|\d*\.\d*))\s*(\w*)\s*$/
+  elsif ( $p_expires_in =~ /^\s*([+-]?(?:\d+|\d*\.\d*))\s*(\w*)\s*$/
           and exists( $_Expiration_Units{ $2 } ))
   {
     $secs = ( $_Expiration_Units{ $2 } ) * $1;
   }
   else
   {
-    croak( "invalid expiration time '$expires_in'" );
+    throw Error( "invalid expiration time '$p_expires_in'" );
   }
 
   return $secs;
@@ -235,74 +207,15 @@ sub Canonicalize_Expiration_Time
 
 sub Build_Path
 {
-  my ( @elements ) = @_;
+  my ( @p_elements ) = @_;
 
-  if ( grep ( /\.\./, @elements ) )
+  if ( grep ( /\.\./, @p_elements ) )
   {
-    croak( "Illegal path characters '..'" );
+    throw Error( "Illegal path characters '..'" );
   }
 
-  my $path = File::Spec->catfile( @elements );
-
-  return $path;
+  return File::Spec->catfile( @p_elements );
 }
-
-
-
-
-# Check to see if a directory exists and is writable, or if a prefix
-# directory exists and we can write to it in order to create
-# subdirectories.
-
-sub Verify_Directory
-{
-  my ( $directory ) = @_;
-
-  defined( $directory ) or
-    croak( "directory required" );
-
-  # If the directory doesn't exist, crawl upwards until we find a file or
-  # directory that exists
-
-  while ( defined $directory and not -e $directory )
-  {
-    $directory = Extract_Parent_Directory( $directory );
-  }
-
-  defined $directory or
-    croak( "parent directory undefined" );
-
-  -d $directory or
-    croak( "path '$directory' is not a directory" );
-
-  -w $directory or
-    croak( "path '$directory' is not writable" );
-
-  return $SUCCESS;
-}
-
-
-# find the parent directory of a directory. Returns undef if there is
-# no parent
-
-sub Extract_Parent_Directory
-{
-  my ( $directory ) = @_;
-
-  defined( $directory ) or
-    croak( "directory required" );
-
-  my @directories = File::Spec->splitdir( $directory );
-
-  pop @directories;
-
-  return undef unless @directories;
-
-  my $parent_directory = File::Spec->catdir( @directories );
-
-  return $parent_directory;
-}
-
 
 
 # create a directory with optional mask, building subdirectories as
@@ -310,25 +223,22 @@ sub Extract_Parent_Directory
 
 sub Create_Directory
 {
-  my ( $directory, $optional_new_umask ) = @_;
+  my ( $p_directory, $p_optional_new_umask ) = @_;
 
-  defined( $directory ) or
-    croak( "directory required" );
+  Assert_Defined( $p_directory );
 
-  my $old_umask = umask( ) if defined $optional_new_umask;
+  my $old_umask = umask( ) if defined $p_optional_new_umask;
 
-  umask( $optional_new_umask ) if defined $optional_new_umask;
+  umask( $p_optional_new_umask ) if defined $p_optional_new_umask;
 
-  $directory =~ s|/$||;
+  $p_directory =~ s|/$||;
 
-  mkpath( $directory, 0, $DIRECTORY_MODE );
+  mkpath( $p_directory, 0, $DIRECTORY_MODE );
 
-  -d $directory or
-    croak( "Couldn't create directory: $directory: $!" );
+  -d $p_directory or
+    throw Error( "Couldn't create directory: $p_directory: $!" );
 
   umask( $old_umask ) if defined $old_umask;
-
-  return $SUCCESS;
 }
 
 
@@ -336,12 +246,13 @@ sub Create_Directory
 
 sub Freeze_Object
 {
-  my ( $object_ref, $frozen_object_ref  ) = @_;
+  my ( $p_object_ref, $p_frozen_object_ref  ) = @_;
 
-  $$frozen_object_ref = nfreeze( $$object_ref ) or
-    croak( "Couldn't freeze object" );
+  Assert_Defined( $p_object_ref );
+  Assert_Defined( $p_frozen_object_ref );
 
-  return $SUCCESS;
+  $$p_frozen_object_ref = nfreeze( $$p_object_ref ) or
+    throw Error( "Couldn't freeze object" );
 }
 
 
@@ -349,11 +260,13 @@ sub Freeze_Object
 
 sub Thaw_Object
 {
-  my ( $frozen_object_ref, $object_ref ) = @_;
+  my ( $p_frozen_object_ref, $p_object_ref ) = @_;
 
-  $$object_ref = thaw( $$frozen_object_ref );
+  Assert_Defined( $p_frozen_object_ref );
+  Assert_Defined( $$p_frozen_object_ref );
+  Assert_Defined( $p_object_ref );
 
-  return $SUCCESS;
+  $$p_object_ref = thaw( $$p_frozen_object_ref );
 }
 
 
@@ -362,22 +275,19 @@ sub Thaw_Object
 
 sub Split_Word
 {
-  my ( $word, $depth, $split_word_list_ref ) = @_;
+  my ( $p_word, $p_depth ) = @_;
 
-  defined $word or
-    croak( "word required" );
+  Assert_Defined( $p_word );
+  Assert_Defined( $p_depth );
 
-  defined $depth or
-    croak( "depth required" );
+  my @split_word_list;
 
-  my @list;
-
-  for ( my $i = 0; $i < $depth; $i++ )
+  for ( my $i = 0; $i < $p_depth; $i++ )
   {
-    push ( @$split_word_list_ref, substr( $word, $i, 1 ) );
+    push ( @split_word_list, substr( $p_word, $i, 1 ) );
   }
 
-  return $SUCCESS;
+  return @split_word_list;
 }
 
 
@@ -386,18 +296,14 @@ sub Split_Word
 
 sub Make_Path
 {
-  my ( $path, $optional_new_umask ) = @_;
+  my ( $p_path, $p_optional_new_umask ) = @_;
 
-  my ( $volume, $directory, $filename ) = File::Spec->splitpath( $path );
+  my ( $volume, $directory, $filename ) = File::Spec->splitpath( $p_path );
 
-  return $SUCCESS unless $directory;
-
-  return $SUCCESS if -d $directory;
-
-  Create_Directory( $directory, $optional_new_umask ) or
-    croak( "Couldn't create directory $directory" );
-
-  return $SUCCESS;
+  if ( defined $directory and not -d $directory )
+  {
+    Create_Directory( $directory, $p_optional_new_umask );
+  }
 }
 
 
@@ -405,43 +311,32 @@ sub Make_Path
 
 sub Write_File
 {
-  my ( $filename, $data_ref, $optional_mode, $optional_new_umask ) = @_;
+  my ( $p_filename, $p_data_ref, $p_optional_mode, $p_optional_umask ) = @_;
 
-  defined( $filename ) or
-    croak( "filename required" );
+  Assert_Defined( $p_filename );
+  Assert_Defined( $p_data_ref );
 
-  defined( $data_ref ) or
-    croak( "data reference required" );
+  my $old_umask = umask if $p_optional_umask;
 
-  # Change the umask if necessary
+  umask( $p_optional_umask ) if $p_optional_umask;
 
-  my $old_umask = umask if $optional_new_umask;
-
-  umask( $optional_new_umask ) if $optional_new_umask;
-
-  # Create a temp filename
-
-  my $temp_filename = "$filename.tmp$$";
+  my $temp_filename = "$p_filename.tmp$$";
 
   open( FILE, ">$temp_filename" ) or
-    croak( "Couldn't open $temp_filename for writing: $!\n" );
-
-  # Use binmode in case the user stores binary data
+    throw Error( "Couldn't open $temp_filename for writing: $!" );
 
   binmode( FILE );
 
-  chmod( $optional_mode, $filename ) if defined $optional_mode;
-
-  print FILE $$data_ref;
+  print FILE $$p_data_ref;
 
   close( FILE );
 
-  rename( $temp_filename, $filename ) or
-    croak( "Couldn't rename $temp_filename to $filename" );
+  rename( $temp_filename, $p_filename ) or
+    throw Error( "Couldn't rename $temp_filename to $p_filename" );
+
+  chmod( $p_optional_mode, $p_filename ) if defined $p_optional_mode;
 
   umask( $old_umask ) if $old_umask;
-
-  return $SUCCESS;
 }
 
 
@@ -449,21 +344,18 @@ sub Write_File
 
 sub Read_File
 {
-  my ( $filename ) = @_;
+  my ( $p_filename ) = @_;
 
-  my $data_ref;
+  Assert_Defined( $p_filename );
 
-  defined( $filename ) or
-    croak( "filename required" );
-
-  open( FILE, $filename ) or
+  open( FILE, $p_filename ) or
     return undef;
-
-  # In case the user stores binary data
 
   binmode( FILE );
 
   local $/ = undef;
+
+  my $data_ref;
 
   $$data_ref = <FILE>;
 
@@ -478,19 +370,18 @@ sub Read_File
 
 sub Read_File_Without_Time_Modification
 {
-  my ( $filename ) = @_;
+  my ( $p_filename ) = @_;
 
-  defined( $filename ) or
-    croak( "filename required" );
+  Assert_Defined( $p_filename );
 
-  -e $filename or
+  -e $p_filename or
     return undef;
 
-  my ( $file_access_time, $file_modified_time ) = ( stat( $filename ) )[8,9];
+  my ( $file_access_time, $file_modified_time ) = ( stat( $p_filename ) )[8,9];
 
-  my $data_ref = Read_File( $filename );
+  my $data_ref = Read_File( $p_filename );
 
-  utime( $file_access_time, $file_modified_time, $filename );
+  utime( $file_access_time, $file_modified_time, $p_filename );
 
   return $data_ref;
 }
@@ -500,20 +391,17 @@ sub Read_File_Without_Time_Modification
 
 sub Remove_File
 {
-  my ( $filename ) = @_;
+  my ( $p_filename ) = @_;
 
-  defined( $filename ) or
-    croak( "directory required" );
+  Assert_Defined( $p_filename );
 
-  if ( -f $filename )
+  if ( -f $p_filename )
   {
     # We don't catch the error, because this may fail if two
     # processes are in a race and try to remove the object
 
-    unlink( $filename );
+    unlink( $p_filename );
   }
-
-  return $SUCCESS;
 }
 
 
@@ -522,20 +410,17 @@ sub Remove_File
 
 sub Remove_Directory
 {
-  my ( $directory ) = @_;
+  my ( $p_directory ) = @_;
 
-  defined( $directory ) or
-    croak( "directory required" );
+  Assert_Defined( $p_directory );
 
-  if ( -d $directory )
+  if ( -d $p_directory )
   {
     # We don't catch the error, because this may fail if two
     # processes are in a race and try to remove the object
 
-    rmdir( $directory );
+    rmdir( $p_directory );
   }
-
-  return $SUCCESS;
 }
 
 
@@ -544,28 +429,18 @@ sub Remove_Directory
 
 sub List_Subdirectories
 {
-  my ( $directory, $subdirectories_ref ) = @_;
+  my ( $p_directory, $p_subdirectories_ref ) = @_;
 
-  opendir( DIR, $directory ) or
-    croak( "Couldn't open directory $directory: $!" );
-
-  my @dirents = readdir( DIR );
-
-  closedir( DIR ) or
-    croak( "Couldn't close directory $directory" );
-
-  foreach my $dirent ( @dirents )
+  foreach my $dirent ( Read_Dirents( $p_directory ) )
   {
     next if $dirent eq '.' or $dirent eq '..';
 
-    my $path = Build_Path( $directory, $dirent );
+    my $path = Build_Path( $p_directory, $dirent );
 
     next unless -d $path;
 
-    push( @$subdirectories_ref, $dirent );
+    push( @$p_subdirectories_ref, $dirent );
   }
-
-  return $SUCCESS;
 }
 
 
@@ -573,122 +448,78 @@ sub List_Subdirectories
 
 sub Recursively_List_Files
 {
-  my ( $directory, $files_ref ) = @_;
+  my ( $p_directory, $p_files_ref ) = @_;
 
-  return $SUCCESS unless -d $directory;
+  return unless -d $p_directory;
 
-  opendir( DIR, $directory ) or
-    croak( "Couldn't open directory $directory: $!" );
-
-  my @dirents = readdir( DIR );
-
-  closedir( DIR ) or
-    croak( "Couldn't close directory $directory" );
-
-  my @files;
-
-  foreach my $dirent ( @dirents )
+  foreach my $dirent ( Read_Dirents( $p_directory ) )
   {
     next if $dirent eq '.' or $dirent eq '..';
 
-    my $path = Build_Path( $directory, $dirent );
+    my $path = Build_Path( $p_directory, $dirent );
 
     if ( -d $path )
     {
-      Recursively_List_Files( $path, $files_ref ) or
-        croak( "Couldn't recursively list files at $path" );
+      Recursively_List_Files( $path, $p_files_ref );
     }
     else
     {
-      push( @$files_ref, $dirent );
+      push( @$p_files_ref, $dirent );
     }
   }
-
-  return $SUCCESS;
 }
 
 
-
-# recursively list the files of the subdirectories, without the full paths
+# recursively list the files of the subdirectories, with the full paths
 
 sub Recursively_List_Files_With_Paths
 {
-  my ( $directory, $files_ref ) = @_;
+  my ( $p_directory, $p_files_ref ) = @_;
 
-  opendir( DIR, $directory ) or
-    croak( "Couldn't open directory $directory: $!" );
-
-  my @dirents = readdir( DIR );
-
-  closedir( DIR ) or
-    croak( "Couldn't close directory $directory" );
-
-  my @files;
-
-  foreach my $dirent ( @dirents )
+  foreach my $dirent ( Read_Dirents( $p_directory ) )
   {
     next if $dirent eq '.' or $dirent eq '..';
 
-    my $path = Build_Path( $directory, $dirent );
+    my $path = Build_Path( $p_directory, $dirent );
 
     if ( -d $path )
     {
-      Recursively_List_Files_With_Paths( $path, $files_ref ) or
-        croak( "Couldn't recursively list files at $path" );
+      Recursively_List_Files_With_Paths( $path, $p_files_ref );
     }
     else
     {
-      push( @$files_ref, $path );
+      push( @$p_files_ref, $path );
     }
   }
-
-  return $SUCCESS;
 }
+
 
 
 # remove a directory and all subdirectories and files
 
 sub Recursively_Remove_Directory
 {
-  my ( $root ) = @_;
+  my ( $p_root ) = @_;
 
-  -d $root or
-    return $SUCCESS;
+  return unless -d $p_root;
 
-  opendir( DIR, $root ) or
-    croak( "Couldn't open directory $root: $!" );
-
-  my @dirents = readdir( DIR );
-
-  closedir( DIR ) or
-    croak( "Couldn't close directory $root: $!" );
-
-  foreach my $dirent ( @dirents )
+  foreach my $dirent ( Read_Dirents( $p_root ) )
   {
     next if $dirent eq '.' or $dirent eq '..';
 
-    my $path_to_dirent = "$root/$dirent";
+    my $path = Build_Path( $p_root, $dirent );
 
-    if ( -d $path_to_dirent )
+    if ( -d $path )
     {
-      Recursively_Remove_Directory( $path_to_dirent );
+      Recursively_Remove_Directory( $path );
     }
     else
     {
-      my $untainted_path_to_dirent = Untaint_Path( $path_to_dirent );
-
-      Remove_File( $untainted_path_to_dirent ) or
-        croak( "Couldn't Remove_File( $untainted_path_to_dirent ): $!\n" );
+      Remove_File( Untaint_Path( $path ) );
     }
   }
 
-  my $untainted_root = Untaint_Path( $root ) or
-    croak( "Couldn't untain root" );
-
-  Remove_Directory( $untainted_root ) or
-    croak( "Couldn't Remove_Directory( $untainted_root ): $!" );
-
-  return $SUCCESS;
+  Remove_Directory( Untaint_Path( $p_root ) );
 }
 
 
@@ -698,28 +529,19 @@ sub Recursively_Remove_Directory
 
 sub Recursive_Directory_Size
 {
-  my ( $directory ) = @_;
+  my ( $p_directory ) = @_;
 
-  defined( $directory ) or
-    croak( "directory required" );
+  Assert_Defined( $p_directory );
+
+  return 0 unless -d $p_directory;
 
   my $size = 0;
 
-  -d $directory or
-    return 0;
-
-  opendir( DIR, $directory ) or
-    croak( "Couldn't opendir '$directory': $!" );
-
-  my @dirents = readdir( DIR );
-
-  closedir( DIR );
-
-  foreach my $dirent ( @dirents )
+  foreach my $dirent ( Read_Dirents( $p_directory ) )
   {
     next if $dirent eq '.' or $dirent eq '..';
 
-    my $path = Build_Path( $directory, $dirent );
+    my $path = Build_Path( $p_directory, $dirent );
 
     if ( -d $path )
     {
@@ -735,32 +557,51 @@ sub Recursive_Directory_Size
 }
 
 
+
+# read the dirents from a directory
+
+sub Read_Dirents
+{
+  my ( $p_directory ) = @_;
+
+  Assert_Defined( $p_directory );
+
+  opendir( DIR, $p_directory ) or
+    throw Error( "Couldn't open directory $p_directory: $!" );
+
+  my @dirents = readdir( DIR );
+
+  closedir( DIR ) or
+    throw Error( "Couldn't close directory $p_directory" );
+
+  return @dirents;
+}
+
+
 # Untaint a file path
 
 sub Untaint_Path
 {
-  my ( $path ) = @_;
+  my ( $p_path ) = @_;
 
-  return Untaint_String( $path, $UNTAINTED_PATH_REGEX );
+  return Untaint_String( $p_path, $UNTAINTED_PATH_REGEX );
 }
+
 
 # Untaint a string
 
 sub Untaint_String
 {
-  my ( $string, $untainted_regex ) = @_;
+  my ( $p_string, $p_untainted_regex ) = @_;
 
-  defined( $untainted_regex ) or
-    croak( "untainted regex required" );
+  Assert_Defined( $p_string );
+  Assert_Defined( $p_untainted_regex );
 
-  defined( $string ) or
-    croak( "string required" );
+  my ( $untainted_string ) = $p_string =~ /$p_untainted_regex/;
 
-  my ( $untainted_string ) = $string =~ /$untainted_regex/;
-
-  if ( not defined $untainted_string || $untainted_string ne $string )
+  if ( not defined $untainted_string || $untainted_string ne $p_string )
   {
-    warn( "String $string contains possible taint" );
+    warn( "String $p_string contains possible taint" );
   }
 
   return $untainted_string;
@@ -772,34 +613,22 @@ sub Untaint_String
 
 sub Build_Object
 {
-  my ( $identifier, $data, $default_expires_in, $expires_in ) = @_;
+  my ( $p_identifier, $p_data, $p_default_expires_in, $p_expires_in ) = @_;
 
-  $identifier or
-    croak( "identifier required" );
+  Assert_Defined( $p_identifier );
+  Assert_Defined( $p_default_expires_in );
 
-  defined $default_expires_in or
-    croak( "default_expires_in required" );
+  my $now = time( );
 
-  my $object = new Cache::Object( ) or
-    croak( "Couldn't construct new cache object" );
+  my $object = new Cache::Object( );
 
-  $object->set_identifier( $identifier );
-
-  $object->set_data( $data );
-
-  my $created_at = time( ) or
-    croak( "Couldn't get time" );
-
-  $object->set_created_at( $created_at );
-
-  my $expires_at =
-    Build_Expires_At( $created_at, $default_expires_in, $expires_in ) or
-      croak( "Couldn't build expires at" );
-
-  $object->set_expires_at( $expires_at );
-
-  $object->set_accessed_at( $created_at );
-
+  $object->set_identifier( $p_identifier );
+  $object->set_data( $p_data );
+  $object->set_created_at( $now );
+  $object->set_accessed_at( $now );
+  $object->set_expires_at( Build_Expires_At( $now,
+                                             $p_default_expires_in,
+                                             $p_expires_in ) );
   return $object;
 }
 
@@ -809,7 +638,7 @@ sub Build_Object
 sub Get_Temp_Directory
 {
   my $tmpdir = File::Spec->tmpdir( ) or
-    croak( "No tmpdir on this system.  Bugs to the authors of File::Spec" );
+    throw Error( "No tmpdir on this system.  Upgrade File::Spec?" );
 
   return $tmpdir;
 }
@@ -851,48 +680,30 @@ sub Static_Params
 
 sub Limit_Size
 {
-  my ( $cache, $cache_meta_data, $new_size ) = @_;
+  my ( $p_cache, $p_cache_meta_data, $p_new_size ) = @_;
 
-  defined $cache or
-    croak( "cache required" );
+  Assert_Defined( $p_cache );
+  Assert_Defined( $p_cache_meta_data );
+  Assert_Defined( $p_new_size );
 
-  defined $cache_meta_data or
-    croak( "cache_meta_data required" );
+  $p_new_size >= 0 or
+    throw Error( "p_new_size >= 0 required" );
 
-  defined $new_size or
-    croak( "new_size required" );
+  my $size_estimate = $p_cache_meta_data->get_cache_size( );
 
-  $new_size >= 0 or
-    croak( "size >= 0 required" );
+  return if $size_estimate <= $p_new_size;
 
-  my $current_size = $cache_meta_data->get_cache_size( );
-
-  return $SUCCESS if ( $current_size <= $new_size );
-
-  my @removal_list;
-
-  $cache_meta_data->build_removal_list( \@removal_list ) or
-    croak( "Couldn't build removal list" );
-
-  foreach my $identifier ( @removal_list )
+  foreach my $identifier ( $p_cache_meta_data->build_removal_list( ) )
   {
-    my $object_size = $cache_meta_data->build_object_size( $identifier ) or
-      croak( "Couldn't build object size" );
+    $size_estimate -= $p_cache_meta_data->build_object_size( $identifier );
 
-    $cache->remove( $identifier ) or
-      croak( "Couldn't remove identifier" );
+    $p_cache->remove( $identifier );
+    $p_cache_meta_data->remove( $identifier );
 
-    $cache_meta_data->remove( $identifier ) or
-      croak( "Couldn't remove identifier from cache_meta_data" );
-
-    $current_size -= $object_size;
-
-    return $SUCCESS if ( $current_size <= $new_size );
+    return if $size_estimate <= $p_new_size;
   }
 
-  warn("Couldn't limit size to $new_size\n");
-
-  return $FAILURE;
+  warn( "Couldn't limit size to $p_new_size" );
 }
 
 
@@ -901,21 +712,30 @@ sub Limit_Size
 
 sub Update_Access_Time
 {
-  my ( $path ) = @_;
+  my ( $p_path ) = @_;
 
-  if ( not -e $path )
+  if ( not -e $p_path )
   {
-    warn( "$path does not exist" );
+    warn( "$p_path does not exist" );
   }
   else
   {
     my $now = time( );
 
-    utime( $now, $now, $path );
+    utime( $now, $now, $p_path );
   }
-
-  return $SUCCESS;
 }
 
+
+# throw an Exception if the Assertion fails
+
+sub Assert_Defined
+{
+  if ( not defined $_[0] )
+  {
+    my ( $package, $filename, $line ) = caller( );
+    throw Error::Simple( "Assert_Defined failed: $package line $line\n" );
+  }
+}
 
 1;

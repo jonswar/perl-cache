@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareCacheTester.pm,v 1.5 2001/03/22 18:40:08 dclinton Exp $
+# $Id: SizeAwareCacheTester.pm,v 1.6 2001/03/22 21:41:35 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -13,7 +13,7 @@ package Cache::SizeAwareCacheTester;
 use strict;
 use Carp;
 use Cache::BaseCacheTester;
-use Cache::Cache qw( $SUCCESS );
+use Cache::Cache;
 
 use vars qw( @ISA $EXPIRES_DELAY );
 
@@ -40,10 +40,7 @@ sub _test_one
   $cache or
     croak( "cache required" );
 
-  my $clear_status = $cache->clear( );
-
-  ( $clear_status eq $SUCCESS ) ?
-    $self->ok( ) : $self->not_ok( '$clear_status eq $SUCCESS' );
+  $cache->clear( );
 
   my $empty_size = $cache->size( );
 
@@ -56,10 +53,7 @@ sub _test_one
 
   my $value = $self;
 
-  my $first_set_status = $cache->set( $first_key, $value, $first_expires_in );
-
-  ( $first_set_status eq $SUCCESS ) ?
-    $self->ok( ) : $self->not_ok( '$first_set_status eq $SUCCESS' );
+  $cache->set( $first_key, $value, $first_expires_in );
 
   my $first_size = $cache->size( );
 
@@ -72,11 +66,7 @@ sub _test_one
 
   my $second_expires_in = $first_expires_in * 2;
 
-  my $second_set_status = 
-    $cache->set( $second_key, $value, $second_expires_in );
-
-  ( $second_set_status eq $SUCCESS ) ?
-    $self->ok( ) : $self->not_ok( '$second_set_status eq $SUCCESS' );
+  $cache->set( $second_key, $value, $second_expires_in );
 
   my $second_size = $cache->size( );
 
@@ -108,10 +98,7 @@ sub _test_two
   $cache or
     croak( "cache required" );
 
-  my $clear_status = $cache->clear( );
-
-  ( $clear_status eq $SUCCESS ) ?
-    $self->ok( ) : $self->not_ok( '$clear_status eq $SUCCESS' );
+  $cache->clear( );
 
   my $empty_size = $cache->size( );
 
@@ -124,11 +111,7 @@ sub _test_two
 
   my $first_expires_in = 20;
 
-  my $first_set_status = 
-    $cache->set( $first_key, $value, $first_expires_in );
-
-  ( $first_set_status eq $SUCCESS ) ?
-    $self->ok( ) : $self->not_ok( '$first_set_status eq $SUCCESS' );
+  $cache->set( $first_key, $value, $first_expires_in );
 
   my $first_size = $cache->size( );
 
@@ -145,10 +128,7 @@ sub _test_two
 
     sleep ( 1 );
 
-    my $set_status = $cache->set( $key, $value, $second_expires_in );
-
-    ( $set_status eq $SUCCESS ) ?
-      $self->ok( ) : $self->not_ok( 'set_status eq $SUCCESS' );
+    $cache->set( $key, $value, $second_expires_in );
   }
 
   my $second_size = $cache->size( );
@@ -183,10 +163,7 @@ sub _test_three
   $cache or
     croak( "cache required" );
 
-  my $clear_status = $cache->clear( );
-
-  ( $clear_status eq $SUCCESS ) ?
-    $self->ok( ) : $self->not_ok( '$clear_status eq $SUCCESS' );
+  $cache->clear( );
 
   my $empty_size = $cache->size( );
 
@@ -197,10 +174,7 @@ sub _test_three
 
   my $value = $self;
 
-  my $first_set_status = $cache->set( $first_key, $value );
-
-  ( $first_set_status eq $SUCCESS ) ?
-    $self->ok( ) : $self->not_ok( '$first_set_status eq $SUCCESS' );
+  $cache->set( $first_key, $value );
 
   my $first_size = $cache->size( );
 
@@ -213,10 +187,7 @@ sub _test_three
 
   my $second_key = 'Key 2';
 
-  my $second_set_status = $cache->set( $second_key, $value );
-
-  ( $second_set_status eq $SUCCESS ) ?
-    $self->ok( ) : $self->not_ok( '$second_set_status eq $SUCCESS' );
+  $cache->set( $second_key, $value );
 
   my $second_size = $cache->size( );
 

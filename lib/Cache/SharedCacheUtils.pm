@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheUtils.pm,v 1.16 2001/03/23 00:15:06 dclinton Exp $
+# $Id: SharedCacheUtils.pm,v 1.1 2001/03/25 18:13:16 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -12,10 +12,11 @@ package Cache::SharedCacheUtils;
 
 use strict;
 use vars qw( @ISA @EXPORT_OK );
-use Cache::Cache qw( $SUCCESS $FAILURE );
-use Cache::CacheUtils qw( Freeze_Object
+use Cache::CacheUtils qw( Assert_Defined
+                          Freeze_Object
                           Static_Params
                           Thaw_Object );
+use Error;
 use IPC::ShareLite qw( LOCK_EX LOCK_UN );
 
 
@@ -36,22 +37,18 @@ use IPC::ShareLite qw( LOCK_EX LOCK_UN );
 
 sub Instantiate_Share
 {
-  my ( $ipc_identifier ) = Static_Params( @_ );
+  my ( $p_ipc_identifier ) = Static_Params( @_ );
 
-  defined $ipc_identifier or
-    croak( "ipc_identifier required" );
+  Assert_Defined( $p_ipc_identifier );
 
   my %ipc_options = (
-                     -key       =>  $ipc_identifier,
+                     -key       =>  $p_ipc_identifier,
                      -create    => 'yes',
                      -destroy   => 'no',
                      -exclusive => 'no'
                     );
 
-  my $share = new IPC::ShareLite( %ipc_options ) or
-    croak( "Couldn't instantiate new IPC::ShareLite" );
-
-  return $share;
+  return new IPC::ShareLite( %ipc_options );
 }
 
 
@@ -60,21 +57,16 @@ sub Instantiate_Share
 
 sub Restore_Shared_Hash_Ref
 {
-  my ( $ipc_identifier ) = Static_Params( @_ );
+  my ( $p_ipc_identifier ) = Static_Params( @_ );
 
-  defined $ipc_identifier or
-    croak( "ipc_identifier required" );
-
-  my $share = Instantiate_Share( $ipc_identifier ) or
-    croak( "Couldn't instantiate share" );
-
-  my $frozen_hash_ref = $share->fetch( ) or
-    return ( { } );
+  Assert_Defined( $p_ipc_identifier );
 
   my $hash_ref = { };
 
-  Thaw_Object( \$frozen_hash_ref, \$hash_ref ) or
-    croak( "Couldn't thaw object" );
+  my $frozen_hash_ref = Instantiate_Share( $p_ipc_identifier )->fetch( ) or
+    return $hash_ref;
+
+  Thaw_Object( \$frozen_hash_ref, \$hash_ref );
 
   return $hash_ref;
 }
@@ -86,24 +78,20 @@ sub Restore_Shared_Hash_Ref
 
 sub Restore_Shared_Hash_Ref_With_Lock
 {
-  my ( $ipc_identifier ) = Static_Params( @_ );
+  my ( $p_ipc_identifier ) = Static_Params( @_ );
 
-  defined $ipc_identifier or
-    croak( "ipc_identifier required" );
+  Assert_Defined( $p_ipc_identifier );
 
-  my $share = Instantiate_Share( $ipc_identifier ) or
-    croak( "Couldn't instantiate share" );
+  my $share = Instantiate_Share( $p_ipc_identifier );
 
-  $share->lock( LOCK_EX ) or
-    croak( "Couldn't lock share" );
-
-  my $frozen_hash_ref = $share->fetch( ) or
-    return ( { } );
+  $share->lock( LOCK_EX );
 
   my $hash_ref = { };
 
-  Thaw_Object( \$frozen_hash_ref, \$hash_ref ) or
-    croak( "Couldn't thaw object" );
+  my $frozen_hash_ref = $share->fetch( ) or
+    return $hash_ref;
+
+  Thaw_Object( \$frozen_hash_ref, \$hash_ref );
 
   return $hash_ref;
 }
@@ -114,26 +102,16 @@ sub Restore_Shared_Hash_Ref_With_Lock
 
 sub Store_Shared_Hash_Ref
 {
-  my ( $ipc_identifier, $hash_ref ) = @_;
+  my ( $p_ipc_identifier, $p_hash_ref ) = @_;
 
-  defined $ipc_identifier or
-    croak( "ipc_identifier required" );
-
-  defined $hash_ref or
-    croak( "hash_ref required" );
+  Assert_Defined( $p_ipc_identifier );
+  Assert_Defined( $p_hash_ref );
 
   my $frozen_hash_ref = { };
 
-  Freeze_Object( \$hash_ref, \$frozen_hash_ref ) or
-    croak( "Couldn't freeze hash ref" );
+  Freeze_Object( \$p_hash_ref, \$frozen_hash_ref );
 
-  my $share = Instantiate_Share( $ipc_identifier ) or
-    croak( "Couldn't instantiate share" );
-
-  $share->store( $frozen_hash_ref ) or
-    croak( "Couldn't store frozen_hash_ref" );
-
-  return $SUCCESS;
+  Instantiate_Share( $p_ipc_identifier )->store( $frozen_hash_ref );
 }
 
 
@@ -143,29 +121,20 @@ sub Store_Shared_Hash_Ref
 
 sub Store_Shared_Hash_Ref_And_Unlock
 {
-  my ( $ipc_identifier, $hash_ref ) = @_;
+  my ( $p_ipc_identifier, $p_hash_ref ) = @_;
 
-  defined $ipc_identifier or
-    croak( "ipc_identifier required" );
-
-  defined $hash_ref or
-    croak( "hash_ref required" );
+  Assert_Defined( $p_ipc_identifier );
+  Assert_Defined( $p_hash_ref );
 
   my $frozen_hash_ref = { };
 
-  Freeze_Object( \$hash_ref, \$frozen_hash_ref ) or
-    croak( "Couldn't freeze hash ref" );
+  Freeze_Object( \$p_hash_ref, \$frozen_hash_ref );
 
-  my $share = Instantiate_Share( $ipc_identifier ) or
-    croak( "Couldn't instantiate share" );
+  my $share = Instantiate_Share( $p_ipc_identifier );
 
-  $share->store( $frozen_hash_ref ) or
-    croak( "Couldn't store frozen_hash_ref" );
+  $share->store( $frozen_hash_ref );
 
-  $share->unlock( LOCK_UN ) or
-    croak( "Couldn't unlock share" );
-
-  return $SUCCESS;
+  $share->unlock( LOCK_UN );
 }
 
 

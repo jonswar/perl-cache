@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareSharedMemoryCache.pm,v 1.13 2001/09/05 14:39:27 dclinton Exp $
+# $Id: SizeAwareSharedMemoryCache.pm,v 1.14 2001/11/05 13:34:45 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -14,16 +14,15 @@ package Cache::SizeAwareSharedMemoryCache;
 
 use strict;
 use vars qw( @ISA @EXPORT_OK $NO_MAX_SIZE );
-use Cache::Cache qw( $EXPIRES_NEVER $SUCCESS $FAILURE $TRUE $FALSE );
-use Cache::CacheUtils qw( Static_Params );
+use Cache::Cache qw( $EXPIRES_NEVER );
+use Cache::CacheUtils qw( Assert_Defined
+                          Static_Params );
 use Cache::SharedCacheUtils qw( Restore_Shared_Hash_Ref
                                 Restore_Shared_Hash_Ref_With_Lock
                                 Store_Shared_Hash_Ref
-                                Store_Shared_Hash_Ref_And_Unlock
-                              );
+                                Store_Shared_Hash_Ref_And_Unlock );
 use Cache::SizeAwareMemoryCache;
 use Cache::SharedMemoryCache;
-use Carp;
 use Exporter;
 
 
@@ -123,23 +122,15 @@ sub new
 
 sub remove
 {
-  my ( $self, $identifier ) = @_;
+  my ( $self, $p_identifier ) = @_;
 
-  $identifier or
-    croak( "identifier required" );
+  Assert_Defined( $p_identifier );
 
-  my $namespace = $self->get_namespace( ) or
-    croak( "Couldn't get namespace" );
+  my $cache_hash_ref = _Restore_Cache_Hash_Ref( );
 
-  my $cache_hash_ref = _Restore_Cache_Hash_Ref( ) or
-    croak( "Couldn't restore cache hash ref" );
+  delete $cache_hash_ref->{ $self->get_namespace( ) }->{ $p_identifier };
 
-  delete $cache_hash_ref->{$namespace}->{$identifier};
-
-  _Store_Cache_Hash_Ref( $cache_hash_ref ) or
-    croak( "Couldn't store cache hash ref" );
-
-  return $SUCCESS;
+  _Store_Cache_Hash_Ref( $cache_hash_ref );
 }
 
 
@@ -151,95 +142,65 @@ sub remove
 
 sub _new
 {
-  my ( $proto, $options_hash_ref ) = @_;
+  my ( $proto, $p_options_hash_ref ) = @_;
   my $class = ref( $proto ) || $proto;
-
-  my $self  =  $class->SUPER::_new( $options_hash_ref ) or
-    croak( "Couldn't run super constructor" );
-
-  return $self;
+  return $class->SUPER::_new( $p_options_hash_ref );
 }
 
 
 
 sub _build_object_size
 {
-  my ( $self, $identifier ) = @_;
+  my ( $self, $p_identifier ) = @_;
 
-  $identifier or
-    croak( "identifier required" );
+  Assert_Defined( $p_identifier );
 
-  my $namespace = $self->get_namespace( ) or
-    croak( "Couldn't get namespace" );
+  my $object_dump =
+    _Restore_Cache_Hash_Ref( )
+      ->{ $self->get_namespace( ) }
+        ->{ $p_identifier } or
+          return 0;
 
-  my $cache_hash_ref = _Restore_Cache_Hash_Ref( ) or
-    croak( "Couldn't restore cache hash ref" );
-
-  my $object_dump = $cache_hash_ref->{$namespace}->{$identifier} or
-    return 0;
-
-  my $size = length $object_dump;
-
-  return $size;
+  return length $object_dump;
 }
 
 
 sub _store
 {
-  my ( $self, $identifier, $object ) = @_;
+  my ( $self, $p_identifier, $p_object ) = @_;
 
-  $identifier or
-    croak( "identifier required" );
+  Assert_Defined( $p_identifier );
 
-  my $namespace = $self->get_namespace( ) or
-    croak( "Couldn't get namespace" );
+  my $cache_hash_ref = _Restore_Cache_Hash_Ref_With_Lock( );
 
-  my $object_dump = $self->_freeze( $object ) or
-    croak( "Couldn't freeze object" );
+  $cache_hash_ref->{ $self->get_namespace( ) }->{ $p_identifier } =
+    $self->_freeze( $p_object );
 
-  my $cache_hash_ref = _Restore_Cache_Hash_Ref_With_Lock( ) or
-    croak( "Couldn't restore cache hash ref" );
-
-  $cache_hash_ref->{$namespace}->{$identifier} = $object_dump;
-
-  _Store_Cache_Hash_Ref( $cache_hash_ref ) or
-    croak( "Couldn't store cache hash ref" );
-
-  return $SUCCESS;
+  _Store_Cache_Hash_Ref( $cache_hash_ref );
 }
 
 
 sub _restore
 {
-  my ( $self, $identifier ) = @_;
+  my ( $self, $p_identifier ) = @_;
 
-  $identifier or
-    croak( "identifier required" );
+  Assert_Defined( $p_identifier );
 
-  my $namespace = $self->get_namespace( ) or
-    croak( "Couldn't get namespace" );
+  my $object_dump = _Restore_Cache_Hash_Ref( )
+    ->{ $self->get_namespace( ) }
+      ->{ $p_identifier } or
+        return undef;
 
-  my $cache_hash_ref = _Restore_Cache_Hash_Ref( ) or
-    croak( "Couldn't restore cache hash ref" );
-
-  my $object_dump = $cache_hash_ref->{$namespace}->{$identifier} or
-    return undef;
-
-  my $object = $self->_thaw( $object_dump ) or
-    croak( "Couldn't thaw object" );
-
-  return $object;
+  return $self->_thaw( \$object_dump );
 }
 
 
 sub _delete_namespace
 {
-  my ( $self, $namespace ) = @_;
+  my ( $self, $p_namespace ) = @_;
 
-  _Delete_Namespace( $namespace ) or
-    croak( "Couldn't delete namespace $namespace" );
-
-  return $SUCCESS;
+  _Delete_Namespace( $p_namespace ) or
+    croak( "Couldn't delete namespace $p_namespace" );
 }
 
 
@@ -252,15 +213,14 @@ sub get_identifiers
 {
   my ( $self ) = @_;
 
-  my $namespace = $self->get_namespace( ) or
-    croak( "Couldn't get namespace" );
-
-  my $cache_hash_ref = _Restore_Cache_Hash_Ref( ) or
-    croak( "Couldn't restore cache hash ref" );
-
-  return ( ) unless defined $cache_hash_ref->{ $namespace };
-
-  return keys %{ $cache_hash_ref->{ $namespace } };
+  if ( defined _Restore_Cache_Hash_Ref( )->{ $self->get_namespace( ) } )
+  {
+    return keys %{ _Restore_Cache_Hash_Ref( )->{ $self->get_namespace( ) } };
+  }
+  else
+  {
+    return ( );
+  }
 }
 
 

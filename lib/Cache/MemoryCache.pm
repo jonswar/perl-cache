@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: MemoryCache.pm,v 1.17 2001/09/05 14:39:27 dclinton Exp $
+# $Id: MemoryCache.pm,v 1.18 2001/11/05 13:34:45 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -15,8 +15,9 @@ package Cache::MemoryCache;
 use strict;
 use vars qw( @ISA );
 use Cache::BaseCache;
-use Cache::Cache qw( $EXPIRES_NEVER $TRUE $FALSE $SUCCESS $FAILURE );
-use Cache::CacheUtils qw( Build_Object
+use Cache::Cache qw( $EXPIRES_NEVER );
+use Cache::CacheUtils qw( Assert_Defined
+                          Build_Object
                           Object_Has_Expired
                           Static_Params
                           );
@@ -38,11 +39,8 @@ sub Clear
 {
   foreach my $namespace ( _Namespaces( ) )
   {
-    _Delete_Namespace( $namespace ) or
-      croak( "Couldn't delete namespace $namespace" );
+    _Delete_Namespace( $namespace );
   }
-
-  return $SUCCESS;
 }
 
 
@@ -50,14 +48,10 @@ sub Purge
 {
   foreach my $namespace ( _Namespaces( ) )
   {
-    my $cache = new Cache::MemoryCache( { 'namespace' => $namespace } ) or
-      croak( "Couldn't construct cache with namespace $namespace" );
+    my $cache = new Cache::MemoryCache( { 'namespace' => $namespace } );
 
-    $cache->purge( ) or
-      croak( "Couldn't purge cache with namespace $namespace" );
+    $cache->purge( );
   }
-
-  return $SUCCESS;
 }
 
 
@@ -67,8 +61,7 @@ sub Size
 
   foreach my $namespace ( _Namespaces( ) )
   {
-    my $cache = new Cache::MemoryCache( { 'namespace' => $namespace } ) or
-      croak( "Couldn't construct cache with namespace $namespace" );
+    my $cache = new Cache::MemoryCache( { 'namespace' => $namespace } );
 
     $size += $cache->size( );
   }
@@ -84,26 +77,15 @@ sub Size
 
 sub _Delete_Namespace
 {
-  my ( $namespace ) = Static_Params( @_ );
+  my ( $p_namespace ) = Static_Params( @_ );
 
-  defined $namespace or
-    croak( "Namespace required" );
-
-  my $cache_hash_ref = _Get_Cache_Hash_Ref( ) or
-    croak( "Couldn't get cache hash ref" );
-
-  delete $cache_hash_ref->{ $namespace };
-
-  return $SUCCESS;
+  delete _Get_Cache_Hash_Ref( )->{ $p_namespace };
 }
 
 
 sub _Namespaces
 {
-  my $cache_hash_ref = _Get_Cache_Hash_Ref( ) or
-    croak( "Couldn't get cache hash ref" );
-
-  return keys %{$cache_hash_ref};
+  return keys %{ _Get_Cache_Hash_Ref( ) };
 }
 
 
@@ -142,35 +124,24 @@ sub clear
 {
   my ( $self ) = @_;
 
-  my $namespace = $self->get_namespace( ) or
-    croak( "Namespace required" );
-
-  $self->_delete_namespace( $namespace ) or
-    croak( "Couldn't delete namespace $namespace" );
-
-  return $SUCCESS;
+  $self->_delete_namespace( $self->get_namespace( ) );
 }
 
 
 sub get
 {
-  my ( $self, $identifier ) = @_;
+  my ( $self, $p_identifier ) = @_;
 
-  $identifier or
-    croak( "identifier required" );
+  Assert_Defined( $p_identifier );
 
   $self->_conditionally_auto_purge_on_get( );
 
-  my $object = $self->get_object( $identifier ) or
+  my $object = $self->get_object( $p_identifier ) or
     return undef;
 
-  my $has_expired = Object_Has_Expired( $object );
-
-  if ( $has_expired eq $TRUE )
+  if ( Object_Has_Expired( $object ) )
   {
-    $self->remove( $identifier ) or
-      croak( "Couldn't remove object $identifier" );
-
+    $self->remove( $p_identifier );
     return undef;
   }
 
@@ -180,15 +151,11 @@ sub get
 
 sub get_object
 {
-  my ( $self, $identifier ) = @_;
+  my ( $self, $p_identifier ) = @_;
 
-  $identifier or
-    croak( "identifier required" );
+  Assert_Defined( $p_identifier );
 
-  my $object = $self->_restore( $identifier ) or
-    return undef;
-
-  return $object;
+  return $self->_restore( $p_identifier );
 }
 
 
@@ -200,58 +167,43 @@ sub purge
   {
     $self->get( $identifier );
   }
-
-  return $SUCCESS;
 }
 
 
 sub remove
 {
-  my ( $self, $identifier ) = @_;
+  my ( $self, $p_identifier ) = @_;
 
-  $identifier or
-    croak( "identifier required" );
+  Assert_Defined( $p_identifier );
 
-  my $cache_hash_ref = $self->_get_cache_hash_ref( ) or
-    croak( "Couldn't get cache hash ref" );
-
-  my $namespace = $self->get_namespace( ) or
-    croak( "Couldn't get namespace" );
-
-  delete $cache_hash_ref->{$namespace}->{$identifier};
-
-  return $SUCCESS;
+  delete $self->_get_cache_hash_ref( )
+    ->{ $self->get_namespace( ) }
+      ->{ $p_identifier };
 }
 
 
 sub set
 {
-  my ( $self, $identifier, $data, $expires_in ) = @_;
+  my ( $self, $p_identifier, $p_data, $p_expires_in ) = @_;
 
   $self->_conditionally_auto_purge_on_set( );
 
-  my $default_expires_in = $self->get_default_expires_in( );
-
-  my $object =
-    Build_Object( $identifier, $data, $default_expires_in, $expires_in ) or
-      croak( "Couldn't build cache object" );
-
-  $self->set_object( $identifier, $object ) or
-    croak( "Couldn't set object" );
-
-  return $SUCCESS;
+  $self->_store( $p_identifier,
+                 Build_Object( $p_identifier,
+                               $p_data,
+                               $self->get_default_expires_in( ),
+                               $p_expires_in ) );
 }
+
 
 
 sub set_object
 {
-  my ( $self, $identifier, $object ) = @_;
+  my ( $self, $p_identifier, $p_object ) = @_;
 
-  $self->_store( $identifier, $object ) or
-    croak( "Couldn't store $identifier" );
-
-  return $SUCCESS;
+  $self->_store( $p_identifier, $p_object );
 }
+
 
 
 sub size
@@ -277,105 +229,59 @@ sub size
 
 sub _new
 {
-  my ( $proto, $options_hash_ref ) = @_;
+  my ( $proto, $p_options_hash_ref ) = @_;
   my $class = ref( $proto ) || $proto;
-
-  my $self  =  $class->SUPER::_new( $options_hash_ref ) or
-    croak( "Couldn't run super constructor" );
-
-  $self->_initialize_memory_cache( ) or
-    croak( "Couldn't initialize Cache::MemoryCache" );
-
-  return $self;
-}
-
-
-sub _initialize_memory_cache
-{
-  my ( $self, $options_hash_ref ) = @_;
-
-  return $SUCCESS;
+  return $class->SUPER::_new( $p_options_hash_ref );
 }
 
 
 sub _store
 {
-  my ( $self, $identifier, $object ) = @_;
+  my ( $self, $p_identifier, $p_object ) = @_;
 
-  $identifier or
-    croak( "identifier required" );
+  Assert_Defined( $p_identifier );
+  Assert_Defined( $p_object );
 
-  my $object_dump = $self->_freeze( $object ) or
-    croak( "Couldn't freeze object" );
-
-  my $namespace = $self->get_namespace( ) or
-    croak( "Couldn't get namespace" );
-
-  my $cache_hash_ref = $self->_get_cache_hash_ref( ) or
-    croak( "Couldn't get cache hash ref" );
-
-  $cache_hash_ref->{$namespace}->{$identifier} = $object_dump;
-
-  return $SUCCESS;
+  $self->_get_cache_hash_ref( )
+    ->{ $self->get_namespace( ) }
+      ->{ $p_identifier } = $self->_freeze( $p_object );
 }
 
 
 sub _restore
 {
-  my ( $self, $identifier ) = @_;
+  my ( $self, $p_identifier ) = @_;
 
-  $identifier or
-    croak( "identifier required" );
+  Assert_Defined( $p_identifier );
 
-  my $cache_hash_ref = $self->_get_cache_hash_ref( ) or
-    croak( "Couldn't get cache hash ref" );
+  my $object_dump = $self->_get_cache_hash_ref( )
+    ->{ $self->get_namespace( ) }
+      ->{ $p_identifier } or
+        return undef;
 
-  my $namespace = $self->get_namespace( ) or
-    croak( "Couldn't get namespace" );
-
-  my $object_dump = $cache_hash_ref->{$namespace}->{$identifier} or
-    return undef;
-
-  my $object = $self->_thaw( $object_dump ) or
-    croak( "Couldn't thaw object" );
-
-  return $object;
+  return $self->_thaw( \$object_dump );
 }
 
 
 sub _delete_namespace
 {
-  my ( $self, $namespace ) = @_;
+  my ( $self, $p_namespace ) = @_;
 
-  defined( $namespace ) or
-    croak( "namespace required" );
+  Assert_Defined( $p_namespace );
 
-  _Delete_Namespace( $namespace ) or
-    croak( "Couldn't delete namespace $namespace" );
-
-  return $SUCCESS;
+  _Delete_Namespace( $p_namespace );
 }
 
 
 sub _build_object_size
 {
-  my ( $self, $identifier ) = @_;
+  my ( $self, $p_identifier ) = @_;
 
-  $identifier or
-    croak( "identifier required" );
+  Assert_Defined( $p_identifier );
 
-  my $cache_hash_ref = $self->_get_cache_hash_ref( ) or
-    croak( "Couldn't get cache hash ref" );
-
-  my $namespace = $self->get_namespace( ) or
-    croak( "Couldn't get namespace" );
-
-  my $object_dump = $cache_hash_ref->{$namespace}->{$identifier} or
-    return 0;
-
-  my $size = length $object_dump;
-
-  return $size;
+  return length $self->_get_cache_hash_ref( )
+    ->{ $self->get_namespace( ) }
+      ->{ $p_identifier };
 }
 
 
@@ -396,15 +302,14 @@ sub get_identifiers
 {
   my ( $self ) = @_;
 
-  my $cache_hash_ref = $self->_get_cache_hash_ref( ) or
-    croak( "Couldn't get cache hash ref" );
-
-  my $namespace = $self->get_namespace( ) or
-    croak( "Couldn't get namespace" );
-
-  return ( ) unless defined $cache_hash_ref->{ $namespace };
-
-  return keys %{ $cache_hash_ref->{ $namespace} };
+  if ( defined $self->_get_cache_hash_ref( )->{ $self->get_namespace( ) } )
+  {
+    return keys %{ $self->_get_cache_hash_ref( )->{ $self->get_namespace() } };
+  }
+  else
+  {
+    return ( );
+  }
 }
 
 

@@ -1,5 +1,10 @@
 Revision history for Cache
 
+1.00 in progress
+ - major refactoring of code
+ - replaced non-standard usage of SUCCESS and FAILURE with Error.pm
+ - replaced non-standard usage of TRUE and FALSE with 1 and 0 
+
 0.09 2001-09-10-12-10
  - released version 0.09
  - applied Axel Beckert patch to fix the expiration units

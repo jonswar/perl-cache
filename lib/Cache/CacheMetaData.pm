@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheMetaData.pm,v 1.4 2001/04/08 22:48:37 dclinton Exp $
+# $Id: CacheMetaData.pm,v 1.5 2001/11/05 13:34:45 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -71,14 +71,11 @@ sub remove
 
 sub build_removal_list
 {
-  my ( $self, $removal_list_ref ) = @_;
-
-  defined $removal_list_ref or
-    throw Error( "removal_list_ref required" );
+  my ( $self ) = @_;
 
   my $meta_data_hash_ref = $self->_get_meta_data_hash_ref( );
 
-  @$removal_list_ref =
+  return
     sort
     {
       my $a_expires_at  = $meta_data_hash_ref->{ $a }->[ $_EXPIRES_AT_OFFSET ];

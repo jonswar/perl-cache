@@ -1,5 +1,5 @@
 #####################################################################
-# $Id: Cache.pm,v 1.18 2001/09/05 14:40:47 dclinton Exp $
+# $Id: Cache.pm,v 1.19 2001/10/22 13:33:56 jswartz Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -17,11 +17,7 @@ use vars qw( @ISA
              @EXPORT_OK
              $VERSION
              $EXPIRES_NOW
-             $EXPIRES_NEVER
-             $TRUE
-             $FALSE
-             $SUCCESS
-             $FAILURE );
+             $EXPIRES_NEVER );
 use Exporter;
 
 
@@ -30,11 +26,7 @@ use Exporter;
 
 @EXPORT_OK = qw( $VERSION
                  $EXPIRES_NOW
-                 $EXPIRES_NEVER
-                 $TRUE
-                 $FALSE
-                 $SUCCESS
-                 $FAILURE );
+                 $EXPIRES_NEVER );
 
 
 use vars @EXPORT_OK;
@@ -43,12 +35,6 @@ use vars @EXPORT_OK;
 $VERSION = 0.09;
 $EXPIRES_NOW = 'now';
 $EXPIRES_NEVER = 'never';
-$TRUE = 1;
-$FALSE = 0;
-$SUCCESS = 1;
-$FAILURE = 0;
-
-
 
 ##
 # Public class methods
@@ -366,7 +352,7 @@ Cache::SharedMemoryCache, and Cache::SizeAwareFileCache
 
 Original author: DeWitt Clinton <dewitt@unto.net>
 
-Last author:     $Author: dclinton $
+Last author:     $Author: jswartz $
 
 Copyright (C) 2001 DeWitt Clinton
 

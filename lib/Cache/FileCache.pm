@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: FileCache.pm,v 1.18 2001/09/05 14:39:27 dclinton Exp $
+# $Id: FileCache.pm,v 1.19 2001/11/05 13:34:45 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -15,8 +15,9 @@ package Cache::FileCache;
 use strict;
 use vars qw( @ISA );
 use Cache::BaseCache;
-use Cache::Cache qw( $EXPIRES_NEVER $SUCCESS $FAILURE $TRUE $FALSE );
-use Cache::CacheUtils qw ( Build_Object
+use Cache::Cache;
+use Cache::CacheUtils qw ( Assert_Defined
+                           Build_Object
                            Build_Path
                            Build_Unique_Key
                            Create_Directory
@@ -34,8 +35,7 @@ use Cache::CacheUtils qw ( Build_Object
                            Update_Access_Time
                            Write_File );
 use Cache::Object;
-use Carp;
-
+use Error;
 
 @ISA = qw ( Cache::BaseCache );
 
@@ -67,15 +67,9 @@ my $DEFAULT_DIRECTORY_UMASK = 000;
 
 sub Clear
 {
-  my ( $optional_cache_root ) = Static_Params( @_ );
+  my ( $p_optional_cache_root ) = Static_Params( @_ );
 
-  my $cache_root = _Build_Cache_Root( $optional_cache_root ) or
-    croak( "Couldn't build cache root" );
-
-  Recursively_Remove_Directory( $cache_root ) or
-    croak( "Couldn't remove $cache_root" );
-
-  return $SUCCESS;
+  Recursively_Remove_Directory( _Build_Cache_Root( $p_optional_cache_root ) );
 }
 
 
@@ -85,37 +79,24 @@ sub Clear
 
 sub Purge
 {
-  my ( $optional_cache_root ) = Static_Params( @_ );
+  my ( $p_optional_cache_root ) = Static_Params( @_ );
 
-  my @namespaces;
-
-  _List_Namespaces( \@namespaces, $optional_cache_root ) or
-    croak( "Couldn't list namespaces" );
-
-  foreach my $namespace ( @namespaces )
+  foreach my $namespace ( _List_Namespaces( $p_optional_cache_root ) )
   {
-    my $cache = new Cache::FileCache( { 'namespace' => $namespace } ) or
-      croak( "Couldn't construct cache with namespace $namespace" );
+    my $cache = new Cache::FileCache( { 'namespace' => $namespace } );
 
-    $cache->purge( ) or
-      croak( "Couldn't purge cache with namespace $namespace" );
+    $cache->purge( );
   }
-
-  return $SUCCESS;
 }
 
 
 sub Size
 {
-  my ( $optional_cache_root ) = Static_Params( @_ );
+  my ( $p_optional_cache_root ) = Static_Params( @_ );
 
-  my $cache_root = _Build_Cache_Root( $optional_cache_root ) or
-    croak( "Couldn't build cache root" );
-
-  my $size = Recursive_Directory_Size( $cache_root );
-
-  return $size;
+  return Recursive_Directory_Size( _Build_Cache_Root($p_optional_cache_root) );
 }
+
 
 
 ##
@@ -125,38 +106,24 @@ sub Size
 
 sub _Build_Cache_Root
 {
-  my ( $optional_cache_root ) = Static_Params( @_ );
+  my ( $p_optional_cache_root ) = Static_Params( @_ );
 
-  my $cache_root;
-
-  if ( defined $optional_cache_root )
-  {
-    $cache_root = $optional_cache_root;
-  }
-  else
-  {
-    my $tmpdir = Get_Temp_Directory( ) or
-      croak( "Couldn't get temp directory" );
-
-    $cache_root = Build_Path( $tmpdir, $DEFAULT_CACHE_ROOT ) or
-      croak( "Couldn't build cache root" );
-  }
-
-  return $cache_root;
+  return defined $p_optional_cache_root ?
+    $p_optional_cache_root :
+      Build_Path( Get_Temp_Directory( ), $DEFAULT_CACHE_ROOT );
 }
 
 
 sub _List_Namespaces
 {
-  my ( $namespaces_ref, $optional_cache_root ) = Static_Params( @_ );
+  my ( $p_optional_cache_root ) = Static_Params( @_ );
 
-  my $cache_root = _Build_Cache_Root( $optional_cache_root ) or
-    croak( "Couldn't build cache root" );
+  my @namespaces;
 
-  List_Subdirectories( $cache_root, $namespaces_ref ) or
-    croak( "Couldn't list subdirectories of $cache_root" );
+  List_Subdirectories( _Build_Cache_Root( $p_optional_cache_root ), 
+                       \@namespaces );
 
-  return $SUCCESS;
+  return @namespaces;
 }
 
 
@@ -184,41 +151,28 @@ sub clear
 {
   my ( $self ) = @_;
 
-  my $namespace_path = $self->_build_namespace_path( ) or
-    croak( "Couldn't build namespace path" );
-
-  Recursively_Remove_Directory( $namespace_path ) or
-    croak( "Couldn't remove $namespace_path" );
-
-  return $SUCCESS;
+  Recursively_Remove_Directory( $self->_build_namespace_path( ) );
 }
 
 
 sub get
 {
-  my ( $self, $identifier ) = @_;
+  my ( $self, $p_identifier ) = @_;
 
-  $identifier or
-    croak( "identifier required" );
+  Assert_Defined( $p_identifier );
 
   $self->_conditionally_auto_purge_on_get( );
 
-
-  my $object = $self->get_object( $identifier ) or
+  my $object = $self->get_object( $p_identifier ) or
     return undef;
 
-  my $has_expired = Object_Has_Expired( $object );
-
-  if ( $has_expired eq $TRUE )
+  if ( Object_Has_Expired( $object ) )
   {
-    $self->remove( $identifier ) or
-      croak( "Couldn't remove object $identifier" );
-
+    $self->remove( $p_identifier );
     return undef;
   }
 
-  $self->_update_access_time( $identifier ) or
-    croak( "Couldn't update access time for $identifier" );
+  $self->_update_access_time( $p_identifier );
 
   return $object->get_data( );
 }
@@ -226,18 +180,11 @@ sub get
 
 sub get_object
 {
-  my ( $self, $identifier ) = @_;
+  my ( $self, $p_identifier ) = @_;
 
-  $identifier or
-    croak( "identifier required" );
+  Assert_Defined( $p_identifier );
 
-  my $unique_key = Build_Unique_Key( $identifier ) or
-    croak( "Couldn't build unique key" );
-
-  my $object = $self->_restore( $unique_key ) or
-    return undef;
-
-  return $object;
+  return $self->_restore( Build_Unique_Key( $p_identifier ) );
 }
 
 
@@ -245,84 +192,48 @@ sub purge
 {
   my ( $self ) = @_;
 
-  my @unique_keys;
-
-  $self->_list_unique_keys( \@unique_keys ) or
-    croak( "Couldn't list unique keys" );
-
-  foreach my $unique_key ( @unique_keys )
+  foreach my $unique_key ( $self->_list_unique_keys( ) )
   {
     my $object = $self->_restore( $unique_key ) or
       next;
 
-    my $has_expired = Object_Has_Expired( $object );
-
-    if ( $has_expired eq $TRUE )
+    if ( Object_Has_Expired( $object ) )
     {
-      my $identifier = $object->get_identifier( );
-
-      $self->remove( $identifier ) or
-        croak( "Couldn't remove object $identifier" );
+      $self->remove( $object->get_identifier( ) );
     }
   }
-
-  return $SUCCESS;
 }
 
 
 sub remove
 {
-  my ( $self, $identifier ) = @_;
+  my ( $self, $p_identifier ) = @_;
 
-  $identifier or
-    croak( "identifier required" );
+  Assert_Defined( $p_identifier );
 
-  my $unique_key = Build_Unique_Key( $identifier ) or
-    croak( "Couldn't build unique key" );
-
-  my $object_path = $self->_build_object_path( $unique_key ) or
-    croak( "Couldn't build object path for $unique_key" );
-
-  Remove_File( $object_path ) or
-    croak( "Couldn't remove file $object_path" );
-
-  return $SUCCESS;
+  Remove_File( $self->_build_object_path( Build_Unique_Key($p_identifier) ) );
 }
 
 
 sub set
 {
-  my ( $self, $identifier, $data, $expires_in ) = @_;
+  my ( $self, $p_identifier, $p_data, $p_expires_in ) = @_;
 
   $self->_conditionally_auto_purge_on_set( );
 
-  my $default_expires_in = $self->get_default_expires_in( );
-
-  my $object =
-    Build_Object( $identifier, $data, $default_expires_in, $expires_in ) or
-      croak( "Couldn't build cache object" );
-
-  my $unique_key = Build_Unique_Key( $identifier ) or
-    croak( "Couldn't build unique key" );
-
-  $self->_store( $unique_key, $object ) or
-    croak( "Couldn't store $identifier" );
-
-  return $SUCCESS;
+  $self->_store( Build_Unique_Key( $p_identifier ),
+                 Build_Object( $p_identifier,
+                               $p_data,
+                               $self->get_default_expires_in( ),
+                               $p_expires_in ) );
 }
 
 
 sub set_object
 {
-  my ( $self, $identifier, $object ) = @_;
+  my ( $self, $p_identifier, $p_object ) = @_;
 
-  my $unique_key = Build_Unique_Key( $identifier ) or
-    croak( "Couldn't build unique key" );
-
-  $self->_store( $unique_key, $object ) or
-    croak( "Couldn't store $identifier" );
-
-  return $SUCCESS;
+  $self->_store( Build_Unique_Key( $p_identifier ), $p_object );
 }
 
 
@@ -330,12 +241,7 @@ sub size
 {
   my ( $self ) = @_;
 
-  my $namespace_path = $self->_build_namespace_path( ) or
-    croak( "Couldn't build namespace path" );
-
-  my $size = Recursive_Directory_Size( $namespace_path );
-
-  return $size;
+  return Recursive_Directory_Size( $self->_build_namespace_path( ) );
 }
 
 
@@ -344,17 +250,14 @@ sub size
 ##
 
 
-
 sub _new
 {
-  my ( $proto, $options_hash_ref ) = @_;
+  my ( $proto, $p_options_hash_ref ) = @_;
   my $class = ref( $proto ) || $proto;
 
-  my $self  =  $class->SUPER::_new( $options_hash_ref ) or
-    croak( "Couldn't run super constructor" );
+  my $self  =  $class->SUPER::_new( $p_options_hash_ref );
 
-  $self->_initialize_file_cache( ) or
-    croak( "Couldn't initialize Cache::FileCache" );
+  $self->_initialize_file_cache( );
 
   return $self;
 }
@@ -364,16 +267,9 @@ sub _initialize_file_cache
 {
   my ( $self ) = @_;
 
-  $self->_initialize_cache_depth( ) or
-    croak( "Couldn't initialize cache depth" );
-
-  $self->_initialize_cache_root( ) or
-    croak( "Couldn't initialize cache root" );
-
-  $self->_initialize_directory_umask( ) or
-    croak( "Couldn't initialize directory umask" );
-
-  return $SUCCESS;
+  $self->_initialize_cache_depth( );
+  $self->_initialize_cache_root( );
+  $self->_initialize_directory_umask( );
 }
 
 
@@ -381,12 +277,8 @@ sub _initialize_cache_depth
 {
   my ( $self ) = @_;
 
-  my $cache_depth = 
-    $self->_read_option( 'cache_depth', $DEFAULT_CACHE_DEPTH );
-
-  $self->set_cache_depth( $cache_depth );
-
-  return $SUCCESS;
+  $self->set_cache_depth( $self->_read_option( 'cache_depth',
+                                               $DEFAULT_CACHE_DEPTH ) );
 }
 
 
@@ -394,13 +286,7 @@ sub _initialize_cache_root
 {
   my ( $self ) = @_;
 
-  my $optional_cache_root = $self->_read_option( 'cache_root' );
-
-  my $cache_root = _Build_Cache_Root( $optional_cache_root );
-
-  $self->set_cache_root( $cache_root );
-
-  return $SUCCESS;
+  $self->set_cache_root(_Build_Cache_Root($self->_read_option('cache_root')));
 }
 
 
@@ -408,96 +294,66 @@ sub _initialize_directory_umask
 {
   my ( $self ) = @_;
 
-  my $directory_umask = 
-    $self->_read_option( 'directory_umask', $DEFAULT_DIRECTORY_UMASK );
+  $self->set_directory_umask( $self->_read_option( 'directory_umask',
+                                                   $DEFAULT_DIRECTORY_UMASK ));
 
-  $self->set_directory_umask( $directory_umask );
-
-  return $SUCCESS;
 }
 
 
 sub _store
 {
-  my ( $self, $unique_key, $object ) = @_;
+  my ( $self, $p_unique_key, $p_object ) = @_;
 
-  $unique_key or
-    croak( "unique_key required" );
+  Assert_Defined( $p_unique_key );
 
-  my $object_path = $self->_build_object_path( $unique_key ) or
-    croak( "Couldn't build object path" );
+  Make_Path( $self->_build_object_path( $p_unique_key ),
+             $self->get_directory_umask( ) );
 
-  my $object_dump = $self->_freeze( $object ) or
-    croak( "Couldn't freeze object" );
-
-  my $directory_umask = $self->get_directory_umask( );
-
-  defined $directory_umask or
-    croak( "Couldn't get directory umask" );
-
-  Make_Path( $object_path, $directory_umask ) or
-    croak( "Couldn't make path: $object_path" );
-
-  Write_File( $object_path, \$object_dump ) or
-    croak( "Couldn't write file $object_path" );
-
-  return $SUCCESS;
+  Write_File( $self->_build_object_path( $p_unique_key ),
+              \$self->_freeze( $p_object ) );
 }
 
 
 sub _restore
 {
-  my ( $self, $unique_key ) = @_;
+  my ( $self, $p_unique_key ) = @_;
 
-  $unique_key or
-    croak( "unique_key required" );
+  Assert_Defined( $p_unique_key );
 
-  my $object_path = $self->_build_object_path( $unique_key ) or
-    croak( "Couldn't build object path" );
+  my $object_path = $self->_build_object_path( $p_unique_key );
 
   my $object_dump_ref = Read_File_Without_Time_Modification( $object_path ) or
     return undef;
 
-  my $object = $self->_thaw( $$object_dump_ref ) or
-    croak( "Couldn't thaw object dump" );
+  my $object = $self->_thaw( $object_dump_ref );
 
-  my $accessed_at = ( stat( $object_path ) )[8] or
-    croak( "Couldn't get accessed_at" );
-
-  $object->set_accessed_at( $accessed_at );
+  $object->set_accessed_at( $self->_get_atime( $object_path ) );
 
   return $object;
 }
 
 
+sub _get_atime
+{
+  my ( $self, $p_path ) = @_;
+
+  return ( stat( $p_path ) )[8];
+}
+
+
 sub _build_object_path
 {
-  my ( $self, $unique_key ) = @_;
+  my ( $self, $p_unique_key ) = @_;
 
-  ( $unique_key !~ m|[0-9][a-f][A-F]| ) or
-    croak( "unique_key '$unique_key' contains illegal characters'" );
+  Assert_Defined( $p_unique_key );
 
-  $unique_key or
-    croak( "unique_key required" );
+  ( $p_unique_key !~ m|[0-9][a-f][A-F]| ) or
+    throw Error( "unique_key '$p_unique_key' contains illegal characters'" );
 
-  my $cache_depth = $self->get_cache_depth( );
-
-  my @prefix;
-
-  Split_Word( $unique_key, $cache_depth, \@prefix ) or
-    croak( "Couldn't split word $unique_key" );
-
-  my $namespace = $self->get_namespace( ) or
-    croak( "Couldn't get namespace" );
-
-  my $cache_root = $self->get_cache_root( ) or
-    croak( "Couldn't get cache root" );
-
-  my $object_path = 
-    Build_Path( $cache_root, $namespace, @prefix, $unique_key ) or
-      croak( "Couldn't build object_path" );
-
-  return $object_path;
+  return Build_Path( $self->get_cache_root( ),
+                     $self->get_namespace( ),
+                     Split_Word( $p_unique_key, $self->get_cache_depth( ) ),
+                     $p_unique_key );
 }
 
 
@@ -505,53 +361,29 @@ sub _build_namespace_path
 {
   my ( $self ) = @_;
 
-  my $cache_root = $self->get_cache_root( ) or
-    croak( "Couldn't get cache root" );
-
-  my $namespace = $self->get_namespace( ) or
-    croak( "Couldn't get namespace" );
-
-  my $namespace_path = 
-    Build_Path( $cache_root, $namespace ) or
-      croak( "Couldn't build namespace path" );
-
-  return $namespace_path;
+  return Build_Path( $self->get_cache_root( ), $self->get_namespace( ) );
 }
 
 
 sub _list_unique_keys
 {
-  my ( $self, $unique_keys_ref ) = @_;
-
-  my $namespace_path = $self->_build_namespace_path( ) or
-    croak( "Couldn't build namespace path" );
+  my ( $self ) = @_;
 
   my @unique_keys;
 
-  Recursively_List_Files( $namespace_path, $unique_keys_ref ) or
-    croak( "Couldn't recursively list files at $namespace_path" );
+  Recursively_List_Files( $self->_build_namespace_path( ), \@unique_keys );
 
-  return $SUCCESS;
+  return @unique_keys;
 }
 
 
 sub _update_access_time
 {
-  my ( $self, $identifier ) = @_;
+  my ( $self, $p_key ) = @_;
 
-  defined $identifier or
-    croak( "identifier required" );
+  Assert_Defined( $p_key );
 
-  my $unique_key = Build_Unique_Key( $identifier ) or
-    croak( "Couldn't build unique key" );
-
-  my $object_path = $self->_build_object_path( $unique_key ) or
-    croak( "Couldn't build object path" );
-
-  Update_Access_Time( $object_path ) or
-    croak( "Couldn't update access time for $object_path" );
-
-  return $SUCCESS;
+  Update_Access_Time( $self->_build_object_path( Build_Unique_Key($p_key) ) );
 }
 
 
@@ -611,22 +443,14 @@ sub get_identifiers
 {
   my ( $self ) = @_;
 
-  my @unique_keys;
-
-  $self->_list_unique_keys( \@unique_keys ) or
-    croak( "Couldn't list unique keys" );
-
   my @identifiers;
 
-  foreach my $unique_key ( @unique_keys )
+  foreach my $unique_key ( $self->_list_unique_keys( ) )
   {
     my $object = $self->_restore( $unique_key ) or
       next;
 
-    my $identifier = $object->get_identifier( ) or
-      croak( "Couldn't get identifier" );
-
-    push( @identifiers, $identifier );
+    push( @identifiers, $object->get_identifier( ) );
   }
 
   return @identifiers;

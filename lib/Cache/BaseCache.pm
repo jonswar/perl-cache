@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: BaseCache.pm,v 1.8 2001/09/05 14:39:27 dclinton Exp $
+# $Id: BaseCache.pm,v 1.9 2001/11/05 13:34:45 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -14,8 +14,9 @@ package Cache::BaseCache;
 
 use strict;
 use vars qw( @ISA );
-use Cache::Cache qw( $EXPIRES_NEVER $TRUE $FALSE);
-use Cache::CacheUtils qw( Build_Object
+use Cache::Cache qw( $EXPIRES_NEVER );
+use Cache::CacheUtils qw( Assert_Defined
+                          Build_Object
                           Freeze_Object
                           Object_Has_Expired
                           Thaw_Object
@@ -28,8 +29,8 @@ use Error;
 
 my $DEFAULT_EXPIRES_IN = $EXPIRES_NEVER;
 my $DEFAULT_NAMESPACE = "Default";
-my $DEFAULT_AUTO_PURGE_ON_SET = $FALSE;
-my $DEFAULT_AUTO_PURGE_ON_GET = $FALSE;
+my $DEFAULT_AUTO_PURGE_ON_SET = 0;
+my $DEFAULT_AUTO_PURGE_ON_GET = 0;
 
 
 # namespace that stores the keys used for the auto purge functionality
@@ -181,8 +182,7 @@ sub _freeze
 {
   my ( $self, $p_object ) = @_;
 
-  defined $p_object or
-    throw Error( "object required" );
+  Assert_Defined( $p_object );
 
   $p_object->set_size( undef );
 
@@ -196,16 +196,17 @@ sub _freeze
 
 sub _thaw
 {
-  my ( $self, $p_object_dump ) = @_;
+  my ( $self, $p_object_dump_ref ) = @_;
 
-  defined $p_object_dump or
-    throw Error( "object_dump required" );
+  Assert_Defined( $p_object_dump_ref );
 
   my $object;
 
-  Thaw_Object( \$p_object_dump, \$object );
+  Thaw_Object( $p_object_dump_ref, \$object );
 
-  $object->set_size( length $p_object_dump );
+  Assert_Defined( $object );
+
+  $object->set_size( length $$p_object_dump_ref );
 
   return $object;
 }

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareFileCache.pm,v 1.18 2001/09/05 14:39:27 dclinton Exp $
+# $Id: SizeAwareFileCache.pm,v 1.19 2001/11/05 13:34:45 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -14,9 +14,9 @@ package Cache::SizeAwareFileCache;
 
 use strict;
 use vars qw( @ISA );
-use Cache::Cache qw( $EXPIRES_NEVER $SUCCESS $FAILURE $TRUE $FALSE );
 use Cache::CacheMetaData;
-use Cache::CacheUtils qw ( Build_Object
+use Cache::CacheUtils qw ( Assert_Defined
+                           Build_Object
                            Build_Unique_Key
                            Limit_Size
                            Make_Path
@@ -27,7 +27,6 @@ use Cache::CacheUtils qw ( Build_Object
                            Write_File );
 use Cache::FileCache;
 use Cache::SizeAwareCache qw( $NO_MAX_SIZE );
-use Carp;
 
 
 @ISA = qw ( Cache::FileCache Cache::SizeAwareCache );
@@ -93,48 +92,25 @@ sub new
 
 sub set
 {
-  my ( $self, $identifier, $data, $expires_in ) = @_;
+  my ( $self, $p_identifier, $p_data, $p_expires_in ) = @_;
 
-  $self->_conditionally_auto_purge_on_set( );
+  $self->SUPER::set( $p_identifier, $p_data, $p_expires_in );
 
-  my $default_expires_in = $self->get_default_expires_in( );
-
-  my $object =
-    Build_Object( $identifier, $data, $default_expires_in, $expires_in ) or
-      croak( "Couldn't build cache object" );
-
-  my $unique_key = Build_Unique_Key( $identifier ) or
-    croak( "Couldn't build unique key" );
-
-  $self->_store( $unique_key, $object ) or
-    croak( "Couldn't store $identifier" );
-
-  my $max_size = $self->get_max_size();
-
-  if ( $max_size != $NO_MAX_SIZE )
+  if ( $self->get_max_size( ) != $NO_MAX_SIZE )
   {
-    $self->limit_size( $max_size );
+    $self->limit_size( $self->get_max_size( ) );
   }
-
-  return $SUCCESS;
 }
 
 
 
 sub limit_size
 {
-  my ( $self, $new_size ) = @_;
+  my ( $self, $p_new_size ) = @_;
 
-  defined $new_size or
-    croak( "new_size required" );
+  Assert_Defined( $p_new_size );
 
-  my $cache_meta_data = $self->_build_cache_meta_data( ) or
-    croak( "Couldn't build cache meta data" );
-
-  Limit_Size( $self, $cache_meta_data, $new_size ) or
-    croak( "Couldn't limit size to $new_size" );
-
-  return $SUCCESS;
+  Limit_Size( $self, $self->_build_cache_meta_data( ), $p_new_size );
 }
 
 
@@ -145,14 +121,12 @@ sub limit_size
 
 sub _new
 {
-  my ( $proto, $options_hash_ref ) = @_;
+  my ( $proto, $p_options_hash_ref ) = @_;
   my $class = ref( $proto ) || $proto;
 
-  my $self  =  $class->SUPER::_new( $options_hash_ref ) or
-    croak( "Couldn't run super constructor" );
+  my $self  =  $class->SUPER::_new( $p_options_hash_ref );
 
-  $self->_initialize_size_aware_file_cache( ) or
-    croak( "Couldn't initialize Cache::SizeAwareFileCache" );
+  $self->_initialize_size_aware_file_cache( );
 
   return $self;
 }
@@ -160,12 +134,9 @@ sub _new
 
 sub _initialize_size_aware_file_cache
 {
-  my ( $self, $options_hash_ref ) = @_;
+  my ( $self ) = @_;
 
-  $self->_initialize_max_size( ) or
-    croak( "Couldn't initialize max size" );
-
-  return $SUCCESS;
+  $self->_initialize_max_size( );
 }
 
 
@@ -173,11 +144,7 @@ sub _initialize_max_size
 {
   my ( $self ) = @_;
 
-  my $max_size = $self->_read_option( 'max_size', $DEFAULT_MAX_SIZE );
-
-  $self->set_max_size( $max_size );
-
-  return $SUCCESS;
+  $self->set_max_size( $self->_read_option( 'max_size', $DEFAULT_MAX_SIZE ) );
 }
 
 
@@ -185,28 +152,18 @@ sub _build_cache_meta_data
 {
   my ( $self ) = @_;
 
-  my $namespace_path = $self->_build_namespace_path( ) or
-    croak( "Couldn't build namespace path" );
-
-  defined( $namespace_path ) or
-    croak( "namespace_path required" );
-
-  my $cache_meta_data = new Cache::CacheMetaData( ) or
-    croak( "Couldn't instantiate new CacheMetaData" );
+  my $cache_meta_data = new Cache::CacheMetaData( );
 
   my @filenames;
 
-  Recursively_List_Files( $namespace_path, \@filenames );
+  Recursively_List_Files( $self->_build_namespace_path( ), \@filenames );
 
   foreach my $filename ( @filenames )
   {
     my $object = $self->_restore( $filename ) or
       next;
 
-    my $size = $object->get_size( );
-
-    $cache_meta_data->insert( $object ) or
-      croak( "Couldn't insert meta data" );
+    $cache_meta_data->insert( $object );
   }
 
   return $cache_meta_data;
