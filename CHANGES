@@ -1,6 +1,7 @@
 Revision history for Cache
 
-0.06 in progress
+0.06 2000-03-23-08-36
+ - release version 0.06
  - added the get_identifiers method to the Cache interface, implemented
    the method for all classes, added a new test, and updated the test 
    scripts
