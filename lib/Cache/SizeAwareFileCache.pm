@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareFileCache.pm,v 1.13 2001/03/22 21:41:35 dclinton Exp $
+# $Id: SizeAwareFileCache.pm,v 1.14 2001/03/23 00:15:06 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -259,37 +259,53 @@ the documentation for Cache::FileCache for more information.
 
 See Cache::Cache
 
-=item C<$optional_cache_root>
+=over 4
+
+=item $optional_cache_root
 
 If specified, this indicates the root on the filesystem of the cache
 to be cleared.
+
+=back
 
 =item B<Purge( $optional_cache_root )>
 
 See Cache::Cache
 
-=item C<$optional_cache_root>
+=over 4
+
+=item $optional_cache_root
 
 If specified, this indicates the root on the filesystem of the cache
 to be purged.
+
+=back
 
 =item B<Size( $optional_cache_root )>
 
 See Cache::Cache
 
-=item C<$optional_cache_root>
+=over 4
+
+=item $optional_cache_root
 
 If specified, this indicates the root on the filesystem of the cache
 to be sized.
+
+=back
 
 =item B<new( $options_hash_ref )>
 
 Constructs a new SizeAwareFileCache
 
-=item C<$options_hash_ref>
+=over 4
+
+=item $options_hash_ref
 
 A reference to a hash containing configuration options for the cache.
 See the section OPTIONS below.
+
+=back
 
 =item B<clear(  )>
 

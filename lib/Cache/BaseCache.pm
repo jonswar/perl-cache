@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: BaseCache.pm,v 1.3 2001/03/06 15:12:54 dclinton Exp $
+# $Id: BaseCache.pm,v 1.4 2001/03/22 21:41:35 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -16,7 +16,7 @@ use strict;
 use vars qw( @ISA );
 use Cache::Cache qw( $SUCCESS $FAILURE $EXPIRES_NEVER );
 use Cache::CacheUtils qw( Freeze_Object
-                          Thaw_Object 
+                          Thaw_Object
                         );
 use Carp;
 

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: Cache.pm,v 1.7 2001/03/10 18:30:42 dclinton Exp $
+# $Id: SizeAwareCache.pm,v 1.1 2001/03/13 01:26:38 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -16,7 +16,6 @@ use strict;
 use Cache::Cache;
 use vars qw( @ISA
              @EXPORT_OK
-             $VERSION
              $EXPIRES_NOW
              $EXPIRES_NEVER
              $TRUE
@@ -29,8 +28,7 @@ use Exporter;
 
 @ISA = qw( Cache::Cache Exporter );
 
-@EXPORT_OK = qw( $VERSION
-                 $EXPIRES_NOW
+@EXPORT_OK = qw( $EXPIRES_NOW
                  $EXPIRES_NEVER
                  $TRUE
                  $FALSE
@@ -42,7 +40,6 @@ use Exporter;
 use vars @EXPORT_OK;
 
 
-$VERSION = $Cache::Cache::VERSION;
 $EXPIRES_NOW = $Cache::Cache::EXPIRES_NOW;
 $EXPIRES_NEVER = $Cache::Cache::EXPIRES_NEVER;
 $TRUE = $Cache::Cache::TRUE;
@@ -121,7 +118,9 @@ Please see Cache::Cache for standard methods
 Attempt to resize the cache such that the total disk usage is under
 the 'new_size' parameter.
 
-=item C<$new_size>
+=over 4
+
+=item $new_size
 
 The size (in bytes) that the cache should be limited to.  This is
 only a one time adjustment.  To maintain the cache size, consider using
@@ -130,6 +129,8 @@ the 'max_size' option, although it is considered very expensive.
 =item Returns
 
 Either $SUCCESS or $FAILURE
+
+=back
 
 =back
 

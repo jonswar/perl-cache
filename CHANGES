@@ -1,5 +1,10 @@
 Revision history for Cache
 
+0.08 in progress
+ - updated the perldoc formatting to look better in HTML
+ - removed the $VERSION from SizeAwareCache
+ - started version 0.08
+
 0.07 2000-03-27-08-55
  - released version 0.07
  - prepared for initial CPAN release

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SharedMemoryCache.pm,v 1.10 2001/03/23 00:15:06 dclinton Exp $
+# $Id: SharedMemoryCache.pm,v 1.11 2001/03/25 18:13:16 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -336,10 +336,14 @@ See Cache::Cache
 
 Constructs a new SharedMemoryCache.
 
-=item C<$options_hash_ref>
+=over 4
+
+=item $options_hash_ref
 
 A reference to a hash containing configuration options for the cache.
 See the section OPTIONS below.
+
+=back
 
 =item B<clear(  )>
 

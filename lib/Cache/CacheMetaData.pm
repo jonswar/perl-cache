@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheMetaData.pm,v 1.2 2001/03/22 21:41:35 dclinton Exp $
+# $Id: CacheMetaData.pm,v 1.3 2001/03/23 00:15:06 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -251,17 +251,25 @@ Construct a new Cache::CacheMetaData object
 
 Inform the CacheMetaData about an object in the cache.
 
-=item C<$object>
+=over 4
+
+=item $object
 
 The object to be examined for its meta data
+
+=back
 
 =item B<remove( $identifier )>
 
 Inform the CacheMetaData that an object is no longer in the cache
 
-=item C<identifier>
+=over 4
+
+=item $identifier
 
 The key under which the object was stored.
+
+=back
 
 =item B<build_removal_list( $removal_list_ref )>
 
@@ -279,21 +287,29 @@ NOTE: This could be improved further by taking the size into account
 on accessed_at ties.  However, this type of tie is unlikely in normal
 usage.
 
-=item C<removal_list_ref>
+=over 4
+
+=item $removal_list_ref
 
 A reference to the list that should hold the result
+
+=back
 
 =item B<build_object_size( $identifier, $object_size_ref )>
 
 Determine the size of an object that the CacheMetaData knows about
 
-=item C<identifier>
+=over 4
+
+=item $identifier
 
 The key under which the object was stored.
 
-=item C<object_size_ref>
+=item $object_size_ref
 
 A reference to the scalar that should hold the result
+
+=back
 
 =back
 
