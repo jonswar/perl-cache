@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SharedMemoryCache.pm,v 1.16 2001/11/07 13:10:56 dclinton Exp $
+# $Id: SharedMemoryCache.pm,v 1.17 2001/11/08 23:01:23 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -56,7 +56,7 @@ sub Size
 
   foreach my $namespace ( _Namespaces( ) )
   {
-    my $cache = new Cache::MemoryCache( { 'namespace' => $namespace } );
+    my $cache = new Cache::SharedMemoryCache( { 'namespace' => $namespace } );
 
     $size += $cache->size( );
   }

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheTester.pm,v 1.10 2001/11/07 13:10:56 dclinton Exp $
+# $Id: CacheTester.pm,v 1.11 2001/11/07 16:35:35 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -174,7 +174,7 @@ sub _test_four
   ( $fetched_value eq $value ) ?
     $self->ok( ) : $self->not_ok( '$fetched_value eq $value' );
 
-  sleep( $EXPIRES_DELAY );
+  sleep( $EXPIRES_DELAY + 1 );
 
   my $fetched_expired_value = $cache->get( $key );
 
@@ -300,7 +300,7 @@ sub _test_eight
   ( $pre_purge_size > $empty_size ) ?
     $self->ok( ) : $self->not_ok( '$pre_purge_size > $empty_size' );
 
-  sleep( $EXPIRES_DELAY );
+  sleep( $EXPIRES_DELAY + 1 );
 
   $cache->purge( );
 
@@ -391,7 +391,7 @@ sub _test_eleven
   ( $pre_purge_size > $empty_size ) ?
     $self->ok( ) : $self->not_ok( '$pre_purge_size > $empty_size' );
 
-  sleep( $EXPIRES_DELAY );
+  sleep( $EXPIRES_DELAY + 1 );
 
   $cache->Purge( );
 
@@ -441,7 +441,7 @@ sub _test_twelve
   ( $pre_purge_size > $empty_size ) ?
     $self->ok( ) : $self->not_ok( '$pre_purge_size > $empty_size' );
 
-  sleep( $EXPIRES_DELAY );
+  sleep( $EXPIRES_DELAY + 1 );
 
   my $purge_method = "$class\:\:Purge";
 
@@ -476,7 +476,7 @@ sub _test_thirteen
   ( $fetched_value eq $value ) ?
     $self->ok( ) : $self->not_ok( '$fetched_value eq $value' );
 
-  sleep( $EXPIRES_DELAY );
+  sleep( $EXPIRES_DELAY + 1 );
 
   my $fetched_expired_value = $cache->get( $key );
 

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareSharedMemoryCache.pm,v 1.15 2001/11/06 23:44:08 dclinton Exp $
+# $Id: SizeAwareSharedMemoryCache.pm,v 1.16 2001/11/07 13:10:56 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -17,10 +17,7 @@ use vars qw( @ISA @EXPORT_OK $NO_MAX_SIZE );
 use Cache::Cache qw( $EXPIRES_NEVER );
 use Cache::CacheUtils qw( Assert_Defined
                           Static_Params );
-use Cache::SharedCacheUtils qw( Restore_Shared_Hash_Ref
-                                Restore_Shared_Hash_Ref_With_Lock
-                                Store_Shared_Hash_Ref
-                                Store_Shared_Hash_Ref_And_Unlock );
+use Cache::SharedMemoryBackend;
 use Cache::SizeAwareMemoryCache;
 use Cache::SharedMemoryCache;
 use Exporter;
@@ -31,9 +28,6 @@ use Exporter;
 
 
 $NO_MAX_SIZE = $Cache::SizeAwareMemoryCache::NO_MAX_SIZE;
-
-
-my $IPC_IDENTIFIER = 'ipcc';
 
 
 ##
@@ -59,50 +53,6 @@ sub Size
 }
 
 
-
-##
-# Private class methods
-##
-
-
-
-
-sub _Restore_Cache_Hash_Ref
-{
-  return Cache::SharedMemoryCache::_Restore_Cache_Hash_Ref( @_ );
-}
-
-
-sub _Restore_Cache_Hash_Ref_With_Lock
-{
-  return Cache::SharedMemoryCache::_Restore_Cache_Hash_Ref_With_Lock( @_ );
-}
-
-
-sub _Store_Cache_Hash_Ref
-{
-  return Cache::SharedMemoryCache::_Store_Cache_Hash_Ref( @_ );
-}
-
-
-sub _Store_Cache_Hash_Ref_And_Unlock
-{
-  return Cache::SharedMemoryCache::_Store_Cache_Hash_Ref_And_Unlock( @_ );
-}
-
-
-sub _Delete_Namespace
-{
-  return Cache::SharedMemoryCache::_Delete_Namespace( @_ );
-}
-
-
-sub _Namespaces
-{
-  return Cache::SharedMemoryCache::_Namespaces( @_ );
-}
-
-
 ##
 # Constructor
 ##
@@ -119,110 +69,27 @@ sub new
 }
 
 
-
-sub remove
-{
-  my ( $self, $p_key ) = @_;
-
-  Assert_Defined( $p_key );
-
-  my $cache_hash_ref = _Restore_Cache_Hash_Ref( );
-
-  delete $cache_hash_ref->{ $self->get_namespace( ) }->{ $p_key };
-
-  _Store_Cache_Hash_Ref( $cache_hash_ref );
-}
-
-
 ##
 # Private instance methods
 ##
-
 
 
 sub _new
 {
   my ( $proto, $p_options_hash_ref ) = @_;
   my $class = ref( $proto ) || $proto;
-  return $class->SUPER::_new( $p_options_hash_ref );
+  my $self = $class->SUPER::_new( $p_options_hash_ref );
+  $self->_initialize_size_aware_shared_memory_cache( );
+  return $self;
 }
 
 
-
-sub _build_object_size
-{
-  my ( $self, $p_key ) = @_;
-
-  Assert_Defined( $p_key );
-
-  my $object_dump =
-    _Restore_Cache_Hash_Ref( )
-      ->{ $self->get_namespace( ) }
-        ->{ $p_key } or
-          return 0;
-
-  return length $object_dump;
-}
-
-
-sub _store
-{
-  my ( $self, $p_key, $p_object ) = @_;
-
-  Assert_Defined( $p_key );
-
-  my $cache_hash_ref = _Restore_Cache_Hash_Ref_With_Lock( );
-
-  $cache_hash_ref->{ $self->get_namespace( ) }->{ $p_key } =
-    $self->_freeze( $p_object );
-
-  _Store_Cache_Hash_Ref( $cache_hash_ref );
-}
-
-
-sub _restore
-{
-  my ( $self, $p_key ) = @_;
-
-  Assert_Defined( $p_key );
-
-  my $object_dump = _Restore_Cache_Hash_Ref( )
-    ->{ $self->get_namespace( ) }
-      ->{ $p_key } or
-        return undef;
-
-  return $self->_thaw( \$object_dump );
-}
-
-
-sub _delete_namespace
-{
-  my ( $self, $p_namespace ) = @_;
-
-  _Delete_Namespace( $p_namespace ) or
-    croak( "Couldn't delete namespace $p_namespace" );
-}
-
-
-##
-# Instance properties
-##
-
-
-sub get_keys
+sub _initialize_size_aware_shared_memory_cache
 {
   my ( $self ) = @_;
 
-  if ( defined _Restore_Cache_Hash_Ref( )->{ $self->get_namespace( ) } )
-  {
-    return keys %{ _Restore_Cache_Hash_Ref( )->{ $self->get_namespace( ) } };
-  }
-  else
-  {
-    return ( );
-  }
+  $self->_set_backend( new Cache::SharedMemoryBackend( ) );
 }
-
 
 
 1;

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareCacheTester.pm,v 1.6 2001/03/22 21:41:35 dclinton Exp $
+# $Id: SizeAwareCacheTester.pm,v 1.7 2001/11/06 23:44:08 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -15,7 +15,7 @@ use Carp;
 use Cache::BaseCacheTester;
 use Cache::Cache;
 
-use vars qw( @ISA $EXPIRES_DELAY );
+use vars qw( @ISA );
 
 @ISA = qw ( Cache::BaseCacheTester );
 
