@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: FileBackend.pm,v 1.13 2001/12/12 15:14:12 dclinton Exp $
+# $Id: FileBackend.pm,v 1.14 2002/01/02 14:26:20 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -615,7 +615,6 @@ sub _path_to_unique_key
                      _Split_Word( $p_unique_key, $self->get_depth( ) ),
                      $p_unique_key );
 }
-
 
 # the data is returned as reference to an array ( key, data )
 
