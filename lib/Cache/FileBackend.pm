@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: FileBackend.pm,v 1.8 2001/11/29 22:40:39 dclinton Exp $
+# $Id: FileBackend.pm,v 1.9 2001/12/03 17:21:32 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -95,6 +95,9 @@ sub Read_Dirents
   my ( $p_directory ) = @_;
 
   Assert_Defined( $p_directory );
+
+  -d $p_directory or
+    return ( );
 
   opendir( DIR, Untaint_Path( $p_directory ) ) or
     throw Error::Simple( "Couldn't open directory $p_directory: $!" );
