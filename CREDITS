@@ -1,3 +1,6 @@
+- Christophe Marcant <christophe@marcant.org> offered a patch to allow
+  spaces to be used in the filenames
+
 - Eric Cholet <cholet@logilune.com> offered a patch to fix the missing
   import in Cache::CacheUtils and is helping debug using a Backend on
   its own

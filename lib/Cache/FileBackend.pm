@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: FileBackend.pm,v 1.11 2001/12/09 22:43:03 dclinton Exp $
+# $Id: FileBackend.pm,v 1.12 2001/12/09 23:40:52 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -26,7 +26,7 @@ my $DIRECTORY_MODE = 0777;
 # valid filepath characters for tainting. Be sure to accept
 # DOS/Windows style path specifiers (C:\path) also
 
-my $UNTAINTED_PATH_REGEX = qr{^([-\@\w\\\\~./:]+|[\w]:[-\@\w\\\\~./]+)$};
+my $UNTAINTED_PATH_REGEX = qr{^([-\@\w\s\\\\~./:]+|[\w]:[-\@\w\s\\\\~./]+)$};
 
 
 sub new
