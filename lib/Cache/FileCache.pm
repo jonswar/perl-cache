@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: FileCache.pm,v 1.7 2001/03/06 07:07:43 dclinton Exp $
+# $Id: FileCache.pm,v 1.8 2001/03/06 17:02:01 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -109,7 +109,7 @@ sub Size
 
 sub _Build_Cache_Root
 {
-  my ( $optional_cache_root ) = @_;
+  my ( $optional_cache_root ) = Static_Params( @_ );
 
   my $cache_root;
 
@@ -132,7 +132,7 @@ sub _Build_Cache_Root
 
 sub _List_Namespaces
 {
-  my ( $namespaces_ref, $optional_cache_root ) = @_;
+  my ( $namespaces_ref, $optional_cache_root ) = Static_Params( @_ );
 
   my $cache_root = _Build_Cache_Root( $optional_cache_root ) or
     croak( "Couldn't build cache root" );
@@ -451,8 +451,6 @@ sub _build_object_path
 }
 
 
-
-
 sub _build_namespace_path
 {
   my ( $self ) = @_;
@@ -497,6 +495,7 @@ sub get_cache_root
 
   return $self->{_Cache_Root};
 }
+
 
 sub set_cache_root
 {
