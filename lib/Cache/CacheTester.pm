@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheTester.pm,v 1.13 2001/11/29 22:40:39 dclinton Exp $
+# $Id: CacheTester.pm,v 1.14 2001/12/03 17:21:32 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -594,4 +594,59 @@ sub Arrays_Are_Equal
 
 1;
 
+
+__END__
+
+=pod
+
+=head1 NAME
+
+Cache::CacheTester -- a class for regression testing caches
+
+=head1 DESCRIPTION
+
+The CacheTester is used to verify that a cache implementation honors
+its contract.
+
+=head1 SYNOPSIS
+
+  use Cache::MemoryCache;
+  use Cache::CacheTester;
+
+  my $cache = new Cache::MemoryCache( ) or
+  n  ot_ok( "Couldn't create new MemoryCache" );
+
+  ok( );
+
+  my $cache_tester = new Cache::CacheTester( 1 ) or
+    not_ok( "Couldn't create new CacheTester" );
+
+  $cache_tester->test( $cache );
+
+=head1 METHODS
+
+=over
+
+=item B<new( $initial_count )>
+
+Construct a new CacheTester object, with the counter starting at
+I<$initial_count>.
+
+=item B<test( )>
+
+Run the tests.
+
+=head1 SEE ALSO
+
+Cache::Cache, Cache::BaseCacheTester
+
+=head1 AUTHOR
+
+Original author: DeWitt Clinton <dewitt@unto.net>
+
+Last author:     $Author: dclinton $
+
+Copyright (C) 2001 DeWitt Clinton
+
+=cut
 

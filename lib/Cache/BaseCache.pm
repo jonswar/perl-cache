@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: BaseCache.pm,v 1.20 2001/11/29 22:40:39 dclinton Exp $
+# $Id: BaseCache.pm,v 1.21 2001/12/03 17:21:32 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -682,7 +682,10 @@ the protected _set_backend method, which will be used to retrieve the
 persistance mechanism.  The subclass can then inherit the BaseCache's
 implentation of get, set, etc.  However, due to the difficulty
 inheriting static methods in Perl, the subclass will likely need to
-explicitly implement Clear, Purge, and Size.
+explicitly implement Clear, Purge, and Size.  Also, a factory pattern
+should be used to invoke the _complete_initialization routine after
+the object is constructed.
+
 
   package Cache::MyCache;
 
@@ -708,6 +711,37 @@ explicitly implement Clear, Purge, and Size.
     my $self = $class->SUPER::_new( $p_options_hash_ref );
     $self->_set_backend( new Cache::MyBackend( ) );
     return $self;
+  }
+
+
+  sub Clear
+  {
+    foreach my $namespace ( _Namespaces( ) )
+    {
+      _Get_Backend( )->delete_namespace( $namespace );
+    }
+  }
+
+
+  sub Purge
+  {
+    foreach my $namespace ( _Namespaces( ) )
+    {
+      _Get_Cache( $namespace )->purge( );
+    }
+  }
+
+
+  sub Size
+  {
+    my $size = 0;
+
+    foreach my $namespace ( _Namespaces( ) )
+    {
+      $size += _Get_Cache( $namespace )->size( );
+    }
+
+    return $size;
   }
 
 

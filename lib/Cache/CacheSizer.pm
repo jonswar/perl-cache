@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareMemoryCache.pm,v 1.15 2001/11/29 18:12:55 dclinton Exp $
+# $Id: CacheSizer.pm,v 1.1 2001/12/03 17:23:27 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -17,36 +17,6 @@ use Cache::Cache;
 use Cache::CacheMetaData;
 use Cache::CacheUtils qw ( Assert_Defined );
 use Cache::SizeAwareCache qw ( $NO_MAX_SIZE );
-
-
-# take a Cache reference and a CacheMetaData reference and
-# limit the cache's size to new_size
-
-sub Limit_Size
-{
-  my ( $p_cache, $p_cache_meta_data, $p_new_size ) = @_;
-
-  Assert_Defined( $p_cache );
-  Assert_Defined( $p_cache_meta_data );
-  Assert_Defined( $p_new_size );
-
-  $p_new_size >= 0 or
-    throw Error::Simple( "p_new_size >= 0 required" );
-
-  my $size_estimate = $p_cache_meta_data->get_cache_size( );
-
-  return if $size_estimate <= $p_new_size;
-
-  foreach my $key ( $p_cache_meta_data->build_removal_list( ) )
-  {
-    return if $size_estimate <= $p_new_size;
-    $size_estimate -= $p_cache_meta_data->build_object_size( $key );
-    $p_cache->remove( $key );
-    $p_cache_meta_data->remove( $key );
-  }
-
-  warn( "Couldn't limit size to $p_new_size" );
-}
 
 
 sub new
@@ -87,9 +57,39 @@ sub limit_size
 
   return if $p_new_size == $NO_MAX_SIZE;
 
-  Limit_Size( $self->_get_cache( ),
-              $self->_build_cache_meta_data( ),
-              $p_new_size );
+  _Limit_Size( $self->_get_cache( ),
+               $self->_build_cache_meta_data( ),
+               $p_new_size );
+}
+
+
+# take a Cache reference and a CacheMetaData reference and
+# limit the cache's size to new_size
+
+sub _Limit_Size
+{
+  my ( $p_cache, $p_cache_meta_data, $p_new_size ) = @_;
+
+  Assert_Defined( $p_cache );
+  Assert_Defined( $p_cache_meta_data );
+  Assert_Defined( $p_new_size );
+
+  $p_new_size >= 0 or
+    throw Error::Simple( "p_new_size >= 0 required" );
+
+  my $size_estimate = $p_cache_meta_data->get_cache_size( );
+
+  return if $size_estimate <= $p_new_size;
+
+  foreach my $key ( $p_cache_meta_data->build_removal_list( ) )
+  {
+    return if $size_estimate <= $p_new_size;
+    $size_estimate -= $p_cache_meta_data->build_object_size( $key );
+    $p_cache->remove( $key );
+    $p_cache_meta_data->remove( $key );
+  }
+
+  warn( "Couldn't limit size to $p_new_size" );
 }
 
 
@@ -144,6 +144,68 @@ sub set_max_size
 }
 
 
-
-
 1;
+
+
+__END__
+
+=pod
+
+=head1 NAME
+
+Cache::CacheSizer -- component object for mamanging the size of caches
+
+=head1 DESCRIPTION
+
+The CacheSizer class is used internally in SizeAware caches such as
+SizeAwareFileCache to encapsulate the logic of limiting cache size.
+
+=head1 SYNOPSIS
+
+  use Cache::CacheSizer;
+
+  my $sizer = new Cache::CacheSizer( $cache, $max_size );
+
+  $sizer->limit_size( $new_size );
+
+
+=head1 METHODS
+
+=over
+
+=item B<new( $cache, $max_size )>
+
+Construct a new Cache::CacheSizer object for the cache I<$cache> with
+a maximum size of I<$max_size>.
+
+=item B<update_access_time( $key )>
+
+Inform the cache that the object specified by I<$key> has been accessed.
+
+=item B<limit_size( $new_size )>
+
+Use the sizing algorithms to get the cache down under I<$new_size> if
+possible.
+
+
+=head1 PROPERTIES
+
+=over 4
+
+=item B<get_max_size>
+
+The desired size limit for the cache under control.
+
+=head1 SEE ALSO
+
+Cache::Cache, Cache::CacheMetaData, Cache::SizeAwareCache
+
+=head1 AUTHOR
+
+Original author: DeWitt Clinton <dewitt@unto.net>
+
+Last author:     $Author: dclinton $
+
+Copyright (C) 2001 DeWitt Clinton
+
+=cut

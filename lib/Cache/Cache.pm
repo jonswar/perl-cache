@@ -1,5 +1,5 @@
 #####################################################################
-# $Id: Cache.pm,v 1.24 2001/11/29 18:33:21 dclinton Exp $
+# $Id: Cache.pm,v 1.25 2001/12/09 16:02:33 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -96,11 +96,26 @@ corresponding static methods for persisting data across method calls.
 
 =head1 USAGE
 
-One common way to use the cache is as a mechanism for temporarily
-storing data that is expensive to retrieve from a backend.  In the
-following example, the cache is used to store a customer record for a
-short period of time to save repeated expensive calls to a database
-via the get_customer_from_db routine.
+  First, choose the best type of cache implementation for your needs.
+  The simplest cache is the MemoryCache, which is suitable for
+  applications that are serving multiple sequential requests, and
+  which to avoid making redundant expensive queries, such as an
+  Apache/mod_perl application talking to a database.  If you wish to
+  share that data between processes, then perhaps the
+  SharedMemoryCache is appropriate, although its behavior is tightly
+  bound to the underlying IPC mechanism, which varies from system to
+  system, and is unsuitable for large objects or large numbers of
+  objects.  When the SharedMemoryCache is not acceptable, then
+  FileCache offers all of the same functionality with similar
+  performance metrics, and it is not limited in terms of the number of
+  objects or their size.  If you wish to maintain a strict limit on
+  the size of a file system based cache, then the SizeAwareFileCache
+  is the way to go.  Similarly, the SizeAwareMemoryCache and the
+  SizeAwareSharedMemoryCache add size management functionality
+  to the MemoryCache and SharedMemoryCache classes respectively.
+
+  Using a cache is simple.  Here is some sample code for instantiating
+  and using a file system based cache.
 
     use Cache::FileCache;
 
@@ -115,6 +130,7 @@ via the get_customer_from_db routine.
     }
 
     return $customer;
+
 
 =head1 CONSTANTS
 
@@ -136,13 +152,13 @@ The item being set in the cache will expire immediately.
 
 =item B<Clear( )>
 
-Remove all objects from all caches of this type. Returns either $SUCCESS or $FAILURE.
+Remove all objects from all caches of this type.
 
 =item B<Purge( )>
 
-Remove all objects that have expired from all caches of this type. Returns either $SUCCESS or $FAILURE.
+Remove all objects that have expired from all caches of this type.
 
-=item B<Size( $optional_namespace )>
+=item B<Size( )>
 
 Returns the total size of all objects in all caches of this type.
 
@@ -154,7 +170,7 @@ OPTIONS below.
 
 =item B<clear(  )>
 
-Remove all objects from the namespace associated with this cache instance. Returns either $SUCCESS or $FAILURE.
+Remove all objects from the namespace associated with this cache instance.
 
 =item B<get( $key )>
 
@@ -170,17 +186,15 @@ of the cached object even if the object has expired.
 
 Associates I<$key> with Cache::Object I<$object>.  Using
 _object (as opposed to set) does not trigger an automatic purge.
-Returns either $SUCCESS or $FAILURE.
 
 =item B<purge(  )>
 
 Remove all objects that have expired from the namespace associated
-with this cache instance. Returns either $SUCCESS or $FAILURE.
+with this cache instance.
 
 =item B<remove( $key )>
 
 Delete the data associated with the I<$key> from the cache.
-Returns either $SUCCESS or $FAILURE.
 
 =item B<set( $key, $data, [$expires_in] )>
 
@@ -192,7 +206,7 @@ $EXPIRES_NEVER.  This variable can also be in the extended format of
 seconds, sec, m, minute, minutes, min, h, hour, hours, w, week, weeks,
 M, month, months, y, year, and years.  Additionally, $EXPIRES_NOW can
 be represented as "now" and $EXPIRES_NEVER can be represented as
-"never". Returns either $SUCCESS or $FAILURE.
+"never".
 
 =item B<size(  )>
 
@@ -253,6 +267,10 @@ The default expiration time for objects placed in this cache instance
 
 The list of keys specifying objects in the namespace associated
 with this cache instance
+
+=item B<get_identifiers( )>
+
+This method has been deprecated in favor of B<get_keys( )>.
 
 =item B<(get|set)_auto_purge_interval( )>
 

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: BaseCacheTester.pm,v 1.4 2001/11/05 13:34:45 dclinton Exp $
+# $Id: BaseCacheTester.pm,v 1.5 2001/11/29 18:33:21 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -121,20 +121,12 @@ class that will test cache implementations.
 
 =head1 METHODS
 
-=over 4
+=over
 
 =item B<new( $base_test_count )>
 
 Construct a new BaseCacheTester and initialize the test count to
-'base_test_count'
-
-=over 4
-
-=item $base_test_count
-
-The initial test count
-
-=back
+I<$base_test_count>.
 
 =item B<ok( )>
 
@@ -143,29 +135,13 @@ incremements the test count.
 
 =item B<not_ok( $message )>
 
-Print a message to stdout in the form "not ok $test_count # $message "
+Print a message to stdout in the form "not ok $test_count # I<$message> "
 and incremements the test count.
-
-=over 4
-
-=item $message
-
-The reason the test failed
-
-=back
 
 =item B<skip( $message )>
 
-Print a message to stdout in the form "ok $test_count # skipped $message "
+Print a message to stdout in the form "ok $test_count # skipped I<$message> "
 and incremements the test count.
-
-=over 4
-
-=item $message
-
-The reason the test was skipped
-
-=back
 
 =back
 

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheMetaData.pm,v 1.8 2001/11/29 20:24:47 dclinton Exp $
+# $Id: CacheMetaData.pm,v 1.9 2001/12/03 17:21:32 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -176,7 +176,6 @@ sub _set_meta_data_hash_ref
 1;
 
 
-
 __END__
 
 =pod
@@ -199,17 +198,21 @@ CacheMetaData directly.
 
  my $cache_meta_data = new Cache::CacheMetaData( );
 
- $cache_meta_data->insert( $object );
+ foreach my $key ( $cache->get_keys( ) )
+ {
+    my $object = $cache->get_object( $key ) or
+      next;
+
+    $cache_meta_data->insert( $object );
+  }
 
  my $current_size = $cache_meta_data->get_cache_size( );
 
- my @removal_list;
-
- $cache_meta_data->build_removal_list( \@removal_list );
+ my @removal_list = $cache_meta_data->build_removal_list( );
 
 =head1 METHODS
 
-=over 4
+=over
 
 =item B<new(  )>
 
@@ -217,29 +220,14 @@ Construct a new Cache::CacheMetaData object
 
 =item B<insert( $object )>
 
-Inform the CacheMetaData about an object in the cache.
-
-=over 4
-
-=item $object
-
-The object to be examined for its meta data
-
-=back
+Inform the CacheMetaData about the object I<$object> in the cache.
 
 =item B<remove( $key )>
 
-Inform the CacheMetaData that an object is no longer in the cache
+Inform the CacheMetaData that the object specified by I<$key> is no
+longer in the cache.
 
-=over 4
-
-=item $key
-
-The key under which the object was stored.
-
-=back
-
-=item B<build_removal_list( $removal_list_ref )>
+=item B<build_removal_list( )>
 
 Create a list of the keys in the cache, ordered as follows:
 
@@ -255,29 +243,9 @@ NOTE: This could be improved further by taking the size into account
 on accessed_at ties.  However, this type of tie is unlikely in normal
 usage.
 
-=over 4
+=item B<build_object_size( $key )>
 
-=item $removal_list_ref
-
-A reference to the list that should hold the result
-
-=back
-
-=item B<build_object_size( $key, $object_size_ref )>
-
-Determine the size of an object that the CacheMetaData knows about
-
-=over 4
-
-=item $key
-
-The key under which the object was stored.
-
-=item $object_size_ref
-
-A reference to the scalar that should hold the result
-
-=back
+Return the size of an object specified by I<$key>.
 
 =back
 
@@ -293,7 +261,7 @@ The total size of the objects in the cache
 
 =head1 SEE ALSO
 
-Cache::Cache
+Cache::Cache, Cache::CacheSizer, Cache::SizeAwareCache
 
 =head1 AUTHOR
 
