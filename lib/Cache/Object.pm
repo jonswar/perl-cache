@@ -1,5 +1,5 @@
 ######################################################################
-# $Id:  $
+# $Id: Object.pm,v 1.1.1.1 2001/02/13 01:30:41 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -9,6 +9,11 @@
 ######################################################################
 
 package Cache::Object;
+
+
+##
+# Constructor
+##
 
 
 sub new
@@ -21,60 +26,10 @@ sub new
 }
 
 
-# $identifier
+##
+# Instance properties
+##
 
-sub get_identifier
-{
-  my ( $self ) = @_;
-
-  return $self->{_Identifier};
-}
-
-sub set_identifier
-{
-  my ( $self, $identifier ) = @_;
-
-  $self->{_Identifier} = $identifier;
-}
-
-
-# $data
-
-sub get_data
-{
-  my ( $self ) = @_;
-
-  return $self->{_Data};
-}
-
-sub set_data
-{
-  my ( $self, $data ) = @_;
-
-  $self->{_Data} = $data;
-}
-
-
-
-
-# $expires_at
-
-sub get_expires_at
-{
-  my ( $self ) = @_;
-
-  return $self->{_Expires_At};
-}
-
-sub set_expires_at
-{
-  my ( $self, $expires_at ) = @_;
-
-  $self->{_Expires_At} = $expires_at;
-}
-
-
-# $created_at
 
 sub get_created_at
 {
@@ -91,6 +46,51 @@ sub set_created_at
 }
 
 
+sub get_data
+{
+  my ( $self ) = @_;
+
+  return $self->{_Data};
+}
+
+sub set_data
+{
+  my ( $self, $data ) = @_;
+
+  $self->{_Data} = $data;
+}
+
+
+sub get_expires_at
+{
+  my ( $self ) = @_;
+
+  return $self->{_Expires_At};
+}
+
+
+sub set_expires_at
+{
+  my ( $self, $expires_at ) = @_;
+
+  $self->{_Expires_At} = $expires_at;
+}
+
+
+sub get_identifier
+{
+  my ( $self ) = @_;
+
+  return $self->{_Identifier};
+}
+
+
+sub set_identifier
+{
+  my ( $self, $identifier ) = @_;
+
+  $self->{_Identifier} = $identifier;
+}
 
 
 1;
@@ -107,8 +107,9 @@ Cache::Object -- the data stored in a Cache.
 =head1 DESCRIPTION
 
 Object is used by classes implementing the Cache interface as an
-object oriented wrapper around the data.  End users will not use
-Object directly.
+object oriented wrapper around the data.  End users will not normally
+use Object directly, but it can be retrieved via the get_object method
+on the Cache::Cache interface.
 
 =head1 SYNOPSIS
 
@@ -128,10 +129,9 @@ Object directly.
 
 =item B<new(  )>
 
-Construct a new Object.
+Construct a new Cache::Object.
 
 =back
-
 
 =head1 PROPERTIES
 
@@ -163,7 +163,7 @@ Cache::Cache
 
 Original author: DeWitt Clinton <dewitt@unto.net>
 
-Last author:     $Author: dewitt $
+Last author:     $Author: dclinton $
 
 Copyright (C) 2001 DeWitt Clinton
 
