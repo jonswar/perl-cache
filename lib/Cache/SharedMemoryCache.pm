@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SharedMemoryCache.pm,v 1.9 2001/03/22 21:41:35 dclinton Exp $
+# $Id: SharedMemoryCache.pm,v 1.10 2001/03/23 00:15:06 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -16,12 +16,12 @@ use strict;
 use vars qw( @ISA );
 use Cache::Cache qw( $TRUE $FALSE $SUCCESS $FAILURE );
 use Cache::MemoryCache;
-use Cache::CacheUtils qw( Restore_Shared_Hash_Ref
-                          Restore_Shared_Hash_Ref_With_Lock
-                          Static_Params
-                          Store_Shared_Hash_Ref
-                          Store_Shared_Hash_Ref_And_Unlock
-                        );
+use Cache::CacheUtils qw( Static_Params );
+use Cache::SharedCacheUtils qw( Restore_Shared_Hash_Ref
+                                Restore_Shared_Hash_Ref_With_Lock
+                                Store_Shared_Hash_Ref
+                                Store_Shared_Hash_Ref_And_Unlock
+                              );
 use Carp;
 
 

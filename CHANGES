@@ -1,5 +1,12 @@
 Revision history for Cache
 
+0.07 in progress
+ - added support in the Makefile.PL to conditionally build the
+   SharedMemoryCache, which requires IPC::ShareLite, and thus runs only
+   on certain architectures.  Also broke out the IPC related routines
+   into the SharedCacheUtils package.
+ - started version 0.07
+
 0.06 2000-03-23-08-36
  - release version 0.06
  - added the get_identifiers method to the Cache interface, implemented

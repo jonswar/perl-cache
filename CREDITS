@@ -1,3 +1,6 @@
+- Dave Rolsky <autarch@urth.org> for helping me rewrite the Makefile.PL to
+  do conditional installation and testing based on dependency detection
+
 - Greg Cope <greg@rubberplant.freeserve.co.uk> suggested that I switch
   to IPC::ShareLite, and helped debug version 0.05
 
@@ -6,10 +9,11 @@
 
 - Jonathan Swartz <jswartz@users.sourceforge.net>, a Perl Cache
   project developer, for the expanded expiration format code and all of
-  the great dialog in the list server
+  the great dialog in the list server, continued testing, and
+  a million good ideas!  A big thanks, Jonathan.
 
 - Sergey Polyakov <alexei@samara.net> for numerous bug reports and for
-  being an ealry adopter of Perl Cache
+  being an early adopter of Perl Cache
 
 # The follow credits were copied from File::Cache, the previous
 # incarnation of this library

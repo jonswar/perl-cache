@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheBenchmark.pm,v 1.4 2001/03/22 02:58:40 dclinton Exp $
+# $Id: CacheBenchmark.pm,v 1.5 2001/03/22 18:40:08 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -50,15 +50,15 @@ my $UNAME_COMMAND = 'uname -a';
 sub Benchmark_Cache
 {
   Print_System_Info( );
-  Benchmark_Memory_Cache( );
-  Benchmark_File_Cache( );
-  Benchmark_Shared_Memory_Cache( );
-  Benchmark_Size_Aware_Memory_Cache_Without_Max_Size( );
-  Benchmark_Size_Aware_Memory_Cache_With_Max_Size( );
+#  Benchmark_Memory_Cache( );
+#  Benchmark_File_Cache( );
+#  Benchmark_Shared_Memory_Cache( );
+#  Benchmark_Size_Aware_Memory_Cache_Without_Max_Size( );
+#  Benchmark_Size_Aware_Memory_Cache_With_Max_Size( );
   Benchmark_Size_Aware_File_Cache_Without_Max_Size( );
-  Benchmark_Size_Aware_File_Cache_With_Max_Size( );
-  Benchmark_Size_Aware_Shared_Memory_Cache_Without_Max_Size( );
-  Benchmark_Size_Aware_Shared_Memory_Cache_With_Max_Size( );
+#  Benchmark_Size_Aware_File_Cache_With_Max_Size( );
+#  Benchmark_Size_Aware_Shared_Memory_Cache_Without_Max_Size( );
+#  Benchmark_Size_Aware_Shared_Memory_Cache_With_Max_Size( );
 }
 
 
