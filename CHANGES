@@ -1,6 +1,8 @@
 Revision history for Cache
 
 0.03 in progress
+ - completely rewrote and improved the limit_size method for a major
+   performance gain
  - updated the syntax for expiration times to include the [number] [unit] 
    format, e.g. "10 seconds"
  - added the get_object method to the Cache interface, which allows
