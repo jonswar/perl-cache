@@ -1,6 +1,7 @@
 Revision history for Cache
 
-0.09 in progress
+0.09 2001-09-10-12-10
+ - released version 0.09
  - applied Axel Beckert patch to fix the expiration units
  - applied Ken Williams's directory creation patch to pass all tests
  - changed the license to be either the GPL or the Artistic license
