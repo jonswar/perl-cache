@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: Cache.pm,v 1.4 2001/03/06 07:07:43 dclinton Exp $
+# $Id: Cache.pm,v 1.5 2001/03/06 15:26:01 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -275,6 +275,25 @@ this cache instance.
 
 The total size of all objects in the namespace associated with this
 cache instance.
+
+=back
+
+=head1 OPTIONS
+
+The options are set by passing in a reference to a hash containing any
+of the following keys:
+
+=over 4
+
+=item namespace
+
+The namespace associated with this cache.  Defaults to "Default" if
+not explicitly set.
+
+=item default_expires_in
+
+The default expiration time for objects place in the cache.  Defaults
+to $EXPIRES_NEVER if not explicitly set.
 
 =back
 
