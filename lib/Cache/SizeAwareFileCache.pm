@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: SizeAwareFileCache.pm,v 1.6 2001/03/06 07:19:43 dclinton Exp $
+# $Id: SizeAwareFileCache.pm,v 1.7 2001/03/06 08:41:33 dclinton Exp $
 # Copyright (C) 2001 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -8,7 +8,9 @@
 # rights and limitations under the License.
 ######################################################################
 
+
 package Cache::SizeAwareFileCache;
+
 
 use strict;
 use vars qw( @ISA @EXPORT_OK $NO_MAX_SIZE );
@@ -24,35 +26,20 @@ use Carp;
 use Data::Dumper;
 use Exporter;
 
-@ISA = qw ( Cache::FileCache );
 
+@ISA = qw ( Cache::FileCache );
 @EXPORT_OK = qw( $NO_MAX_SIZE );
 
-
-# Exported Constants
 
 $NO_MAX_SIZE = -1;
 
 
-# Static Constants
-
 my $DEFAULT_MAX_SIZE = $NO_MAX_SIZE;
 
 
-sub new
-{
-  my ( $proto, $options_hash_ref ) = @_;
-  my $class = ref( $proto ) || $proto;
-
-  my $self  =  $class->SUPER::new( $options_hash_ref ) or
-    croak( "Couldn't run super constructor" );
-
-  $self->_initialize_size_aware_file_cache( ) or
-    croak( "Couldn't initialize Cache::SizeAwareFileCache" );
-
-  return $self;
-}
-
+##
+# Public class methods
+##
 
 
 sub Clear
@@ -79,83 +66,9 @@ sub Size
 }
 
 
-sub _store
-{
-  my ( $self, $unique_key, $object ) = @_;
-
-  $unique_key or
-    croak( "unique_key required" );
-
-  my $object_path = $self->_build_object_path( $unique_key ) or
-    croak( "Couldn't build object path" );
-
-  my $data_dumper = new Data::Dumper( [$object] );
-
-  $data_dumper->Deepcopy( 1 );
-
-  my $object_dump = $data_dumper->Dump( );
-
-  Make_Path( $object_path ) or
-    croak( "Couldn't make path: $object_path" );
-
-  my $max_size = $self->get_max_size();
-
-  if ( $max_size != $NO_MAX_SIZE )
-  {
-    my $new_size = $max_size - length $object_dump;
-
-    $new_size = 0 if $new_size < 0;
-
-    $self->limit_size( $new_size );
-  }
-
-  Write_File( $object_path, \$object_dump ) or
-    croak( "Couldn't write file $object_path" );
-
-  return $SUCCESS;
-}
-
-
-sub limit_size
-{
-  my ( $self, $new_size ) = @_;
-
-  $new_size >= 0 or
-    croak( "size >= 0 required" );
-
-  my $namespace_path = $self->_build_namespace_path( ) or
-    croak( "Couldn't build namespace path" );
-
-  my $current_size = $self->size( );
-
-  my $size_difference = $self->size( ) - $new_size;
-
-  my @removal_list;
-
-  _Build_Removal_List( $namespace_path, \@removal_list );
-
-  foreach my $filename ( @removal_list )
-  {
-    my $size = -s $filename;
-
-    Remove_File( $filename ) or
-      croak( "Couldn't remove file $filename" );
-
-    $size_difference -= $size;
-
-    last if $size_difference <= 0;
-  }
-
-  if ( $size_difference > 0 )
-  {
-    warn("Couldn't limit size to $new_size\n");
-
-    return $FAILURE;
-  }
-
-  return $SUCCESS;
-}
-
+##
+# Private class methods
+##
 
 
 # _Build_Removal_List creates a list of all of the files in the cache
@@ -164,13 +77,13 @@ sub limit_size
 # second, in the order by which they were most recently accessed
 #
 # NOTE:  I aplogize if this method is confusing.  This was an area
-# of significant performance issues, so it is written to be fast
+# of significant performance issues, so it is written to be optimized
 # in terms of run time speed, not clarity
 
 
 sub _Build_Removal_List
 {
-  my ( $namespace_path, $removal_list_ref ) = @_;
+  my ( $namespace_path, $removal_list_ref ) = Static_Params( @_ );
 
   defined( $namespace_path ) or
     croak( "namespace_path required" );
@@ -225,7 +138,7 @@ sub _Build_Removal_List
 
 sub _Restore_Object_Without_Time_Modication
 {
-  my ( $filename ) = @_;
+  my ( $filename ) = Static_Params( @_ );
 
   defined( $filename ) or
     croak( "filename required" );
@@ -253,6 +166,116 @@ sub _Restore_Object_Without_Time_Modication
 }
 
 
+##
+# Constructor
+##
+
+
+sub new
+{
+  my ( $proto, $options_hash_ref ) = @_;
+  my $class = ref( $proto ) || $proto;
+
+  my $self  =  $class->SUPER::new( $options_hash_ref ) or
+    croak( "Couldn't run super constructor" );
+
+  $self->_initialize_size_aware_file_cache( ) or
+    croak( "Couldn't initialize Cache::SizeAwareFileCache" );
+
+  return $self;
+}
+
+
+##
+# Public instance methods
+##
+
+
+sub limit_size
+{
+  my ( $self, $new_size ) = @_;
+
+  $new_size >= 0 or
+    croak( "size >= 0 required" );
+
+  my $namespace_path = $self->_build_namespace_path( ) or
+    croak( "Couldn't build namespace path" );
+
+  my $current_size = $self->size( );
+
+  my $size_difference = $self->size( ) - $new_size;
+
+  return $SUCCESS if ( $size_difference <= 0 );
+
+  my @removal_list;
+
+  _Build_Removal_List( $namespace_path, \@removal_list );
+
+  foreach my $filename ( @removal_list )
+  {
+    my $size = -s $filename;
+
+    Remove_File( $filename ) or
+      croak( "Couldn't remove file $filename" );
+
+    $size_difference -= $size;
+
+    last if $size_difference <= 0;
+  }
+
+  if ( $size_difference > 0 )
+  {
+    warn("Couldn't limit size to $new_size\n");
+
+    return $FAILURE;
+  }
+
+  return $SUCCESS;
+}
+
+
+##
+# Private instance methods
+##
+
+
+sub _store
+{
+  my ( $self, $unique_key, $object ) = @_;
+
+  $unique_key or
+    croak( "unique_key required" );
+
+  my $object_path = $self->_build_object_path( $unique_key ) or
+    croak( "Couldn't build object path" );
+
+  my $data_dumper = new Data::Dumper( [$object] );
+
+  $data_dumper->Deepcopy( 1 );
+
+  my $object_dump = $data_dumper->Dump( );
+
+  Make_Path( $object_path ) or
+    croak( "Couldn't make path: $object_path" );
+
+  my $max_size = $self->get_max_size();
+
+  if ( $max_size != $NO_MAX_SIZE )
+  {
+    my $new_size = $max_size - length $object_dump;
+
+    $new_size = 0 if $new_size < 0;
+
+    $self->limit_size( $new_size );
+  }
+
+  Write_File( $object_path, \$object_dump ) or
+    croak( "Couldn't write file $object_path" );
+
+  return $SUCCESS;
+}
+
+
 sub _initialize_size_aware_file_cache
 {
   my ( $self, $options_hash_ref ) = @_;
@@ -262,7 +285,6 @@ sub _initialize_size_aware_file_cache
 
   return $SUCCESS;
 }
-
 
 
 sub _initialize_max_size
@@ -276,6 +298,10 @@ sub _initialize_max_size
   return $SUCCESS;
 }
 
+
+##
+# Instance properties
+##
 
 
 sub get_max_size
@@ -297,8 +323,8 @@ sub set_max_size
 1;
 
 
-
 __END__
+
 =pod
 
 =head1 NAME
@@ -328,6 +354,54 @@ the documentation for Cache::FileCache for more information.
 
 =over 4
 
+=item B<Clear( $optional_cache_root )>
+
+See Cache::Cache
+
+=item C<$optional_cache_root>
+
+If specified, this indicates the root on the filesystem of the cache
+to be cleared.
+
+=item B<Purge( $optional_cache_root )>
+
+See Cache::Cache
+
+=item C<$optional_cache_root>
+
+If specified, this indicates the root on the filesystem of the cache
+to be purged.
+
+=item B<Size( $optional_cache_root )>
+
+See Cache::Cache
+
+=item C<$optional_cache_root>
+
+If specified, this indicates the root on the filesystem of the cache
+to be sized.
+
+=item B<new( $options_hash_ref )>
+
+Constructs a new FileCache.
+
+=item C<$options_hash_ref>
+
+A reference to a hash containing configuration options for the cache.
+See the section OPTIONS below.
+
+=item B<clear(  )>
+
+See Cache::Cache
+
+=item B<get( $identifier )>
+
+See Cache::Cache
+
+=item B<get_object( $identifier )>
+
+See Cache::Cache
+
 =item B<limit_size( $new_size )>
 
 Attempt to resize the cache such that the total disk usage is under
@@ -345,13 +419,29 @@ the 'max_size' option, although it is considered very expensive.
 
 Either $SUCCESS or $FAILURE
 
+=item B<purge( )>
+
+See Cache::Cache
+
+=item B<remove( $identifier )>
+
+See Cache::Cache
+
+=item B<set( $identifier, $data, $expires_in )>
+
+See Cache::Cache
+
+=item B<size(  )>
+
+See Cache::Cache
+
 =back
 
 =head1 OPTIONS
 
-The options are set by passing in a reference to a hash containing any
-of the following keys.  Also, all of the options available to
-Cache::FileCache apply to this class as well.
+See Cache::Cache for standard options.  Additionally, options are set
+by passing in a reference to a hash containing any of the following
+keys:
 
 =over 4
 
@@ -363,6 +453,8 @@ Defaults to $NO_MAX_SIZE.
 =back
 
 =head1 PROPERTIES
+
+See Cache::Cache for default properties.
 
 =over 4
 
@@ -380,7 +472,6 @@ limit_size( $size ) method.
 =head1 SEE ALSO
 
 Cache::Cache, Cache::FileCache
-
 
 =head1 AUTHOR
 
