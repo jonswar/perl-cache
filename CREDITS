@@ -1,3 +1,6 @@
+- thanks to <info at whawes.co.uk> for catching the windows directory
+  path bug
+
 - worked with andrew velikoredchanin <andrew at rodtext.ru> to fix
   a bug with file permissions at File::Temp
 

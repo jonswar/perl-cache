@@ -1,5 +1,8 @@
 Revision history for Cache
 
+1.05 in progress
+ - fixed directory paths on Windows partitions
+
 1.04 2005-03-17-11-23
  - release version 1.04
  - repair permissions on temp cache files
