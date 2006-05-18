@@ -1,4 +1,4 @@
-Copyright (C) 2001-2003 DeWitt Clinton  All Rights Reserved
+Copyright (C) 2001-2006 DeWitt Clinton  All Rights Reserved
 
    You may distribute under the terms of either the GNU General Public
    License or the Artistic License, as specified in the Perl README file.
@@ -36,8 +36,12 @@ REQUIREMENTS
   Error
   File::Spec
   File::Path
-  IPC::ShareLite
   Storable
+
+
+OPTIONAL
+
+  IPC::ShareLite
 
 
 INSTALLATION
@@ -129,5 +133,5 @@ AUTHOR
 
   Original author: DeWitt Clinton <dewitt@unto.net>
 
-  Copyright (C) 2001-2003 DeWitt Clinton
+  Copyright (C) 2001-2006 DeWitt Clinton
 

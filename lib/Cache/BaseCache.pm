@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: BaseCache.pm,v 1.24 2002/04/07 17:04:46 dclinton Exp $
+# $Id: BaseCache.pm,v 1.25 2003/04/15 14:46:14 dclinton Exp $
 # Copyright (C) 2001-2003 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -193,7 +193,8 @@ sub get
 
   Assert_Defined( $p_key );
 
-  $self->_conditionally_auto_purge_on_get( );
+  $self->_conditionally_auto_purge_on_get( ) unless
+    $self->get_namespace( ) eq $AUTO_PURGE_NAMESPACE;
 
   my $object = $self->get_object( $p_key ) or
     return undef;

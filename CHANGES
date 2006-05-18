@@ -1,6 +1,7 @@
 Revision history for Cache
 
 1.05 in progress
+ - fixed infinite loop with auto_purge_on_get
  - fixed directory paths on Windows partitions
  - NullCache uses BaseCache
 
