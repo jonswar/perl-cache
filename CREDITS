@@ -1,4 +1,4 @@
-- dwright at cpan.org for the fix on the infinite look for
+- dwright at cpan.org for the fix on the infinite loop for
   auto_purge_on_get
 
 - thanks to <info at whawes.co.uk> for catching the windows directory
