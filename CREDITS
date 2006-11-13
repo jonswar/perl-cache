@@ -1,3 +1,5 @@
+- Stefano Rodighiero for catching the extra "use vars" in CacheUtils
+
 - dwright at cpan.org for the fix on the infinite loop for
   auto_purge_on_get
 

@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: CacheUtils.pm,v 1.38 2003/04/14 16:41:12 dclinton Exp $
+# $Id: CacheUtils.pm,v 1.39 2003/04/15 14:46:19 dclinton Exp $
 # Copyright (C) 2001-2003 DeWitt Clinton  All Rights Reserved
 #
 # Software distributed under the License is distributed on an "AS
@@ -26,9 +26,6 @@ use Storable qw( nfreeze thaw dclone );
                  Freeze_Data
                  Static_Params
                  Thaw_Data );
-
-use vars ( @EXPORT_OK );
-
 
 # throw an Exception if the Assertion fails
 

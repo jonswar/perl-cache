@@ -1,6 +1,9 @@
 Revision history for Cache
 
-1.05 in progress
+1.06 in progress
+ - fixed extra "use vars" in CacheUtils
+
+1.05 2006-05-26
  - fixed infinite loop with auto_purge_on_get
  - fixed directory paths on Windows partitions
  - NullCache uses BaseCache
