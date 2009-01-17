@@ -124,14 +124,29 @@ ON LOCKING:
   for safety during the write.
 
 
+CACHE::CACHE VERSUS CHI
+
+  Cache::Cache is in wide use and very stable, but has not changed in years
+  and is no longer actively developed.
+
+  CHI is the successor to Cache::Cache. It adheres to the basic
+  Cache::Cache API but adds new features and drivers (e.g. FastMmap and
+  Memcached), improves performance, and attempts to address limitations
+  in the Cache::Cache implementation.
+
+
 SEE ALSO
 
-  The project homepage at http://perl-cache.sourceforge.net
+  The project homepage at http://perl-cache.googlecode.com/.
+
+  The discussion list at http://groups.google.com/group/perl-cache-discuss.
+
+  The CHI project.
 
 
 AUTHOR
 
   Original author: DeWitt Clinton <dewitt@unto.net>
 
-  Copyright (C) 2001-2006 DeWitt Clinton
+  Copyright (C) 2001-2009 DeWitt Clinton
 
