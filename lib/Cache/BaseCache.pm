@@ -315,7 +315,7 @@ sub get_namespaces
 {
   my ( $self ) = @_;
 
-  return $self->_get_backend( )->get_namespaces( );
+  return grep {!/$AUTO_PURGE_NAMESPACE/} $self->_get_backend( )->get_namespaces( );
 }
 
 

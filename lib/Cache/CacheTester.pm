@@ -570,10 +570,12 @@ sub _test_seventeen
 {
   my ( $self, $cache ) = @_;
 
-  $cache->set( 'foo', 'bar' );
+  $cache->set( 'a', '1' );
+  $cache->set_namespace( 'namespace' );
+  $cache->set( 'b', '2' );
 
   if ( Arrays_Are_Equal( [ sort( $cache->get_namespaces( ) ) ],
-                         [ sort( 'Default', '__AUTO_PURGE__' ) ] ) )
+                         [ sort( 'Default', 'namespace' ) ] ) )
   {
     $self->ok( );
   }
