@@ -97,6 +97,19 @@ The Cache::Cache interface is implemented by classes that support the
 get, set, remove, size, purge, and clear instance methods and their
 corresponding static methods for persisting data across method calls.
 
+=head1 CACHE::CACHE VERSUS CHI
+
+Cache::Cache is in wide use and very stable, but has not changed in years
+and is no longer actively developed.
+
+L<CHI|CHI> is the successor to Cache::Cache. It adheres to the basic
+Cache::Cache API but adds new features and drivers (e.g. FastMmap and
+Memcached), improves performance, and attempts to address limitations
+in the Cache::Cache implementation.
+
+Questions about Cache::Cache and CHI may be directed to the perl-cache
+mailing list at http://groups.google.com/group/perl-cache-discuss.
+
 =head1 USAGE
 
 First, choose the best type of cache implementation for your needs.
@@ -300,6 +313,8 @@ checked on every get.
 =back
 
 =head1 SEE ALSO
+
+CHI - the successor to Cache::Cache
 
 Cache::Object, Cache::MemoryCache, Cache::FileCache,
 Cache::SharedMemoryCache, and Cache::SizeAwareFileCache
