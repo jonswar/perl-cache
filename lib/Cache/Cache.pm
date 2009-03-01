@@ -104,8 +104,8 @@ and is no longer actively developed.
 
 L<CHI|CHI> is the successor to Cache::Cache. It adheres to the basic
 Cache::Cache API but adds new features and drivers (e.g. FastMmap and
-Memcached), improves performance, and attempts to address limitations
-in the Cache::Cache implementation.
+Memcached), improves performance, and addresses limitations in the
+Cache::Cache implementation. The authors recommend the use of CHI going forward.
 
 Questions about Cache::Cache and CHI may be directed to the perl-cache
 mailing list at http://groups.google.com/group/perl-cache-discuss.
