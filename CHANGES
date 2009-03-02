@@ -1,6 +1,6 @@
 Revision history for Cache
 
-1.06 in progress
+1.06 2009-02-28
  - updated the project homepage and added notes about the CHI project
  - fixed extra "use vars" in CacheUtils
 
