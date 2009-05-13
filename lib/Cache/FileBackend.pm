@@ -76,8 +76,8 @@ sub get_keys
 
   foreach my $unique_key ( $self->_get_unique_keys( $p_namespace ) )
   {
-    my $key = $self->_get_key_for_unique_key( $p_namespace, $unique_key ) or
-      next;
+    my $key = $self->_get_key_for_unique_key( $p_namespace, $unique_key );
+    next if !defined($key);
 
     push( @keys, $key );
   }
