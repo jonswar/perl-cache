@@ -20,7 +20,7 @@ use Exporter;
 
 @EXPORT_OK = qw( $VERSION $EXPIRES_NOW $EXPIRES_NEVER );
 
-$VERSION = "1.06";
+$VERSION = "1.07";
 $EXPIRES_NOW = 'now';
 $EXPIRES_NEVER = 'never';
 
