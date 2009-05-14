@@ -1,5 +1,8 @@
 Revision history for Cache
 
+1.07 2009-05-13
+ - fixed FileCache to work with key "0"
+
 1.06 2009-02-28
  - updated the project homepage and added notes about the CHI project
  - fixed extra "use vars" in CacheUtils
