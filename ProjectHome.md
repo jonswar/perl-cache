@@ -1,0 +1,3 @@
+[Cache::Cache](http://cpan.uwinnipeg.ca/module/Cache::Cache) provides a unified Cache interface for Perl. It implements the file, memory, shared memory and size aware caches, with other backends available on CPAN. It has not been changed in years and is extremely stable.
+
+[CHI](http://cpan.uwinnipeg.ca/module/CHI) is the successor to Cache::Cache. It adheres to the basic Cache::Cache API but improves performance, adds new features, and addresses limitations in the Cache::Cache implementation. It has been in production use on at least several large sites for a year.
